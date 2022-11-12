@@ -21,7 +21,7 @@ public class CommandIdBoundary {
     }
 
     public CommandIdBoundary(String superApp, String miniApp ) {
-        super();
+        this();
         this.superApp = superApp;
         this.miniApp = miniApp;
     }
