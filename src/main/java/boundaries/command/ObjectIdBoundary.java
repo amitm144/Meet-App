@@ -13,15 +13,16 @@ public class ObjectIdBoundary {
         this.internalObjectId = Integer.toString(id);
     }
 
-    public ObjectIdBoundary(String superApp, String internalObjectId) {
-        super();
-        this.superApp = superApp;
-        this.internalObjectId = internalObjectId;
-    }
 
     public ObjectIdBoundary(String superApp) {
-        super();
+        this();
         this.superApp = superApp;
+    }
+
+    public ObjectIdBoundary(String superApp, String internalObjectId) {
+        this();
+        this.superApp = superApp;
+        this.internalObjectId = internalObjectId;
     }
 
     public String getSuperApp() {

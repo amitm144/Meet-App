@@ -12,6 +12,7 @@ public class CommandBoundary {
     private Date invocationTimeStamp;
     private Map<String, Object> commandAttributes;
 
+    public CommandBoundary() {}
 
     public CommandBoundary(CommandIdBoundary commandId, ObjectIdBoundary targetObject, String command, Map<String, Object> commandAttributes) {
         this.commandId = commandId;

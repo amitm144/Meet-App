@@ -9,13 +9,13 @@ public class UserIdBoundary {
         this.superApp = "2023a.noam.levy";
     }
 
-    public UserIdBoundary(String superApp, String email) {
-        this.superApp = superApp;
+    public UserIdBoundary(String email) {
+        this();
         this.email = email;
     }
 
-    public UserIdBoundary(String email) {
-        super();
+    public UserIdBoundary(String superApp, String email) {
+        this.superApp = superApp;
         this.email = email;
     }
 
@@ -33,5 +33,13 @@ public class UserIdBoundary {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    @Override
+    public String toString() {
+        return "UserIdBoundary{" +
+                "superApp='" + superApp + '\'' +
+                ", email='" + email + '\'' +
+                '}';
     }
 }

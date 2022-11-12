@@ -1,6 +1,7 @@
 package controllers;
 
 import boundaries.user.UserBoundary;
+import boundaries.user.UserIdBoundary;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +29,6 @@ public class UsersController {
             path= {"/superapp/users/{superapp}/{userEmail}"},
             method = {RequestMethod.PUT},
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    public void update (@PathVariable("superapp") String superapp , @PathVariable("userEmail") String email) {}
+    public void update (@PathVariable("superapp") String superapp , @PathVariable("userEmail") String email) { }
 
 }

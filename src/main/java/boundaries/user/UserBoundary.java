@@ -9,17 +9,15 @@ public class UserBoundary {
 
     public UserBoundary() {}
 
-    public UserBoundary(String superapp , String email, String role, String username, String avatar) {
-        this.userId = new UserIdBoundary(superapp ,email);
-        this.role = role;
-        this.username = username;
-        this.avatar = avatar;
-    }
     public UserBoundary(String email, String role, String username, String avatar) {
         this.userId = new UserIdBoundary(email);
         this.role = role;
         this.username = username;
         this.avatar = avatar;
+    }
+    public UserBoundary(String superApp , String email, String role, String username, String avatar) {
+        this(email, role, username, avatar);
+        this.userId = new UserIdBoundary(superApp ,email);
     }
 
     public static UserBoundary[] getNRandomUsers(int n) {
@@ -36,8 +34,11 @@ public class UserBoundary {
         return userId;
     }
 
-    public void setUserId(UserIdBoundary userId) {
-        this.userId = userId;
+    public void setEmail(String email) {
+        if (this.userId == null)
+            this.userId = new UserIdBoundary(email);
+        else
+            this.userId.setEmail(email);
     }
 
     public String getAvatar() {
@@ -62,5 +63,16 @@ public class UserBoundary {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+
+    @Override
+    public String toString() {
+        return "UserBoundary {" +
+                "userId=" + userId.toString() +
+                ", role='" + role + '\'' +
+                ", username='" + username + '\'' +
+                ", avatar='" + avatar + '\'' +
+                '}';
     }
 }
