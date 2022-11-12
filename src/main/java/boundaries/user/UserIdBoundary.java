@@ -1,4 +1,4 @@
-package boundaries;
+package boundaries.user;
 
 public class UserIdBoundary {
 
