@@ -21,7 +21,6 @@ public class CommandBoundary {
         this.commandAttributes = commandAttributes;
     }
 
-
     public CommandIdBoundary getCommandId() {
         return commandId;
     }

@@ -8,7 +8,6 @@ public class CommandIdBoundary {
     private String miniApp ;
     private String internalCommandId;
 
-
     public CommandIdBoundary() {
         this.superApp = "2023a.noam.levy";
         int id = new Random().nextInt(1000);
