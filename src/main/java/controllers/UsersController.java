@@ -12,9 +12,9 @@ public class UsersController {
             path= {"/superapp/users/login/{superapp}/{email}"},
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    public UserBoundary login (@PathVariable("superapp") String superapp , @PathVariable("email") String email) {
+    public UserBoundary login (@PathVariable("superapp") String superapp, @PathVariable("email") String email) {
         String username = email.split("@")[0];
-        UserBoundary ub = new UserBoundary(superapp , email , "user" , username , "A" ) ;
+        UserBoundary ub = new UserBoundary(superapp, email, "user", username, "A" ) ;
         return ub ;
     }
 

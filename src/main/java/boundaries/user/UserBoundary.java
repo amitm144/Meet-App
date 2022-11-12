@@ -7,8 +7,7 @@ public class UserBoundary {
     private String username ;
     private String avatar ;
 
-    public UserBoundary(){
-    }
+    public UserBoundary() {}
 
     public UserBoundary(String superapp , String email, String role, String username, String avatar) {
         this.userId = new UserIdBoundary(superapp ,email);
@@ -23,12 +22,12 @@ public class UserBoundary {
         this.avatar = avatar;
     }
 
-
-    public static UserBoundary[] getNRandomUsers(int n){
+    public static UserBoundary[] getNRandomUsers(int n) {
         UserBoundary[] userBoundaries = new UserBoundary[n];
         for (int i = 0; i < n; i++) {
-            userBoundaries[i] = new UserBoundary(String.format("random%d@example.com", i) ,
-                    "example" , String.format("random%d", i) , String.format("%d", i));
+            userBoundaries[i] = new UserBoundary(
+                    String.format("random%d@example.com", i),"example",
+                    String.format("random%d", i), String.format("%d", i));
         }
         return userBoundaries;
     }
