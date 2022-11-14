@@ -7,7 +7,7 @@ public class ObjectIdBoundary {
     private String superApp ;
     private String internalObjectId;
 
-    public ObjectIdBoundary(){
+    public ObjectIdBoundary() {
         this.superApp = "2023a.noam.levy";
         int id = new Random().nextInt(1000);
         this.internalObjectId = Integer.toString(id);
@@ -39,5 +39,13 @@ public class ObjectIdBoundary {
 
     public void setInternalObjectId(String internalObjectId) {
         this.internalObjectId = internalObjectId;
+    }
+
+    @Override
+    public String toString() {
+        return "ObjectIdBoundary{" +
+                "superApp='" + superApp + '\'' +
+                ", internalObjectId='" + internalObjectId + '\'' +
+                '}';
     }
 }

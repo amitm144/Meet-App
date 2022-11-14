@@ -1,11 +1,10 @@
 package controllers;
 
 import boundaries.command.CommandBoundary;
-import boundaries.command.CommandIdBoundary;
-import boundaries.command.ObjectIdBoundary;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import java.util.Map;
+
+import java.util.Date;
 
 @RestController
 public class MiniAppObjectsController {
@@ -17,11 +16,7 @@ public class MiniAppObjectsController {
     public CommandBoundary invokeMiniAppCommand (@RequestBody CommandBoundary command,
                                                  @PathVariable("miniAppName") String miniAppName)
     {
-        CommandIdBoundary id = command.getCommandId();
-        ObjectIdBoundary objectId = command.getTargetObject();
-        String cmd = command.getCommand();
-        Map<String,Object> attributes = command.getCommandAttributes();
-
-        return new CommandBoundary(id,objectId,cmd,attributes);
+        command.setInvocationTimeStamp(new Date());
+        return command;
     }
 }

@@ -49,4 +49,13 @@ public class CommandIdBoundary {
     public void setInternalCommandId(String internalCommandId) {
         this.internalCommandId = internalCommandId;
     }
+
+    @Override
+    public String toString() {
+        return "CommandIdBoundary{" +
+                "superApp='" + superApp + '\'' +
+                ", miniApp='" + miniApp + '\'' +
+                ", internalCommandId='" + internalCommandId + '\'' +
+                '}';
+    }
 }

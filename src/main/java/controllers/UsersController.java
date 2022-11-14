@@ -1,7 +1,6 @@
 package controllers;
 
 import boundaries.user.UserBoundary;
-import boundaries.user.UserIdBoundary;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,8 +14,7 @@ public class UsersController {
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public UserBoundary login (@PathVariable("superapp") String superapp, @PathVariable("email") String email) {
         String username = email.split("@")[0];
-        UserBoundary ub = new UserBoundary(superapp, email, "user", username, "A" ) ;
-        return ub ;
+        return new UserBoundary(superapp, email, "user", username, "A" );
     }
 
     @RequestMapping(
