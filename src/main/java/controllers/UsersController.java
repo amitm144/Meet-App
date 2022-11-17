@@ -12,7 +12,7 @@ public class UsersController {
             path= {"/superapp/users/login/{superapp}/{email}"},
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    public UserBoundary login (@PathVariable("superapp") String superapp, @PathVariable("email") String email) {
+    public Object login (@PathVariable("superapp") String superapp, @PathVariable("email") String email) {
         String username = email.split("@")[0];
         return new UserBoundary(superapp, email, "user", username, "A" );
     }
@@ -21,7 +21,7 @@ public class UsersController {
             path= {"/superapp/users"},
             method = {RequestMethod.POST},
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    public UserBoundary createUser (@RequestBody UserBoundary user ) { return user; }
+    public Object createUser (@RequestBody UserBoundary user ) { return user; }
 
     @RequestMapping(
             path= {"/superapp/users/{superapp}/{userEmail}"},

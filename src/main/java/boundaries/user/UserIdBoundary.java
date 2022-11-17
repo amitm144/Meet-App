@@ -1,5 +1,8 @@
 package boundaries.user;
 
+
+import application.EmailChecker;
+
 public class UserIdBoundary {
 
     private String superApp ;
@@ -11,10 +14,14 @@ public class UserIdBoundary {
 
     public UserIdBoundary(String email) {
         this();
+        if (!EmailChecker.isValidEmail(email))
+            throw new RuntimeException("invalid email");
         this.email = email;
     }
 
     public UserIdBoundary(String superApp, String email) {
+        if (!EmailChecker.isValidEmail(email))
+            throw new RuntimeException("invalid email");
         this.superApp = superApp;
         this.email = email;
     }
@@ -32,7 +39,8 @@ public class UserIdBoundary {
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        if (EmailChecker.isValidEmail(email))
+            this.email = email;
     }
 
     @Override
