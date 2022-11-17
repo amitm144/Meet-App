@@ -1,6 +1,9 @@
 package boundaries.command;
 
+import boundaries.user.UserBoundary;
+
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 public class CommandBoundary {
@@ -26,6 +29,25 @@ public class CommandBoundary {
         this.invocationTimeStamp = new Date();
         this.invokedBy = invokedBy;
         this.commandAttributes = commandAttributes;
+    }
+    public static CommandBoundary[] getNcommandBoundries(int n ){
+        Map<String,Object> tObject;
+        Map<String, Object> invokedBy;
+        Map<String,Object> commandAttributes;
+
+        String commandName = "CommandName num :";
+        CommandBoundary[] commandArray = new CommandBoundary[n];
+        for(int i=0; i<n ;i++){
+            tObject = new HashMap<String,Object>();
+            tObject.put("TargetObject",new ObjectIdBoundary());
+            invokedBy = new HashMap<String,Object>();
+            invokedBy.put(commandName,UserBoundary.getNRandomUsers(1)[0].getUserId());
+            commandAttributes = new HashMap<String,Object>();
+            commandAttributes.put("key "+i,i);
+            commandArray[i] = new CommandBoundary(new CommandIdBoundary("miniApp :"+i),commandName+i,tObject,invokedBy,commandAttributes);
+        }
+
+        return commandArray;
     }
 
     public CommandIdBoundary getCommandId() {
@@ -86,4 +108,5 @@ public class CommandBoundary {
                 ", commandAttributes=" + commandAttributes +
                 '}';
     }
+
 }
