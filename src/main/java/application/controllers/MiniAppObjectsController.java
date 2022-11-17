@@ -1,14 +1,10 @@
-package controllers;
+package application.controllers;
 
-import boundaries.command.CommandBoundary;
-import boundaries.command.CommandIdBoundary;
-import boundaries.command.ObjectIdBoundary;
-import boundaries.user.UserIdBoundary;
+import application.boundaries.command.CommandBoundary;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
-import java.util.Map;
 
 @RestController
 public class MiniAppObjectsController {

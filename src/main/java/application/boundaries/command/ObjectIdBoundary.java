@@ -1,4 +1,4 @@
-package boundaries.command;
+package application.boundaries.command;
 
 import java.util.Random;
 
@@ -13,15 +13,8 @@ public class ObjectIdBoundary {
         this.internalObjectId = Integer.toString(id);
     }
 
-
-    public ObjectIdBoundary(String superApp) {
+    public ObjectIdBoundary(String internalObjectId) {
         this();
-        this.superApp = superApp;
-    }
-
-    public ObjectIdBoundary(String superApp, String internalObjectId) {
-        this();
-        this.superApp = superApp;
         this.internalObjectId = internalObjectId;
     }
 

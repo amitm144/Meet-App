@@ -1,4 +1,4 @@
-package boundaries.command;
+package application.boundaries.command;
 
 import java.util.Date;
 import java.util.Map;

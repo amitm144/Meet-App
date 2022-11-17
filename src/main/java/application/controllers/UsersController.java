@@ -1,6 +1,6 @@
-package controllers;
+package application.controllers;
 
-import boundaries.user.UserBoundary;
+import application.boundaries.user.UserBoundary;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 

@@ -1,4 +1,4 @@
-package boundaries.command;
+package application.boundaries.command;
 
 import java.util.Random;
 
@@ -14,15 +14,15 @@ public class CommandIdBoundary {
         this.internalCommandId = Integer.toString(id);
     }
 
-    public CommandIdBoundary(String superApp, String miniApp, String internalCommandId) {
-        this.superApp = superApp;
+    public CommandIdBoundary(String miniApp, String internalCommandId) {
+        if (miniApp.isBlank())
+            throw new RuntimeException("missing miniApp name");
         this.miniApp = miniApp;
         this.internalCommandId = internalCommandId;
     }
 
-    public CommandIdBoundary(String superApp, String miniApp ) {
+    public CommandIdBoundary(String miniApp) {
         this();
-        this.superApp = superApp;
         this.miniApp = miniApp;
     }
 

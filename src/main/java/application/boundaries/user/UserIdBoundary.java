@@ -1,4 +1,4 @@
-package boundaries.user;
+package application.boundaries.user;
 
 
 import application.EmailChecker;
