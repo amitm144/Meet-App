@@ -32,6 +32,23 @@ public class AdminController {
         return c;
     }
 
+    @RequestMapping(
+                path= {"/superapp/admin/users"},
+                method = {RequestMethod.DELETE},
+                produces = {MediaType.APPLICATION_JSON_VALUE})
+    public void deleteUsers () {}
+
+    @RequestMapping(
+            path= {"/superapp/admin/objects"},
+            method = {RequestMethod.DELETE},
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public void deleteObjects () {}
+
+    @RequestMapping(
+            path= {"/superapp/admin/miniapp"},
+            method = {RequestMethod.DELETE},
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public void deleteMiniApp () {}
 
 
-}
+    }
