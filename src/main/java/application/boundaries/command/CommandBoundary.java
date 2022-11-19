@@ -1,6 +1,9 @@
 package application.boundaries.command;
 
+import application.boundaries.user.UserIdBoundary;
+
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 public class CommandBoundary {
@@ -14,18 +17,22 @@ public class CommandBoundary {
     private Map<String, Object> invokedBy;
     private Map<String, Object> commandAttributes;
 
-    public CommandBoundary() {}
+    public CommandBoundary() {
+        this.targetObject = new HashMap<>();
+        this.invokedBy = new HashMap<>();
+    }
 
     public CommandBoundary(CommandIdBoundary commandId, String command,
-                           Map<String, Object> targetObject, Map<String, Object> invokedBy,
+                           ObjectIdBoundary targetObject, UserIdBoundary invokedBy,
                            Map<String, Object> commandAttributes)
     {
+        this();
         this.commandId = commandId;
         this.command = command;
-        this.targetObject = targetObject;
-        this.invocationTimeStamp = new Date();
-        this.invokedBy = invokedBy;
         this.commandAttributes = commandAttributes;
+        this.invocationTimeStamp = new Date();
+        this.targetObject.put("ObjectId", targetObject);
+        this.invokedBy.put("UserId", invokedBy);
     }
 
     public CommandIdBoundary getCommandId() {
@@ -36,12 +43,12 @@ public class CommandBoundary {
         this.commandId = commandId;
     }
 
-    public Map<String, Object> getTargetObject() {
+    public Object getTargetObject() {
         return targetObject;
     }
 
-    public void setTargetObject(Map<String, Object> targetObject) {
-        this.targetObject = targetObject;
+    public void setTargetObject(ObjectIdBoundary targetObject) {
+        this.targetObject.put("ObjectId", targetObject);
     }
 
     public String getCommand() {
@@ -60,15 +67,15 @@ public class CommandBoundary {
         this.invocationTimeStamp = invocationTimeStamp;
     }
 
-    public Map<String, Object> getInvokedBy() {
+    public Object getInvokedBy() {
         return invokedBy;
     }
 
-    public void setInvokedBy(Map<String, Object> invokedBy) {
-        this.invokedBy = invokedBy;
+    public void setInvokedBy(UserIdBoundary invokedBy) {
+        this.invokedBy.put("UserId", invokedBy);
     }
 
-    public Map<String, Object> getCommandAttributes() {
+    public Object getCommandAttributes() {
         return commandAttributes;
     }
 

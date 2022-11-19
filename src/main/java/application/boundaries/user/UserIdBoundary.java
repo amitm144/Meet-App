@@ -22,6 +22,8 @@ public class UserIdBoundary {
     public UserIdBoundary(String superApp, String email) {
         if (!EmailChecker.isValidEmail(email))
             throw new RuntimeException("invalid email");
+        if (superApp.isBlank())
+            throw  new RuntimeException("super-app name cannot be empty");
         this.superApp = superApp;
         this.email = email;
     }
@@ -37,10 +39,11 @@ public class UserIdBoundary {
     public String getEmail() {
         return email;
     }
-
     public void setEmail(String email) {
         if (EmailChecker.isValidEmail(email))
             this.email = email;
+        else
+            throw new RuntimeException("Invalid email");
     }
 
     @Override

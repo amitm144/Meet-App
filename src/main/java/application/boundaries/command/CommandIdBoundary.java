@@ -15,8 +15,8 @@ public class CommandIdBoundary {
     }
 
     public CommandIdBoundary(String miniApp, String internalCommandId) {
-        if (miniApp.isBlank())
-            throw new RuntimeException("missing miniApp name");
+        if (miniApp.isBlank() || internalCommandId.isBlank())
+            throw new RuntimeException("command id or miniApp name cannot be blank");
         this.miniApp = miniApp;
         this.internalCommandId = internalCommandId;
     }

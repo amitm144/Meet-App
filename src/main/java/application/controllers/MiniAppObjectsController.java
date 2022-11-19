@@ -12,10 +12,12 @@ public class MiniAppObjectsController {
     @RequestMapping(
             path= {"/superapp/miniapp/{miniAppName}"},
             method = {RequestMethod.POST},
-            produces = {MediaType.APPLICATION_JSON_VALUE})
+            produces = {MediaType.APPLICATION_JSON_VALUE},
+            consumes = {MediaType.APPLICATION_JSON_VALUE})
     public Object invokeMiniAppCommand (@RequestBody CommandBoundary command,
                                         @PathVariable("miniAppName") String miniAppName)
     {
+        System.err.println(command);
         command.setInvocationTimeStamp(new Date());
         return command;
     }
