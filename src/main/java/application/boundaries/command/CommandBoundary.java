@@ -31,8 +31,8 @@ public class CommandBoundary {
         this.command = command;
         this.commandAttributes = commandAttributes;
         this.invocationTimeStamp = new Date();
-        this.targetObject.put("ObjectId", targetObject);
-        this.invokedBy.put("UserId", invokedBy);
+        this.targetObject.put("objectId", targetObject);
+        this.invokedBy.put("userId", invokedBy);
     }
 
     public CommandIdBoundary getCommandId() {
@@ -47,9 +47,11 @@ public class CommandBoundary {
         return targetObject;
     }
 
-    public void setTargetObject(ObjectIdBoundary targetObject) {
-        this.targetObject.put("ObjectId", targetObject);
-    }
+//    public void setTargetObject(ObjectIdBoundary targetObject) { - DONT KNOW WHY THIS WON'T DO THE JOB
+//        this.targetObject.put("objectId", targetObject);
+//    }
+
+    public void setTargetObject(Map<String, Object> targetObject) { this.targetObject = targetObject; }
 
     public String getCommand() {
         return command;
@@ -71,10 +73,9 @@ public class CommandBoundary {
         return invokedBy;
     }
 
-    public void setInvokedBy(UserIdBoundary invokedBy) {
-        this.invokedBy.put("UserId", invokedBy);
-    }
+//    public void setInvokedBy(UserIdBoundary invokedBy) { this.invokedBy.put("userId", invokedBy); } - DONT KNOW WHY THIS WON'T DO THE JOB
 
+    public void setInvokedBy(Map<String, Object> invokedBy) { this.invokedBy = invokedBy; }
     public Object getCommandAttributes() {
         return commandAttributes;
     }
