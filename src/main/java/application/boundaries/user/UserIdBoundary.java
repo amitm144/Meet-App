@@ -1,7 +1,6 @@
 package application.boundaries.user;
 
-
-import application.EmailChecker;
+import application.util.EmailChecker;
 
 public class UserIdBoundary {
 

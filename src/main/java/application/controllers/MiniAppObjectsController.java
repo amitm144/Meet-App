@@ -17,7 +17,6 @@ public class MiniAppObjectsController {
     public Object invokeMiniAppCommand (@RequestBody CommandBoundary command,
                                         @PathVariable("miniAppName") String miniAppName)
     {
-        System.err.println(command);
         command.setInvocationTimeStamp(new Date());
         return command;
     }
