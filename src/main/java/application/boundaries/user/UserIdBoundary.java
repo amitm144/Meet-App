@@ -1,7 +1,8 @@
 package application.boundaries.user;
 
 
-import application.EmailChecker;
+import application.util.EmailChecker;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 public class UserIdBoundary {
 

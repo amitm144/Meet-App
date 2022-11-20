@@ -1,6 +1,9 @@
 package application.boundaries.command;
 
 import application.boundaries.user.UserIdBoundary;
+import application.util.wrappers.ObjectIdWrapper;
+import application.util.wrappers.ObjectWrapper;
+import application.util.wrappers.UserIdWrapper;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -12,15 +15,12 @@ public class CommandBoundary {
      */
     private CommandIdBoundary commandId ;
     private String command;
-    private Map<String, Object> targetObject;
+    private ObjectIdWrapper targetObject;
     private Date invocationTimeStamp;
-    private Map<String, Object> invokedBy;
+    private UserIdWrapper invokedBy;
     private Map<String, Object> commandAttributes;
 
-    public CommandBoundary() {
-        this.targetObject = new HashMap<>();
-        this.invokedBy = new HashMap<>();
-    }
+    public CommandBoundary() {}
 
     public CommandBoundary(CommandIdBoundary commandId, String command,
                            ObjectIdBoundary targetObject, UserIdBoundary invokedBy,
@@ -31,8 +31,8 @@ public class CommandBoundary {
         this.command = command;
         this.commandAttributes = commandAttributes;
         this.invocationTimeStamp = new Date();
-        this.targetObject.put("objectId", targetObject);
-        this.invokedBy.put("userId", invokedBy);
+        this.targetObject = new ObjectIdWrapper(targetObject);
+        this.invokedBy = new UserIdWrapper(invokedBy);
     }
 
     public CommandIdBoundary getCommandId() {
@@ -47,11 +47,7 @@ public class CommandBoundary {
         return targetObject;
     }
 
-//    public void setTargetObject(ObjectIdBoundary targetObject) { - DONT KNOW WHY THIS WON'T DO THE JOB
-//        this.targetObject.put("objectId", targetObject);
-//    }
-
-    public void setTargetObject(Map<String, Object> targetObject) { this.targetObject = targetObject; }
+    public void setTargetObject(ObjectIdWrapper targetObject) { this.targetObject = targetObject; }
 
     public String getCommand() {
         return command;
@@ -73,9 +69,8 @@ public class CommandBoundary {
         return invokedBy;
     }
 
-//    public void setInvokedBy(UserIdBoundary invokedBy) { this.invokedBy.put("userId", invokedBy); } - DONT KNOW WHY THIS WON'T DO THE JOB
 
-    public void setInvokedBy(Map<String, Object> invokedBy) { this.invokedBy = invokedBy; }
+    public void setInvokedBy(UserIdWrapper invokedBy) { this.invokedBy = invokedBy; }
     public Object getCommandAttributes() {
         return commandAttributes;
     }

@@ -1,4 +1,4 @@
-package application;
+package application.util;
 
 import java.util.regex.*;
 
