@@ -1,4 +1,4 @@
-package boundaries.user;
+package application.boundaries.user;
 
 public class UserBoundary {
 
@@ -10,6 +10,8 @@ public class UserBoundary {
     public UserBoundary() {}
 
     public UserBoundary(String email, String role, String username, String avatar) {
+        if (username.isBlank() || role.isBlank())
+            throw new RuntimeException("Username or role cannot be blank");
         this.userId = new UserIdBoundary(email);
         this.role = role;
         this.username = username;

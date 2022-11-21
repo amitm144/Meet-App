@@ -1,4 +1,6 @@
-package boundaries.user;
+package application.boundaries.user;
+
+import application.util.EmailChecker;
 
 public class UserIdBoundary {
 
@@ -11,10 +13,16 @@ public class UserIdBoundary {
 
     public UserIdBoundary(String email) {
         this();
+        if (!EmailChecker.isValidEmail(email))
+            throw new RuntimeException("invalid email");
         this.email = email;
     }
 
     public UserIdBoundary(String superApp, String email) {
+        if (!EmailChecker.isValidEmail(email))
+            throw new RuntimeException("invalid email");
+        if (superApp.isBlank())
+            throw  new RuntimeException("super-app name cannot be empty");
         this.superApp = superApp;
         this.email = email;
     }
@@ -30,9 +38,11 @@ public class UserIdBoundary {
     public String getEmail() {
         return email;
     }
-
     public void setEmail(String email) {
-        this.email = email;
+        if (EmailChecker.isValidEmail(email))
+            this.email = email;
+        else
+            throw new RuntimeException("Invalid email");
     }
 
     @Override

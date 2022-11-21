@@ -1,4 +1,8 @@
-package boundaries.command;
+package application.boundaries.command;
+
+import application.boundaries.user.UserIdBoundary;
+import application.util.wrappers.ObjectIdWrapper;
+import application.util.wrappers.UserIdWrapper;
 
 import boundaries.user.UserBoundary;
 
@@ -7,28 +11,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CommandBoundary {
-    /*
-        targetObject and invokedBy are maps in order to handle the requested data structure properly.
-     */
+
     private CommandIdBoundary commandId ;
     private String command;
-    private Map<String, Object> targetObject;
+    private ObjectIdWrapper targetObject;
     private Date invocationTimeStamp;
-    private Map<String, Object> invokedBy;
+    private UserIdWrapper invokedBy;
     private Map<String, Object> commandAttributes;
 
-    public CommandBoundary() {}
+    public CommandBoundary() { }
 
     public CommandBoundary(CommandIdBoundary commandId, String command,
-                           Map<String, Object> targetObject, Map<String, Object> invokedBy,
+                           ObjectIdBoundary targetObject, UserIdBoundary invokedBy,
                            Map<String, Object> commandAttributes)
     {
+        this();
         this.commandId = commandId;
         this.command = command;
-        this.targetObject = targetObject;
-        this.invocationTimeStamp = new Date();
-        this.invokedBy = invokedBy;
         this.commandAttributes = commandAttributes;
+        this.invocationTimeStamp = new Date();
+        this.targetObject = new ObjectIdWrapper(targetObject);
+        this.invokedBy = new UserIdWrapper(invokedBy);
     }
     public static CommandBoundary[] getNcommandBoundries(int n ){
         Map<String,Object> tObject;
@@ -58,13 +61,11 @@ public class CommandBoundary {
         this.commandId = commandId;
     }
 
-    public Map<String, Object> getTargetObject() {
+    public Object getTargetObject() {
         return targetObject;
     }
 
-    public void setTargetObject(Map<String, Object> targetObject) {
-        this.targetObject = targetObject;
-    }
+    public void setTargetObject(ObjectIdWrapper targetObject) { this.targetObject = targetObject; }
 
     public String getCommand() {
         return command;
@@ -82,15 +83,13 @@ public class CommandBoundary {
         this.invocationTimeStamp = invocationTimeStamp;
     }
 
-    public Map<String, Object> getInvokedBy() {
+    public Object getInvokedBy() {
         return invokedBy;
     }
 
-    public void setInvokedBy(Map<String, Object> invokedBy) {
-        this.invokedBy = invokedBy;
-    }
+    public void setInvokedBy(UserIdWrapper invokedBy) { this.invokedBy = invokedBy; }
 
-    public Map<String, Object> getCommandAttributes() {
+    public Object getCommandAttributes() {
         return commandAttributes;
     }
 
