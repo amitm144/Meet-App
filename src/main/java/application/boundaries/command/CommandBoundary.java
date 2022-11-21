@@ -5,6 +5,7 @@ import application.util.wrappers.ObjectIdWrapper;
 import application.util.wrappers.UserIdWrapper;
 
 import boundaries.user.UserBoundary;
+import org.apache.catalina.User;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -34,20 +35,15 @@ public class CommandBoundary {
         this.invokedBy = new UserIdWrapper(invokedBy);
     }
     public static CommandBoundary[] getNcommandBoundries(int n ){
-        Map<String,Object> tObject;
-        Map<String, Object> invokedBy;
         Map<String,Object> commandAttributes;
-
         String commandName = "CommandName num :";
         CommandBoundary[] commandArray = new CommandBoundary[n];
         for(int i=0; i<n ;i++){
-            tObject = new HashMap<String,Object>();
-            tObject.put("TargetObject",new ObjectIdBoundary());
             invokedBy = new HashMap<String,Object>();
             invokedBy.put(commandName,UserBoundary.getNRandomUsers(1)[0].getUserId());
             commandAttributes = new HashMap<String,Object>();
             commandAttributes.put("key "+i,i);
-            commandArray[i] = new CommandBoundary(new CommandIdBoundary("miniApp :"+i),commandName+i,tObject,invokedBy,commandAttributes);
+            commandArray[i] = new CommandBoundary(new CommandIdBoundary(),commandName+i,new ObjectIdBoundary(),new UserIdBoundary(),commandAttributes);
         }
 
         return commandArray;

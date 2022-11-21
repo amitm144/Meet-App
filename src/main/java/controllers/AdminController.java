@@ -1,5 +1,8 @@
 package controllers;
 
+import application.boundaries.command.CommandBoundary;
+import application.boundaries.command.CommandIdBoundary;
+import application.boundaries.user.UserBoundary;
 import boundaries.command.CommandBoundary;
 import boundaries.command.CommandIdBoundary;
 import boundaries.user.UserBoundary;
