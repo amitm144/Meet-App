@@ -1,10 +1,11 @@
 package application.boundaries.command;
 
+import application.boundaries.user.UserBoundary;
 import application.boundaries.user.UserIdBoundary;
 import application.util.wrappers.ObjectIdWrapper;
 import application.util.wrappers.UserIdWrapper;
 
-import boundaries.user.UserBoundary;
+
 import org.apache.catalina.User;
 
 import java.util.Date;
@@ -39,11 +40,10 @@ public class CommandBoundary {
         String commandName = "CommandName num :";
         CommandBoundary[] commandArray = new CommandBoundary[n];
         for(int i=0; i<n ;i++){
-            invokedBy = new HashMap<String,Object>();
-            invokedBy.put(commandName,UserBoundary.getNRandomUsers(1)[0].getUserId());
             commandAttributes = new HashMap<String,Object>();
             commandAttributes.put("key "+i,i);
-            commandArray[i] = new CommandBoundary(new CommandIdBoundary(),commandName+i,new ObjectIdBoundary(),new UserIdBoundary(),commandAttributes);
+            UserBoundary user = UserBoundary.getNRandomUsers(1)[0];
+            commandArray[i] = new CommandBoundary(new CommandIdBoundary("mini :" + i),commandName+i,new ObjectIdBoundary(),user.getUserId(),commandAttributes);
         }
 
         return commandArray;

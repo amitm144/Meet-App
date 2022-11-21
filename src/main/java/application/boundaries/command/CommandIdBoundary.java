@@ -13,10 +13,6 @@ public class CommandIdBoundary {
         int id = new Random().nextInt(1000);
         this.internalCommandId = Integer.toString(id);
     }
-    public CommandIdBoundary(String miniApp) {
-        this();
-        this.miniApp = miniApp;
-    }
 
     public CommandIdBoundary(String miniApp, String internalCommandId) {
         if (miniApp.isBlank() || internalCommandId.isBlank())
