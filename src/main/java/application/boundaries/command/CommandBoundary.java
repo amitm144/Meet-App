@@ -4,16 +4,11 @@ import application.boundaries.user.UserBoundary;
 import application.boundaries.user.UserIdBoundary;
 import application.util.wrappers.ObjectIdWrapper;
 import application.util.wrappers.UserIdWrapper;
-
-
-import org.apache.catalina.User;
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 public class CommandBoundary {
-
     private CommandIdBoundary commandId ;
     private String command;
     private ObjectIdWrapper targetObject;
@@ -35,20 +30,6 @@ public class CommandBoundary {
         this.targetObject = new ObjectIdWrapper(targetObject);
         this.invokedBy = new UserIdWrapper(invokedBy);
     }
-    public static CommandBoundary[] getNcommandBoundries(int n ){
-        Map<String,Object> commandAttributes;
-        String commandName = "CommandName num :";
-        CommandBoundary[] commandArray = new CommandBoundary[n];
-        for(int i=0; i<n ;i++){
-            commandAttributes = new HashMap<String,Object>();
-            commandAttributes.put("key "+i,i);
-            UserBoundary user = UserBoundary.getNRandomUsers(1)[0];
-            commandArray[i] = new CommandBoundary(new CommandIdBoundary("mini :" + i),commandName+i,new ObjectIdBoundary(),user.getUserId(),commandAttributes);
-        }
-
-        return commandArray;
-    }
-
     public CommandIdBoundary getCommandId() {
         return commandId;
     }
@@ -92,7 +73,19 @@ public class CommandBoundary {
     public void setCommandAttributes(Map<String, Object> commandAttributes) {
         this.commandAttributes = commandAttributes;
     }
-
+    public static CommandBoundary[] getNcommandBoundries(int n ){
+        Map<String,Object> commandAttributes;
+        String commandName = "CommandName num :";
+        CommandBoundary[] commandArray = new CommandBoundary[n];
+        for(int i=0; i<n ;i++){
+            commandAttributes = new HashMap<String,Object>();
+            commandAttributes.put("key "+i,i);
+            UserBoundary user = UserBoundary.getNRandomUsers(1)[0];
+            commandArray[i] = new CommandBoundary(new CommandIdBoundary("mini :" + i),
+                    commandName+i,new ObjectIdBoundary(),user.getUserId(),commandAttributes);
+        }
+        return commandArray;
+    }
     @Override
     public String toString() {
         return "CommandBoundary{" +
@@ -103,5 +96,4 @@ public class CommandBoundary {
                 ", commandAttributes=" + commandAttributes +
                 '}';
     }
-
 }

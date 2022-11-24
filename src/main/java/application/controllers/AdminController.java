@@ -13,13 +13,11 @@ public class AdminController {
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public UserBoundary[] createUsers () { return UserBoundary.getNRandomUsers(5); }
-
     @RequestMapping(
             path= {"/superapp/admin/miniapp"},
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public CommandBoundary[] exportMiniAppsCommands () { return CommandBoundary.getNcommandBoundries(5); }
-
     @RequestMapping(
             path= {"/superapp/admin/miniapp/{miniAppName}"},
             method = {RequestMethod.GET},
@@ -31,24 +29,16 @@ public class AdminController {
         c[0].setCommandId(b);
         return c;
     }
-
     @RequestMapping(
                 path= {"/superapp/admin/users"},
-                method = {RequestMethod.DELETE},
-                produces = {MediaType.APPLICATION_JSON_VALUE})
+                method = {RequestMethod.DELETE})
     public void deleteUsers () {}
-
     @RequestMapping(
             path= {"/superapp/admin/objects"},
-            method = {RequestMethod.DELETE},
-            produces = {MediaType.APPLICATION_JSON_VALUE})
+            method = {RequestMethod.DELETE})
     public void deleteObjects () {}
-
     @RequestMapping(
             path= {"/superapp/admin/miniapp"},
-            method = {RequestMethod.DELETE},
-            produces = {MediaType.APPLICATION_JSON_VALUE})
+            method = {RequestMethod.DELETE})
     public void deleteMiniApp () {}
-
-
-    }
+}
