@@ -1,7 +1,7 @@
 package com.superapp.boundaries.object;
 
 import com.superapp.boundaries.command.ObjectIdBoundary;
-import com.superapp.boundaries.user.UserIdBoundary;
+import com.superapp.boundaries.command.user.UserIdBoundary;
 import com.superapp.util.wrappers.UserIdWrapper;
 
 import java.util.ArrayList;
