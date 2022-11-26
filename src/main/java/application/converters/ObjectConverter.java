@@ -8,7 +8,7 @@ import java.util.Map;
 //import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.superapp.boundaries.command.ObjectIdBoundary;
+import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.boundaries.command.user.UserBoundary;
 import com.superapp.boundaries.object.ObjectBoundary;
 import com.superapp.data.ObjectEntity;
