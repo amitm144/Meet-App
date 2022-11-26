@@ -2,7 +2,7 @@ package com.superapp.controllers;
 
 import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.boundaries.object.ObjectBoundary;
-import com.superapp.boundaries.user.UserIdBoundary;
+import com.superapp.boundaries.command.user.UserIdBoundary;
 import com.superapp.util.wrappers.UserIdWrapper;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
