@@ -22,7 +22,7 @@ public class AdminController {
             path= {"/superapp/admin/users"},
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    public UserBoundary[] getAllUsers () { return (UserBoundary[])this.usersService.getAllUsers().toArray(); }
+    public Object getAllUsers () { return this.usersService.getAllUsers(); }
 
     @RequestMapping(
             path= {"/superapp/admin/miniapp"},
