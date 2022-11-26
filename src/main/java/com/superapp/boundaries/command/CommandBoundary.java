@@ -1,9 +1,9 @@
-package application.boundaries.command;
+package com.superapp.boundaries.command;
 
-import application.boundaries.user.UserBoundary;
-import application.boundaries.user.UserIdBoundary;
-import application.util.wrappers.ObjectIdWrapper;
-import application.util.wrappers.UserIdWrapper;
+import com.superapp.boundaries.user.UserBoundary;
+import com.superapp.boundaries.user.UserIdBoundary;
+import com.superapp.util.wrappers.ObjectIdWrapper;
+import com.superapp.util.wrappers.UserIdWrapper;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;

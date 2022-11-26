@@ -1,6 +1,6 @@
-package application.util.wrappers;
+package com.superapp.util.wrappers;
 
-import application.boundaries.user.UserIdBoundary;
+import com.superapp.boundaries.user.UserIdBoundary;
 
 public class UserIdWrapper {
 
