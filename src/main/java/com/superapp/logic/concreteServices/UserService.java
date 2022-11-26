@@ -31,6 +31,9 @@ public class UserService implements UsersService {
 
     @Override
     public UserBoundary createUser(UserBoundary user) {
+        if (users.containsKey(user.getUserId().getEmail()))
+            throw new RuntimeException("User already exists");
+
         users.put(user.getUserId().getEmail(), this.converter.toEntity(user));
         //TODO: add newly created user to DB
         return user;
@@ -62,7 +65,7 @@ public class UserService implements UsersService {
         } catch (Exception e) {
             throw new RuntimeException("Cannot update user " + userEmail);
         }
-        return this.converter.toBoundary(user);
+        return this.converter.toBoundary(user); // TODO: update user in DB
     }
 
     @Override
