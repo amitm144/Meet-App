@@ -34,10 +34,10 @@ public class AdminController {
             path= {"/superapp/admin/miniapp/{miniAppName}"},
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    public CommandBoundary[] exportSpecificMiniappsCommands(@PathVariable("miniAppName") String miniappName) {
+    public CommandBoundary[] exportSpecificMiniAppsCommands(@PathVariable("miniAppName") String miniAppName) {
         CommandBoundary[] c = CommandBoundary.getNcommandBoundries(1);
         CommandIdBoundary b = c[0].getCommandId();
-        b.setMiniapp(miniappName);
+        b.setMiniApp(miniAppName);
         c[0].setCommandId(b);
         return c;
     }
