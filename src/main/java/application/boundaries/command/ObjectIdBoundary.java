@@ -1,7 +1,5 @@
 package application.boundaries.command;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
-
 import java.util.Random;
 
 public class ObjectIdBoundary {
