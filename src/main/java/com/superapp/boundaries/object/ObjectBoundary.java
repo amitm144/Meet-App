@@ -1,6 +1,6 @@
 package com.superapp.boundaries.object;
 
-import com.superapp.boundaries.user.UserIdBoundary;
+import com.superapp.boundaries.command.user.UserIdBoundary;
 import com.superapp.util.wrappers.UserIdWrapper;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ public class ObjectBoundary {
     private String type;
     private String alias;
     private boolean active;
-    private Date creationTimestamp;
+    private Date creationTimeStamp;
     private UserIdWrapper createdBy;
     private Map<String, Object> objectDetails;
 
@@ -26,7 +26,7 @@ public class ObjectBoundary {
         this.type = type;
         this.alias = alias;
         this.active = true;
-        this.creationTimestamp = new Date();
+        this.creationTimeStamp = new Date();
         this.createdBy = createdBy;
 
         this.objectDetails = objectDetails;
@@ -64,12 +64,12 @@ public class ObjectBoundary {
         this.active = active;
     }
 
-    public Date getCreationTimestamp() {
-        return creationTimestamp;
+    public Date getCreationTimeStamp() {
+        return creationTimeStamp;
     }
 
-    public void setCreationTimestamp(Date creationTimestamp) {
-        this.creationTimestamp = creationTimestamp;
+    public void setCreationTimeStamp(Date creationTimeStamp) {
+        this.creationTimeStamp = creationTimeStamp;
     }
     public UserIdWrapper getCreatedBy() {
         return createdBy;
@@ -109,7 +109,7 @@ public class ObjectBoundary {
                 ", type='" + type + '\'' +
                 ", alias='" + alias + '\'' +
                 ", active=" + active +
-                ", creationTimestamp=" + creationTimestamp +
+                ", creationTimeStamp=" + creationTimeStamp +
                 ", createBy=" + createdBy +
                 ", objectDetails=" + objectDetails +
                 '}';
