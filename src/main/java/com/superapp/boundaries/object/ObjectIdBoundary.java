@@ -4,11 +4,11 @@ import java.util.Random;
 
 public class ObjectIdBoundary {
 
-    private String superapp ;
+    private String superApp ;
     private String internalObjectId;
 
     public ObjectIdBoundary() {
-        this.superapp = "2023a.noam.levy";
+        this.superApp = "2023a.noam.levy";
         int id = new Random().nextInt(1000);
         this.internalObjectId = Integer.toString(id);
     }
@@ -18,12 +18,12 @@ public class ObjectIdBoundary {
         this.internalObjectId = internalObjectId;
     }
 
-    public String getSuperapp() {
-        return superapp;
+    public String getSuperApp() {
+        return superApp;
     }
 
-    public void setSuperapp(String superapp) {
-        this.superapp = superapp;
+    public void setSuperApp(String superApp) {
+        this.superApp = superApp;
     }
 
     public String getInternalObjectId() {
@@ -37,7 +37,7 @@ public class ObjectIdBoundary {
     @Override
     public String toString() {
         return "ObjectIdBoundary{" +
-                "superapp='" + superapp + '\'' +
+                "superApp='" + superApp + '\'' +
                 ", internalObjectId='" + internalObjectId + '\'' +
                 '}';
     }
