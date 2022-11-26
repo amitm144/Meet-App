@@ -2,6 +2,7 @@ package com.superapp.controllers;
 
 import com.superapp.boundaries.command.CommandBoundary;
 import com.superapp.boundaries.command.CommandIdBoundary;
+import com.superapp.boundaries.command.user.UserBoundary;
 import com.superapp.logic.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;

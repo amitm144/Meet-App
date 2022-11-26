@@ -65,7 +65,7 @@ public class UserService implements UsersService {
         } catch (Exception e) {
             throw new RuntimeException("Cannot update user " + userEmail);
         }
-        return this.converter.toBoundary(user); // TODO: update user in DB
+        return this.converter.toBoundary(user);
     }
 
     @Override
