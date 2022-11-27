@@ -19,7 +19,8 @@ public class MiniAppCommandService implements MiniAppCommandsService {
 
     @Override
     public Object invokeCommand(MiniAppCommandBoundary command) {
-        return this.miniAppConverter.toEntity(command);
+        miniAppsCommands.put(command.getCommandId().getMiniApp(),this.miniAppConverter.toEntity(command));
+        return command;
     }
 
     @Override
