@@ -16,7 +16,9 @@ public class MiniAppCommandBoundary {
     private UserIdWrapper invokedBy;
     private Map<String, Object> commandAttributes;
 
-    public MiniAppCommandBoundary() { }
+    public MiniAppCommandBoundary() {
+
+    }
 
     public MiniAppCommandBoundary(MiniAppCommandIdBoundary commandId, String command,
                                   ObjectIdBoundary targetObject, UserIdBoundary invokedBy,

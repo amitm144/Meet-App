@@ -4,6 +4,7 @@ import com.superapp.boundaries.command.MiniAppCommandBoundary;
 import com.superapp.boundaries.command.MiniAppCommandIdBoundary;
 import com.superapp.logic.UsersService;
 
+import com.superapp.logic.concreteServices.MiniAppCommandService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -12,12 +13,15 @@ import org.springframework.web.bind.annotation.*;
 public class AdminController {
 
     private UsersService usersService;
-
+    private MiniAppCommandService miniappService;
     @Autowired
     public void setMessageService(UsersService usersService) {
         this.usersService = usersService;
     }
-
+    @Autowired
+    public void setMiniAppCommandService(MiniAppCommandService MiniAppCommandService) {
+        this.miniappService = MiniAppCommandService;
+    }
     @RequestMapping(
             path= {"/superapp/admin/users"},
             method = {RequestMethod.GET},
@@ -28,18 +32,15 @@ public class AdminController {
             path= {"/superapp/admin/miniapp"},
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    public MiniAppCommandBoundary[] exportMiniAppsCommands () { return MiniAppCommandBoundary.getNcommandBoundries(5); }
+    public Object exportMiniAppsCommands () { return this.miniappService.getALlCommands();}
+
 
     @RequestMapping(
             path= {"/superapp/admin/miniapp/{miniAppName}"},
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    public MiniAppCommandBoundary[] exportSpecificMiniAppsCommands(@PathVariable("miniAppName") String miniAppName) {
-        MiniAppCommandBoundary[] c = MiniAppCommandBoundary.getNcommandBoundries(1);
-        MiniAppCommandIdBoundary b = c[0].getCommandId();
-        b.setMiniApp(miniAppName);
-        c[0].setCommandId(b);
-        return c;
+    public Object exportSpecificMiniAppsCommands(@PathVariable("miniAppName") String miniAppName) {
+        return this.miniappService.getAllMiniAppCommands(miniAppName);
     }
 
     @RequestMapping(
@@ -55,5 +56,5 @@ public class AdminController {
     @RequestMapping(
             path= {"/superapp/admin/miniapp"},
             method = {RequestMethod.DELETE})
-    public void deleteMiniApp () {}
+    public void deleteMiniApp () {this.miniappService.deleteALlCommands();}
 }

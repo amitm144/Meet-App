@@ -8,9 +8,10 @@ import com.superapp.boundaries.command.user.UserIdBoundary;
 import com.superapp.data.MiniAppCommandEntity;
 import com.superapp.util.wrappers.ObjectIdWrapper;
 import com.superapp.util.wrappers.UserIdWrapper;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
-
+@Component
 public class MiniappCommandConverter {
     private ObjectMapper jackson;
     public MiniappCommandConverter(){

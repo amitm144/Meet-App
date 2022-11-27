@@ -4,22 +4,28 @@ import com.superapp.boundaries.command.MiniAppCommandBoundary;
 import com.superapp.converters.MiniappCommandConverter;
 import com.superapp.data.MiniAppCommandEntity;
 import com.superapp.logic.MiniAppCommandsService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import javax.annotation.PostConstruct;
+import java.util.*;
 
+@Service
 public class MiniAppCommandService implements MiniAppCommandsService {
     private MiniappCommandConverter miniAppConverter;
     private Map<String, MiniAppCommandEntity> miniAppsCommands; // { miniapp: miniAppCommand }
-
+    @Autowired
     public MiniAppCommandService(MiniappCommandConverter miniAppConverter) {
         this.miniAppConverter = miniAppConverter;
     }
+    @PostConstruct
+    public void setup() {
+        this.miniAppsCommands = Collections.synchronizedMap(new HashMap<>());
+    }
 
     @Override
-    public Object invokeCommand(MiniAppCommandBoundary command) {
-        miniAppsCommands.put(command.getCommandId().getMiniApp(),this.miniAppConverter.toEntity(command));
+    public Object invokeCommand(MiniAppCommandBoundary command,String miniapp) {
+        miniAppsCommands.put(miniapp,this.miniAppConverter.toEntity(command));
         return command;
     }
 
