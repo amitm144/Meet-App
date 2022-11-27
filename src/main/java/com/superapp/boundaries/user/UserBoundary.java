@@ -1,4 +1,4 @@
-package application.boundaries.user;
+package com.superapp.boundaries.user;
 
 public class UserBoundary {
 

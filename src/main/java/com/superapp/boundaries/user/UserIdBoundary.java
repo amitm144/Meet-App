@@ -1,6 +1,6 @@
-package application.boundaries.user;
+package com.superapp.boundaries.user;
 
-import application.util.EmailChecker;
+import com.superapp.util.EmailChecker;
 
 public class UserIdBoundary {
 

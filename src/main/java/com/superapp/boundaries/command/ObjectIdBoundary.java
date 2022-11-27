@@ -1,6 +1,4 @@
-package application.boundaries.command;
-
-import com.fasterxml.jackson.annotation.JsonTypeName;
+package com.superapp.boundaries.command;
 
 import java.util.Random;
 
