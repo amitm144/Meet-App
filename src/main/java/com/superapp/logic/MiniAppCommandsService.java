@@ -1,13 +1,12 @@
 package com.superapp.logic;
 
-import com.superapp.boundaries.command.user.UserBoundary;
+import com.superapp.boundaries.command.MiniAppCommandBoundary;
 
 import java.util.List;
 
-public interface MiniAppService {
-    UserBoundary createUser(UserBoundary user);
-    UserBoundary login(String userSuperApp, String userEmail);
-    UserBoundary updateUser(String userSuperApp, String userEmail, UserBoundary update);
-    List<UserBoundary> getAllUsers();
-    void deleteAllUsers();
+public interface MiniAppCommandsService {
+    Object invokeCommand(MiniAppCommandBoundary command);
+    List<MiniAppCommandBoundary> getALlCommands();
+    List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniAppName);
+    void deleteALlCommands();
 }

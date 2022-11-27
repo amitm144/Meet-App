@@ -1,6 +1,6 @@
 package com.superapp.controllers;
 
-import com.superapp.boundaries.command.CommandBoundary;
+import com.superapp.boundaries.command.MiniAppCommandBoundary;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +14,7 @@ public class MiniAppObjectsController {
             method = {RequestMethod.POST},
             produces = {MediaType.APPLICATION_JSON_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE})
-    public Object invokeMiniAppCommand (@RequestBody CommandBoundary command,
+    public Object invokeMiniAppCommand (@RequestBody MiniAppCommandBoundary command,
                                         @PathVariable("miniAppName") String miniAppName)
     {
         command.setInvocationTimeStamp(new Date());

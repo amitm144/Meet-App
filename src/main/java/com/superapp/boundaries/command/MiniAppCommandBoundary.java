@@ -8,19 +8,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CommandBoundary {
-    private CommandIdBoundary commandId ;
+public class MiniAppCommandBoundary {
+    private MiniAppCommandIdBoundary commandId ;
     private String command;
     private ObjectIdWrapper targetObject;
     private Date invocationTimeStamp;
     private UserIdWrapper invokedBy;
     private Map<String, Object> commandAttributes;
 
-    public CommandBoundary() { }
+    public MiniAppCommandBoundary() { }
 
-    public CommandBoundary(CommandIdBoundary commandId, String command,
-                           ObjectIdBoundary targetObject, UserIdBoundary invokedBy,
-                           Map<String, Object> commandAttributes)
+    public MiniAppCommandBoundary(MiniAppCommandIdBoundary commandId, String command,
+                                  ObjectIdBoundary targetObject, UserIdBoundary invokedBy,
+                                  Map<String, Object> commandAttributes)
     {
         this();
         this.commandId = commandId;
@@ -30,11 +30,11 @@ public class CommandBoundary {
         this.targetObject = new ObjectIdWrapper(targetObject);
         this.invokedBy = new UserIdWrapper(invokedBy);
     }
-    public CommandIdBoundary getCommandId() {
+    public MiniAppCommandIdBoundary getCommandId() {
         return commandId;
     }
 
-    public void setCommandId(CommandIdBoundary commandId) {
+    public void setCommandId(MiniAppCommandIdBoundary commandId) {
         this.commandId = commandId;
     }
 
@@ -73,15 +73,15 @@ public class CommandBoundary {
     public void setCommandAttributes(Map<String, Object> commandAttributes) {
         this.commandAttributes = commandAttributes;
     }
-    public static CommandBoundary[] getNcommandBoundries(int n ){
+    public static MiniAppCommandBoundary[] getNcommandBoundries(int n ){
         Map<String,Object> commandAttributes;
         String commandName = "CommandName num :";
-        CommandBoundary[] commandArray = new CommandBoundary[n];
+        MiniAppCommandBoundary[] commandArray = new MiniAppCommandBoundary[n];
         for(int i=0; i<n ;i++){
             commandAttributes = new HashMap<String,Object>();
             commandAttributes.put("key "+i,i);
             UserBoundary user = UserBoundary.getNRandomUsers(1)[0];
-            commandArray[i] = new CommandBoundary(new CommandIdBoundary("mini :" + i),
+            commandArray[i] = new MiniAppCommandBoundary(new MiniAppCommandIdBoundary("mini :" + i),
                     commandName+i,new ObjectIdBoundary(),user.getUserId(),commandAttributes);
         }
         return commandArray;

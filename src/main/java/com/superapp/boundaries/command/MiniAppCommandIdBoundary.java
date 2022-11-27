@@ -2,26 +2,26 @@ package com.superapp.boundaries.command;
 
 import java.util.Random;
 
-public class CommandIdBoundary {
+public class MiniAppCommandIdBoundary {
 
     private String superApp ;
     private String miniApp ;
     private String internalCommandId;
 
-    public CommandIdBoundary() {
+    public MiniAppCommandIdBoundary() {
         this.superApp = "2023a.noam.levy";
         int id = new Random().nextInt(1000);
         this.internalCommandId = Integer.toString(id);
     }
 
-    public CommandIdBoundary(String miniApp, String internalCommandId) {
+    public MiniAppCommandIdBoundary(String miniApp, String internalCommandId) {
         if (miniApp.isBlank() || internalCommandId.isBlank())
             throw new RuntimeException("command id or miniApp name cannot be blank");
         this.miniApp = miniApp;
         this.internalCommandId = internalCommandId;
     }
 
-    public CommandIdBoundary(String miniApp) {
+    public MiniAppCommandIdBoundary(String miniApp) {
         this();
         this.miniApp = miniApp;
     }

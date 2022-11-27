@@ -1,2 +1,8 @@
-package com.superapp.converters;public class MiniAppCommandCoverter {
+package com.superapp.converters;
+
+public class MiniAppCommandCoverter {
+    public MiniAppCommandCoverter(){
+
+    }
+
 }
