@@ -1,6 +1,6 @@
-package application.boundaries.user;
+package com.superapp.boundaries.command.user;
 
-import application.util.EmailChecker;
+import com.superapp.util.EmailChecker;
 
 public class UserIdBoundary {
 
@@ -8,7 +8,7 @@ public class UserIdBoundary {
     private String email ;
 
     public UserIdBoundary() {
-        this.superApp = "2023a.noam.levy";
+        this.superApp = "2023a.noam.levy"; // TODO: change to super app name from application.properties
     }
 
     public UserIdBoundary(String email) {

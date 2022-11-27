@@ -1,6 +1,6 @@
-package application.controllers;
+package com.superapp.controllers;
 
-import application.boundaries.command.CommandBoundary;
+import com.superapp.boundaries.command.CommandBoundary;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 

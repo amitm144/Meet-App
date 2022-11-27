@@ -1,11 +1,11 @@
-package application.boundaries.user;
+package com.superapp.boundaries.command.user;
 
 public class UserBoundary {
 
     private UserIdBoundary userId;
-    private String role ;
-    private String username ;
-    private String avatar ;
+    private String role;
+    private String username;
+    private String avatar;
 
     public UserBoundary() {}
 

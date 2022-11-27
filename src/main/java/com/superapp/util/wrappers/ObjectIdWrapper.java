@@ -1,6 +1,6 @@
-package application.util.wrappers;
+package com.superapp.util.wrappers;
 
-import application.boundaries.command.ObjectIdBoundary;
+import com.superapp.boundaries.command.ObjectIdBoundary;
 
 public class ObjectIdWrapper {
 

@@ -1,9 +1,8 @@
-package application.boundaries.object;
+package com.superapp.boundaries.object;
 
-import application.boundaries.command.ObjectIdBoundary;
-import application.boundaries.user.UserIdBoundary;
-import application.util.wrappers.ObjectIdWrapper;
-import application.util.wrappers.UserIdWrapper;
+import com.superapp.boundaries.command.ObjectIdBoundary;
+import com.superapp.boundaries.command.user.UserIdBoundary;
+import com.superapp.util.wrappers.UserIdWrapper;
 
 import java.util.ArrayList;
 import java.util.Date;

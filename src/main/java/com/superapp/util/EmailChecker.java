@@ -1,4 +1,4 @@
-package application.util;
+package com.superapp.util;
 
 import java.util.regex.*;
 

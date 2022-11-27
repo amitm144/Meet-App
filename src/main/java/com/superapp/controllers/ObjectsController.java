@@ -1,10 +1,9 @@
-package application.controllers;
+package com.superapp.controllers;
 
-import application.boundaries.command.ObjectIdBoundary;
-import application.boundaries.object.ObjectBoundary;
-import application.boundaries.user.UserIdBoundary;
-import application.util.wrappers.ObjectIdWrapper;
-import application.util.wrappers.UserIdWrapper;
+import com.superapp.boundaries.command.ObjectIdBoundary;
+import com.superapp.boundaries.object.ObjectBoundary;
+import com.superapp.boundaries.command.user.UserIdBoundary;
+import com.superapp.util.wrappers.UserIdWrapper;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static application.boundaries.object.ObjectBoundary.getNRandomObjects;
+import static com.superapp.boundaries.object.ObjectBoundary.getNRandomObjects;
 
 @RestController
 public class ObjectsController {
