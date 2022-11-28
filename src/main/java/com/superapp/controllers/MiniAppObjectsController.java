@@ -14,7 +14,7 @@ public class MiniAppObjectsController {
             method = {RequestMethod.POST},
             produces = {MediaType.APPLICATION_JSON_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE})
-    public Object invokeMiniAppCommand (@RequestBody CommandBoundary command,
+    public CommandBoundary invokeMiniAppCommand (@RequestBody CommandBoundary command,
                                         @PathVariable("miniAppName") String miniAppName)
     {
         command.setInvocationTimeStamp(new Date());
