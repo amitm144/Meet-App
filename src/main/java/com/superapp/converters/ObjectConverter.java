@@ -12,9 +12,11 @@ import java.util.Date;
 @Component
 public class ObjectConverter {
     private ObjectMapper mapper;
+
     public ObjectConverter(ObjectMapper jackson) {
         this.mapper = new ObjectMapper();
     }
+
     public ObjectEntity toEntity(ObjectBoundary obj) {
         ObjectEntity objEntity = new ObjectEntity();
         objEntity.setObjectId(obj.getObjectId().getInternalObjectId());
@@ -27,6 +29,7 @@ public class ObjectConverter {
         objEntity.setCreationTimeStamp(obj.getCreationTimeStamp());
         return objEntity;
     }
+
     public ObjectBoundary toBoundary(ObjectEntity obj) {
         ObjectBoundary objBoundary = new ObjectBoundary();
         objBoundary.setObjectId(idEntityToBoundary(obj));
