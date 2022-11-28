@@ -1,88 +1,94 @@
-package application.converters;
+package com.superapp.converters;
+
 import java.util.Map;
 
 //import org.springframework.stereotype.Component;
 
 //import com.fasterxml.jackson.core.JsonProcessingException;
 //import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.superapp.boundaries.command.ObjectIdBoundary;
+import com.superapp.boundaries.command.user.UserBoundary;
+import com.superapp.boundaries.object.ObjectBoundary;
+import com.superapp.data.ObjectEntity;
+import com.superapp.data.UserEntity;
+import com.superapp.data.UserRole;
+import org.springframework.stereotype.Component;
 
 @Component
-public class ObjectConverter{
-    private ObjectMapper
+public class ObjectConverter {
 
-    public ObjectConverter() {
+    private ObjectMapper jackson;
+
+    public ObjectConverter(ObjectMapper jackson) {
         this.jackson = new ObjectMapper();
     }
 
-    //to entity
-    // to boundry
-    // to entity as string
-    // to boundry as map
-
-
-//    public MessageEntity toEntity(DemoBoundary demo) {
-//        MessageEntity rv = new MessageEntity ();
-//
-//        rv.setCurrentTimestamp(demo.getCurrentTimestamp());
-//        rv.setDetails(toEntityAsString(demo.getDetails()));
-//        if (demo.getName() != null) {
-//            rv.setFirstName(demo.getName().getFirstName());
-//            rv.setLastName(demo.getName().getLastName());
-//        }else {
-//            rv.setFirstName(null);
-//            rv.setLastName(null);
-//        }
-//        rv.setId(Long.parseLong(demo.getId()));
-//
-//        if (demo.getImportant() != null) {
-//            rv.setImportant(demo.getImportant());
-//        }else {
-//            rv.setImportant(true);
-//        }
-//
-//        rv.setMessage(demo.getMessage());
-//
-//        rv.setStatus(demo.getStatus());
-//        rv.setVersion(demo.getVersion());
-//
-//        return rv;
-//    }
-
-    public String toEntityAsString(Map<String, Object> details) {
+    public String longToStr(Long id) {
         try {
-            return this.jackson.writeValueAsString(details);
-        }catch (Exception e) {
+            return jackson.writeValueAsString(id);
+        } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
 
-//    public DemoBoundary toBoundary (MessageEntity entity) {
-//        DemoBoundary rv = new DemoBoundary();
-//
-//        rv.setCurrentTimestamp(entity.getCurrentTimestamp());
-//        rv.setDetails(toBoundaryAsMap(entity.getDetails()));
-//        rv.setName(new NameBoundary(entity.getFirstName(), entity.getLastName()));
-//        rv.setId("" + entity.getId());
-//        rv.setImportant(entity.getImportant());
-//        rv.setMessage(entity.getMessage());
-//        rv.setStatus(entity.getStatus());
-//        rv.setVersion(entity.getVersion());
-//
-//        return rv;
-//    }
 
-    private Map<String, Object> toBoundaryAsMap(String details) {
+    public ObjectEntity toEntity(ObjectBoundary obj) {
+
+        ObjectEntity rv = new ObjectEntity();
+        rv.setObjectId(Long.parseLong(obj.getObjectId().getInternalObjectId()));
+        rv.setSuperApp(obj.getObjectId().getSuperApp());
+        rv.setActive(obj.isActive()); // change to get ??
+        rv.setAlias(obj.getAlias());
+        rv.setObjectDetails(obj.getObjectDetails());
+        rv.setType(obj.getType());
+        rv.setCreatedBy(obj.getCreatedBy());
+        rv.setCreationTimeStamp(obj.getCreationTimeStamp());
+
+        return rv;
+    }
+
+    public ObjectBoundary toBoundary(ObjectEntity obj) {
+
+        ObjectBoundary rv = new ObjectBoundary();
+        rv.setObjectId(idEntityToBoundary(obj));
+        rv.setActive(obj.isActive());
+        rv.setAlias(obj.getAlias());
+        rv.setObjectDetails(obj.getObjectDetails());
+        rv.setType(obj.getType());
+        rv.setCreatedBy(obj.getCreatedBy());
+        rv.setCreationTimeStamp(obj.getCreationTimeStamp());
+
+        return rv;
+    }
+
+    public ObjectIdBoundary idEntityToBoundary(ObjectEntity obj){
+
+        ObjectIdBoundary rv = new ObjectIdBoundary();
         try {
-            return (Map<String, Object>)this.jackson
-                    .readValue(details, Map.class);
-        } catch (Exception e) {
+            rv.setInternalObjectId(jackson.writeValueAsString(obj.getObjectId()));
+            rv.setSuperApp(obj.getSuperApp());
+            return rv;
+        } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+
     }
 
-    public Long toEntityAsLong(String id) {
-        return Long.parseLong(id);
-    }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

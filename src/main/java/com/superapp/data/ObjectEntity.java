@@ -1,13 +1,15 @@
-package application.entities;
+package com.superapp.data;
 
-import application.util.wrappers.UserIdWrapper;
+
+import com.superapp.util.wrappers.UserIdWrapper;
 
 import java.util.Date;
 import java.util.Map;
 
 public class ObjectEntity {
 
-    private Long FK_objectId;
+    private Long objectId;
+    private String superApp;
     private String type;
     private String alias;
     private boolean active;
@@ -15,15 +17,24 @@ public class ObjectEntity {
     private UserIdWrapper createdBy;
     private Map<String, Object> objectDetails;
 
+
     public ObjectEntity() {
     }
 
     public Long getObjectId() {
-        return FK_objectId;
+        return objectId;
     }
 
-    public void setObjectId(Long FK_objectId) {
-        this.FK_objectId = FK_objectId;
+    public void setObjectId(Long objectId) {
+        this.objectId = objectId;
+    }
+
+    public String getSuperApp() {
+        return superApp;
+    }
+
+    public void setSuperApp(String superApp) {
+        this.superApp = superApp;
     }
 
     public String getType() {
@@ -57,6 +68,7 @@ public class ObjectEntity {
     public void setCreationTimeStamp(Date creationTimeStamp) {
         this.creationTimeStamp = creationTimeStamp;
     }
+
     public UserIdWrapper getCreatedBy() {
         return createdBy;
     }
@@ -73,17 +85,18 @@ public class ObjectEntity {
         this.objectDetails = objectDetails;
     }
 
+
     @Override
     public String toString() {
-        return "ObjectBoundary{" +
-                "objectId='" + FK_objectId + '\'' +
+        return "ObjectEntity{" +
+                "objectId=" + objectId +
+                ", superApp='" + superApp + '\'' +
                 ", type='" + type + '\'' +
                 ", alias='" + alias + '\'' +
                 ", active=" + active +
                 ", creationTimeStamp=" + creationTimeStamp +
-                ", createBy=" + createdBy +
+                ", createdBy=" + createdBy +
                 ", objectDetails=" + objectDetails +
                 '}';
     }
-
 }
