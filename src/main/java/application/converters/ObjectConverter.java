@@ -1,11 +1,6 @@
 package com.superapp.converters;
 
 import java.util.Map;
-
-//import org.springframework.stereotype.Component;
-
-//import com.fasterxml.jackson.core.JsonProcessingException;
-//import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.superapp.boundaries.object.ObjectIdBoundary;
@@ -35,7 +30,6 @@ public class ObjectConverter {
 
 
     public ObjectEntity toEntity(ObjectBoundary obj) {
-
         ObjectEntity rv = new ObjectEntity();
         rv.setObjectId(Long.parseLong(obj.getObjectId().getInternalObjectId()));
         rv.setSuperApp(obj.getObjectId().getSuperApp());
@@ -50,7 +44,6 @@ public class ObjectConverter {
     }
 
     public ObjectBoundary toBoundary(ObjectEntity obj) {
-
         ObjectBoundary rv = new ObjectBoundary();
         rv.setObjectId(idEntityToBoundary(obj));
         rv.setActive(obj.isActive());
@@ -64,7 +57,6 @@ public class ObjectConverter {
     }
 
     public ObjectIdBoundary idEntityToBoundary(ObjectEntity obj){
-
         ObjectIdBoundary rv = new ObjectIdBoundary();
         try {
             rv.setInternalObjectId(jackson.writeValueAsString(obj.getObjectId()));
@@ -73,22 +65,5 @@ public class ObjectConverter {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-
     }
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
