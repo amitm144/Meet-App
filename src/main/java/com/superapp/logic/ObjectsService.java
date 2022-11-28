@@ -1,6 +1,6 @@
-package application.logic;
+package com.superapp.logic;
 
-import application.boundaries.object.ObjectBoundary;
+import com.superapp.boundaries.object.ObjectBoundary;
 
 public interface ObjectsService {
     ObjectBoundary createObject(ObjectBoundary object);
