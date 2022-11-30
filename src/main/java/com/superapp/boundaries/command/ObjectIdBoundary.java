@@ -1,5 +1,6 @@
 package com.superapp.boundaries.command;
 
+import java.util.Objects;
 import java.util.Random;
 
 public class ObjectIdBoundary {
@@ -17,6 +18,11 @@ public class ObjectIdBoundary {
         this();
         this.internalObjectId = internalObjectId;
     }
+
+//    public ObjectIdBoundary(String superApp, String internalObjectId) {
+//        this.superApp = superApp;
+//        this.internalObjectId = internalObjectId;
+//    }
 
     public String getSuperApp() {
         return superApp;
@@ -41,4 +47,13 @@ public class ObjectIdBoundary {
                 ", internalObjectId='" + internalObjectId + '\'' +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || this.getClass() != obj.getClass()) return false;
+        ObjectIdBoundary objId = (ObjectIdBoundary) obj;
+        return this.superApp.equals( objId.superApp) && this.internalObjectId.equals(objId.internalObjectId);
+
+    }
+
 }

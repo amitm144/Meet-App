@@ -3,7 +3,10 @@ package com.superapp.controllers;
 import com.superapp.boundaries.command.ObjectIdBoundary;
 import com.superapp.boundaries.object.ObjectBoundary;
 import com.superapp.boundaries.command.user.UserIdBoundary;
+import com.superapp.logic.ObjectsService;
+import com.superapp.logic.UsersService;
 import com.superapp.util.wrappers.UserIdWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +18,12 @@ import static com.superapp.boundaries.object.ObjectBoundary.getNRandomObjects;
 
 @RestController
 public class ObjectsController {
+    private ObjectsService objService;
+
+    @Autowired
+    public void setObjectService(ObjectsService objService) {
+        this.objService = objService;
+    }
 
     @RequestMapping(
             path = {"/superapp/objects"},
