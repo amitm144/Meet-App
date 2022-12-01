@@ -1,6 +1,7 @@
 package com.superapp.controllers;
 
 import com.superapp.boundaries.command.MiniAppCommandBoundary;
+import com.superapp.boundaries.command.MiniAppCommandIdBoundary;
 import com.superapp.logic.UsersService;
 import com.superapp.logic.concreteServices.MiniAppCommandService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ public class MiniAppObjectsController {
     public void MiniAppCommandService(MiniAppCommandService miniappservice) {
         this.miniAppCommandService = miniappservice;
     }
+
     @RequestMapping(
             path= {"/superapp/miniapp/{miniAppName}"},
             method = {RequestMethod.POST},
@@ -24,6 +26,7 @@ public class MiniAppObjectsController {
     public Object invokeMiniAppCommand (@RequestBody MiniAppCommandBoundary command,
                                         @PathVariable("miniAppName") String miniAppName)
     {
-        return this.miniAppCommandService.invokeCommand(command,miniAppName);
+    command.getCommandId().setMiniApp(miniAppName);
+        return this.miniAppCommandService.invokeCommand(command);
     }
 }

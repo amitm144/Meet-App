@@ -22,6 +22,7 @@ public class MiniappCommandConverter {
         MiniAppCommandEntity rv = new MiniAppCommandEntity();
         rv.setSuperApp(miniApp.getCommandId().getSuperApp());
         rv.setMiniApp(miniApp.getCommandId().getMiniApp());
+        rv.setInternalCommandId(miniApp.getCommandId().getInternalCommandId());
         rv.setCommand(miniApp.getCommand());
         rv.setInvocationTimeStamp(miniApp.getInvocationTimeStamp());
         rv.setInternalObjectId(((ObjectIdWrapper)miniApp.getTargetObject()).getObjectId().getInternalObjectId());
@@ -47,7 +48,7 @@ public class MiniappCommandConverter {
     }
     public MiniAppCommandBoundary toBoundary(MiniAppCommandEntity miniappEntity) {
         MiniAppCommandBoundary rv = new MiniAppCommandBoundary();
-        rv.setCommandId(new MiniAppCommandIdBoundary(miniappEntity.getSuperApp(),miniappEntity.getInternalCommandId()));
+        rv.setCommandId(new MiniAppCommandIdBoundary(miniappEntity.getMiniApp(),miniappEntity.getInternalCommandId()));
         rv.setCommand(miniappEntity.getCommand());
         rv.setCommandAttributes(toBoundaryAsMap(miniappEntity.getCommandAttributes()));
         rv.setInvokedBy(new UserIdWrapper(new UserIdBoundary(miniappEntity.getSuperApp(), miniappEntity.getEmail())));

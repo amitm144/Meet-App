@@ -13,7 +13,7 @@ import java.util.*;
 @Service
 public class MiniAppCommandService implements MiniAppCommandsService {
     private MiniappCommandConverter miniAppConverter;
-    private Map<String, MiniAppCommandEntity> miniAppsCommands; // { miniapp: miniAppCommand }
+    private Map<String, ArrayList<MiniAppCommandEntity>> miniAppsCommands; // { miniapp: miniAppCommand }
     @Autowired
     public MiniAppCommandService(MiniappCommandConverter miniAppConverter) {
         this.miniAppConverter = miniAppConverter;
@@ -24,27 +24,36 @@ public class MiniAppCommandService implements MiniAppCommandsService {
     }
 
     @Override
-    public Object invokeCommand(MiniAppCommandBoundary command,String miniapp) {
-        miniAppsCommands.put(miniapp,this.miniAppConverter.toEntity(command));
+    public Object invokeCommand(MiniAppCommandBoundary command) {
+
+        if(miniAppsCommands.get(command.getCommandId().getMiniApp()) == null){
+            ArrayList<MiniAppCommandEntity> commandList = new ArrayList<MiniAppCommandEntity>();
+            commandList.add(this.miniAppConverter.toEntity(command));
+            miniAppsCommands.put(command.getCommandId().getMiniApp(),commandList);
+        }
+        else
+            miniAppsCommands.get(command.getCommandId().getMiniApp()).add(this.miniAppConverter.toEntity(command));
         return command;
     }
 
     @Override
     public List<MiniAppCommandBoundary> getALlCommands() {
         ArrayList<MiniAppCommandBoundary> rv = new ArrayList<>();
-        for (MiniAppCommandEntity mini_app_command: this.miniAppsCommands.values()) {
-            rv.add(this.miniAppConverter.toBoundary(mini_app_command));
-        }
+        for (ArrayList<MiniAppCommandEntity> mini_app_command_list: this.miniAppsCommands.values())
+            for (MiniAppCommandEntity command: mini_app_command_list)
+                rv.add(this.miniAppConverter.toBoundary(command));
         return rv;
     }
 
     @Override
     public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniAppName) {
-        MiniAppCommandEntity mini_app = this.miniAppsCommands.get(miniAppName);
-        if(mini_app == null)
+        ArrayList<MiniAppCommandEntity> mini_app_command_list = this.miniAppsCommands.get(miniAppName);
+        if(mini_app_command_list == null)
             throw new RuntimeException("Unknown miniApp");
         ArrayList<MiniAppCommandBoundary> rv = new ArrayList<>();
-        rv.add(this.miniAppConverter.toBoundary(mini_app));
+        for (MiniAppCommandEntity command:mini_app_command_list) {
+            rv.add(this.miniAppConverter.toBoundary(command));
+        }
         return rv;
     }
 

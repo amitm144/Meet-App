@@ -18,6 +18,7 @@ public class MiniAppCommandIdBoundary {
         if (miniApp.isBlank() || internalCommandId.isBlank())
             throw new RuntimeException("command id or miniApp name cannot be blank");
         this.miniApp = miniApp;
+        this.superApp = "2023a.noam.levy";
         this.internalCommandId = internalCommandId;
     }
 
