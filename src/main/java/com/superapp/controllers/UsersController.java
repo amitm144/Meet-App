@@ -22,11 +22,13 @@ public class UsersController {
             method = {RequestMethod.POST},
             produces = {MediaType.APPLICATION_JSON_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE})
-    public Object createUser (@RequestBody UserBoundary user ) { return user; }
+    public UserBoundary createUser (@RequestBody UserBoundary user ) { return user; }
 
     @RequestMapping(
             path= {"/superapp/users/{superapp}/{userEmail}"},
-            method = {RequestMethod.PUT})
+            method = {RequestMethod.PUT},
+            consumes = {MediaType.APPLICATION_JSON_VALUE})
+
     public void update (@PathVariable("superapp") String superapp , @PathVariable("userEmail") String email) { }
 
 }

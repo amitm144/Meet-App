@@ -30,7 +30,6 @@ public class ObjectsController {
     @RequestMapping(
             path = {"/superapp/objects/{miniapp}/{InternalObjectd}"},
             method = {RequestMethod.PUT},
-            produces = {MediaType.APPLICATION_JSON_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE}
     )
     public void updateObject(ObjectBoundary objectBoundary,
