@@ -4,7 +4,6 @@ import com.superapp.boundaries.user.UserBoundary;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-
 @RestController
 public class UsersController {
 
@@ -29,5 +28,4 @@ public class UsersController {
             method = {RequestMethod.PUT},
             consumes = {MediaType.APPLICATION_JSON_VALUE})
     public void update (@PathVariable("superapp") String superapp , @PathVariable("userEmail") String email) { }
-
 }
