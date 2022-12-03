@@ -46,7 +46,7 @@ public class ObjectsController {
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     public ObjectBoundary retrieveObject(@PathVariable String superapp, @PathVariable String InternalObjectId) {
-        //TODO need to query from the DB one object from the superapp parameter and InternalObjectId parameter.
+        //TODO need to query from the DB one object from the superApp parameter and InternalObjectId parameter.
         Map<String, Object> tempMap = new HashMap<>();
         tempMap.put("key", "temp");
         tempMap.put("key2", "temp2");
