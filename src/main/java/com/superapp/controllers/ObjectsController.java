@@ -16,6 +16,12 @@ import static com.superapp.boundaries.object.ObjectBoundary.getNRandomObjects;
 
 @RestController
 public class ObjectsController {
+    private ObjectsService objService;
+
+    @Autowired
+    public void setObjectService(ObjectsService objService) {
+        this.objService = objService;
+    }
 
     @RequestMapping(
             path = {"/superapp/objects"},
@@ -25,9 +31,7 @@ public class ObjectsController {
     )
     @ResponseBody
     public ObjectBoundary createObject(@RequestBody ObjectBoundary objectBoundary) {
-        objectBoundary.setObjectId(new ObjectIdBoundary());
-        objectBoundary.setCreationTimeStamp(new Date());
-        return objectBoundary;
+        return this.objService.createObject(objectBoundary);
     }
 
     @RequestMapping(
