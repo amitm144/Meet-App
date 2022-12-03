@@ -1,6 +1,6 @@
 package com.superapp.controllers;
 
-import com.superapp.boundaries.command.ObjectIdBoundary;
+import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.boundaries.object.ObjectBoundary;
 import com.superapp.boundaries.user.UserIdBoundary;
 import com.superapp.util.wrappers.UserIdWrapper;
@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,6 +25,8 @@ public class ObjectsController {
     )
     @ResponseBody
     public ObjectBoundary createObject(@RequestBody ObjectBoundary objectBoundary) {
+        objectBoundary.setObjectId(new ObjectIdBoundary());
+        objectBoundary.setCreationTimeStamp(new Date());
         return objectBoundary;
     }
 
