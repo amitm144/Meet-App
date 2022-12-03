@@ -40,17 +40,17 @@ public class ObjectsController {
     }
 
     @RequestMapping(
-            path = {"/superapp/objects/{superapp}/{InternalObjectd}"},
+            path = {"/superapp/objects/{superapp}/{InternalObjectId}"},
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public ObjectBoundary retrieveObject(@PathVariable String superapp, @PathVariable String InternalObjectd) {
+    public ObjectBoundary retrieveObject(@PathVariable String superapp, @PathVariable String InternalObjectId) {
         //TODO need to query from the DB one object from the superApp parameter and InternalObjectId parameter.
         Map<String, Object> tempMap = new HashMap<>();
         tempMap.put("key", "temp");
         tempMap.put("key2", "temp2");
         // For Example, I created an object to show some data.
-        return new ObjectBoundary((new ObjectIdBoundary(InternalObjectd)),
+        return new ObjectBoundary((new ObjectIdBoundary(InternalObjectId)),
                 "example-type", "a", tempMap,
                 new UserIdWrapper(new UserIdBoundary("dvir.tayeb@gmail.com"))
         );
