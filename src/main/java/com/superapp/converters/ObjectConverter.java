@@ -2,7 +2,7 @@ package com.superapp.converters;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.superapp.boundaries.command.ObjectIdBoundary;
+import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.boundaries.object.ObjectBoundary;
 import com.superapp.data.ObjectEntity;
 import org.springframework.stereotype.Component;
@@ -29,7 +29,7 @@ public class ObjectConverter {
         ObjectEntity objEntity = new ObjectEntity();
         objEntity.setObjectId(Long.parseLong(obj.getObjectId().getInternalObjectId()));
         objEntity.setSuperApp(obj.getObjectId().getSuperApp());
-        objEntity.setActive(obj.isActive()); // change to get ??
+        objEntity.setActive(obj.getActive()); //
         objEntity.setAlias(obj.getAlias());
         objEntity.setObjectDetails(obj.getObjectDetails());
         objEntity.setType(obj.getType());

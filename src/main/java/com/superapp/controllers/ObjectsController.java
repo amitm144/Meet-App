@@ -3,12 +3,12 @@ package com.superapp.controllers;
 import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.boundaries.object.ObjectBoundary;
 import com.superapp.boundaries.command.user.UserIdBoundary;
+import com.superapp.logic.ObjectsService;
 import com.superapp.util.wrappers.UserIdWrapper;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,6 +16,7 @@ import static com.superapp.boundaries.object.ObjectBoundary.getNRandomObjects;
 
 @RestController
 public class ObjectsController {
+    private ObjectsService objService;
 
     @RequestMapping(
             path = {"/superapp/objects"},
@@ -25,9 +26,7 @@ public class ObjectsController {
     )
     @ResponseBody
     public ObjectBoundary createObject(@RequestBody ObjectBoundary objectBoundary) {
-        objectBoundary.setObjectId(new ObjectIdBoundary());
-        objectBoundary.setCreationTimeStamp(new Date());
-        return objectBoundary;
+        return this.objService.createObject(objectBoundary);
     }
 
     @RequestMapping(
