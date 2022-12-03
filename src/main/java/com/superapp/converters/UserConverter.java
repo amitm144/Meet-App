@@ -1,6 +1,5 @@
 package com.superapp.converters;
 
-//import com.fasterxml.jackson.databind.ObjectMapper;
 import com.superapp.boundaries.command.user.UserBoundary;
 import com.superapp.data.UserEntity;
 import com.superapp.data.UserRole;
@@ -9,10 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserConverter {
 
-//    private ObjectMapper mapper;
-
     public UserConverter() {
-//        this.mapper = new ObjectMapper();
     }
 
     public UserEntity toEntity(UserBoundary user) {

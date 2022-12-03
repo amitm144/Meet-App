@@ -1,20 +1,10 @@
 package com.superapp.controllers;
 
-import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.boundaries.object.ObjectBoundary;
-import com.superapp.boundaries.command.user.UserIdBoundary;
-import com.superapp.util.wrappers.UserIdWrapper;
 import com.superapp.logic.ObjectsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-//import static com.superapp.boundaries.object.ObjectBoundary.getNRandomObjects;
 import java.util.List;
 
 @RestController
