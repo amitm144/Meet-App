@@ -1,6 +1,6 @@
 package com.superapp.logic;
 
-import com.superapp.boundaries.command.user.UserBoundary;
+import com.superapp.boundaries.user.UserBoundary;
 
 import java.util.List;
 

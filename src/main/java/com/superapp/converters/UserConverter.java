@@ -1,7 +1,7 @@
 package com.superapp.converters;
 
 //import com.fasterxml.jackson.databind.ObjectMapper;
-import com.superapp.boundaries.command.user.UserBoundary;
+import com.superapp.boundaries.user.UserBoundary;
 import com.superapp.data.UserEntity;
 import com.superapp.data.UserRole;
 import org.springframework.stereotype.Component;
@@ -22,7 +22,6 @@ public class UserConverter {
         rv.setUsername(user.getUsername());
         rv.setRole(UserRole.valueOf(user.getRole()));
         rv.setAvatar(user.getAvatar());
-
         return rv;
     }
 
@@ -32,7 +31,6 @@ public class UserConverter {
         rv.setRole(user.getRole().name());
         rv.setUsername(user.getUsername());
         rv.setAvatar(user.getAvatar());
-
         return rv;
     }
 }

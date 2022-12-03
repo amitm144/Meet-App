@@ -1,15 +1,16 @@
-package com.superapp.boundaries.command.user;
+package com.superapp.boundaries.user;
 
 import com.superapp.util.EmailChecker;
+import org.springframework.beans.factory.annotation.Value;
+
+import javax.annotation.PostConstruct;
 
 public class UserIdBoundary {
 
     private String superApp ;
     private String email ;
 
-    public UserIdBoundary() {
-        this.superApp = "2023a.noam.levy"; // TODO: change to super app name from application.properties
-    }
+    public UserIdBoundary() {}
 
     public UserIdBoundary(String email) {
         this();
@@ -31,6 +32,8 @@ public class UserIdBoundary {
         return superApp;
     }
 
+    @PostConstruct
+    @Value("${spring.application.name}")
     public void setSuperApp(String superApp) {
         this.superApp = superApp;
     }

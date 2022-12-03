@@ -1,4 +1,4 @@
-package com.superapp.boundaries.command.user;
+package com.superapp.boundaries.user;
 
 public class UserBoundary {
 
@@ -66,7 +66,6 @@ public class UserBoundary {
     public void setUsername(String username) {
         this.username = username;
     }
-
 
     @Override
     public String toString() {

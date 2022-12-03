@@ -4,13 +4,15 @@ import com.superapp.converters.UserConverter;
 import com.superapp.data.UserEntity;
 import com.superapp.data.UserRole;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 
-import com.superapp.boundaries.command.user.UserBoundary;
+import com.superapp.boundaries.user.UserBoundary;
 import com.superapp.logic.UsersService;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -40,9 +42,7 @@ public class UserService implements UsersService {
     }
 
     @Override
-    public UserBoundary login(String userSuperApp, String userEmail) {
-        if (!userSuperApp.equals("2023a.noam.levy")) // TODO: change to super app name from application.properties
-            throw new RuntimeException("Unknown superApp");
+    public UserBoundary login(@Value("${spring.application.name}") String userSuperApp, String userEmail) {
         UserEntity user = this.users.get(userEmail);
         if (user == null || !user.getSuperApp().equals(userSuperApp) || !user.getEmail().equals(userEmail))
             throw new RuntimeException("Unknown user");
@@ -51,9 +51,7 @@ public class UserService implements UsersService {
     }
 
     @Override
-    public UserBoundary updateUser(String userSuperApp, String userEmail, UserBoundary update) {
-        if (!userSuperApp.equals("2023a.noam.levy")) // TODO: change to super app name from application.properties
-            throw new RuntimeException("Unknown superApp");
+    public UserBoundary updateUser(@Value("${spring.application.name}")String userSuperApp, String userEmail, UserBoundary update) {
         UserEntity user = this.users.get(userEmail);
         if (user == null || !user.getSuperApp().equals(userSuperApp) || !user.getEmail().equals(userEmail))
             throw new RuntimeException("Unknown user");
@@ -70,11 +68,12 @@ public class UserService implements UsersService {
 
     @Override
     public List<UserBoundary> getAllUsers() {
-        ArrayList<UserBoundary> rv = new ArrayList<>();
-        this.users.values().forEach(user -> {
-            rv.add(this.converter.toBoundary(user));
-        });
-        return rv;
+       return this.users.values().stream().map(this.converter::toBoundary).collect(Collectors.toList());
+//        ArrayList<UserBoundary> rv = new ArrayList<>();
+//        this.users.values().forEach(user -> {
+//            rv.add(this.converter.toBoundary(user));
+//        });
+//        return rv;
     }
 
     @Override
