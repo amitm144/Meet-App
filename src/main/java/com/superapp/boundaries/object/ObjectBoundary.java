@@ -1,6 +1,6 @@
 package com.superapp.boundaries.object;
 
-import com.superapp.boundaries.user.UserIdBoundary;
+import com.superapp.boundaries.command.user.UserIdBoundary;
 import com.superapp.util.wrappers.UserIdWrapper;
 
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class ObjectBoundary {
         this.alias = alias;
     }
 
-    public boolean isActive() {
+    public boolean getActive() {
         return active;
     }
 

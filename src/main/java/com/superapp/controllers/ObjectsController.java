@@ -14,7 +14,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.superapp.boundaries.object.ObjectBoundary.getNRandomObjects;
+//import static com.superapp.boundaries.object.ObjectBoundary.getNRandomObjects;
 import java.util.List;
 
 @RestController
@@ -65,7 +65,6 @@ public class ObjectsController {
     )
     @ResponseBody
     public List<ObjectBoundary> getAllObjects() {
-        //TODO need to query from the DB to get all objects we want.
         return this.objService.getAllObjects();
     }
 }

@@ -49,7 +49,6 @@ public class ObjectService implements ObjectsService {
         return this.converter.toBoundary(objects.get(internalObjectId));
     }
 
-    @Override
     public List<ObjectBoundary> getAllObjects() {
         ArrayList<ObjectBoundary> AllObjects = new ArrayList<>();
         for (ObjectEntity obj: objects.values()) {

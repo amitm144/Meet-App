@@ -2,6 +2,8 @@ package com.superapp.logic;
 
 import com.superapp.boundaries.object.ObjectBoundary;
 
+import java.util.List;
+
 public interface ObjectsService {
     ObjectBoundary createObject(ObjectBoundary object);
 
@@ -9,7 +11,7 @@ public interface ObjectsService {
 
     ObjectBoundary getSpecificObject(String objectSuperApp, String internalObjectId);
 
-    ObjectBoundary[] getAllObjects();
+    List<ObjectBoundary> getAllObjects();
 
     void deleteAllObjects();
 }
