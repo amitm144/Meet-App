@@ -56,7 +56,7 @@ public class ObjectBoundary {
         this.alias = alias;
     }
 
-    public boolean isActive() {
+    public boolean getActive() {
         return active;
     }
 

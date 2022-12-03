@@ -2,7 +2,6 @@ package com.superapp.controllers;
 
 import com.superapp.boundaries.object.ObjectBoundary;
 import com.superapp.logic.ObjectsService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,7 +50,6 @@ public class ObjectsController {
     )
     @ResponseBody
     public List<ObjectBoundary> getAllObjects() {
-        //TODO need to query from the DB to get all objects we want.
         return this.objService.getAllObjects();
     }
 }

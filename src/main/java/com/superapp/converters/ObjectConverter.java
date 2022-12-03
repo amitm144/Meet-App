@@ -33,7 +33,7 @@ public class ObjectConverter {
     public ObjectBoundary toBoundary(ObjectEntity obj) {
         ObjectBoundary objBoundary = new ObjectBoundary();
         objBoundary.setObjectId(idEntityToBoundary(obj));
-        objBoundary.setActive(obj.isActive());
+        objBoundary.setActive(obj.getActive());
         objBoundary.setAlias(obj.getAlias());
         objBoundary.setObjectDetails(obj.getObjectDetails());
         objBoundary.setType(obj.getType());
