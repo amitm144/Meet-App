@@ -19,10 +19,6 @@ public class ObjectIdBoundary {
         this.internalObjectId = internalObjectId;
     }
 
-//    public ObjectIdBoundary(String superApp, String internalObjectId) {
-//        this.superApp = superApp;
-//        this.internalObjectId = internalObjectId;
-//    }
 
     public String getSuperApp() {
         return superApp;

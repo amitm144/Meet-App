@@ -33,7 +33,7 @@ public class ObjectsController {
     )
     @ResponseBody
     public ObjectBoundary createObject(@RequestBody ObjectBoundary objectBoundary) {
-        return objectBoundary;
+        return this.objService.createObject(objectBoundary);
     }
 
     @RequestMapping(

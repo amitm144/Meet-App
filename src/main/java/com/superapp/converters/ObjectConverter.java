@@ -29,7 +29,7 @@ public class ObjectConverter {
         ObjectEntity objEntity = new ObjectEntity();
         objEntity.setObjectId(Long.parseLong(obj.getObjectId().getInternalObjectId()));
         objEntity.setSuperApp(obj.getObjectId().getSuperApp());
-        objEntity.setActive(obj.getActive()); // change to get ??
+        objEntity.setActive(obj.getActive()); //
         objEntity.setAlias(obj.getAlias());
         objEntity.setObjectDetails(obj.getObjectDetails());
         objEntity.setType(obj.getType());
