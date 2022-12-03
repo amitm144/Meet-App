@@ -1,18 +1,12 @@
 package com.superapp.controllers;
 
-import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.boundaries.object.ObjectBoundary;
-import com.superapp.boundaries.command.user.UserIdBoundary;
 import com.superapp.logic.ObjectsService;
-import com.superapp.util.wrappers.UserIdWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import static com.superapp.boundaries.object.ObjectBoundary.getNRandomObjects;
+import java.util.List;
 
 @RestController
 public class ObjectsController {
@@ -34,10 +28,10 @@ public class ObjectsController {
             method = {RequestMethod.PUT},
             consumes = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public void updateObject(ObjectBoundary objectBoundary,
+    public void updateObject(@RequestBody ObjectBoundary objectBoundary,
                              @PathVariable String superapp,
                              @PathVariable String InternalObjectId) {
-        //TODO - Update the specific object in DB with the superapp and InternalObjectId vars
+        this.objService.updateObject(superapp, InternalObjectId, objectBoundary);
     }
 
     @RequestMapping(
@@ -47,14 +41,7 @@ public class ObjectsController {
     )
     public ObjectBoundary retrieveObject(@PathVariable String superapp, @PathVariable String InternalObjectId) {
         //TODO need to query from the DB one object from the superApp parameter and InternalObjectId parameter.
-        Map<String, Object> tempMap = new HashMap<>();
-        tempMap.put("key", "temp");
-        tempMap.put("key2", "temp2");
-        // For Example, I created an object to show some data.
-        return new ObjectBoundary((new ObjectIdBoundary(InternalObjectId)),
-                "example-type", "a", tempMap,
-                new UserIdWrapper(new UserIdBoundary("dvir.tayeb@gmail.com"))
-        );
+        return this.objService.getSpecificObject(superapp, InternalObjectId);
     }
 
     @RequestMapping(
@@ -63,10 +50,8 @@ public class ObjectsController {
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     @ResponseBody
-    public ArrayList<ObjectBoundary> getAllObjects() {
+    public List<ObjectBoundary> getAllObjects() {
         //TODO need to query from the DB to get all objects we want.
-
-        // For example, we returned some random array data.
-        return getNRandomObjects(3);
+        return this.objService.getAllObjects();
     }
 }
