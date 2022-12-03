@@ -4,7 +4,6 @@ import com.superapp.boundaries.user.UserBoundary;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-
 @RestController
 public class UsersController {
 
@@ -12,7 +11,7 @@ public class UsersController {
             path= {"/superapp/users/login/{superapp}/{email}"},
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Object login (@PathVariable("superapp") String superapp, @PathVariable("email") String email) {
+    public UserBoundary login (@PathVariable("superapp") String superapp, @PathVariable("email") String email) {
         String username = email.split("@")[0];
         return new UserBoundary(superapp, email, "user", username, "A" );
     }
@@ -28,7 +27,5 @@ public class UsersController {
             path= {"/superapp/users/{superapp}/{userEmail}"},
             method = {RequestMethod.PUT},
             consumes = {MediaType.APPLICATION_JSON_VALUE})
-
     public void update (@PathVariable("superapp") String superapp , @PathVariable("userEmail") String email) { }
-
 }
