@@ -1,6 +1,5 @@
 package com.superapp.logic.concreteServices;
 
-import com.superapp.boundaries.command.ObjectIdBoundary;
 import com.superapp.boundaries.object.ObjectBoundary;
 import com.superapp.converters.ObjectConverter;
 import com.superapp.data.ObjectEntity;
@@ -35,11 +34,11 @@ public class ObjectService implements ObjectsService {
     }
 
     @Override
-    public ObjectBoundary updateObject(String objectSuperApp, String internalObjectId, ObjectBoundary update) {
-        if ( !objects.containsKey(internalObjectId) ) {
+    public ObjectBoundary updateObject(String objectSuperApp, String InternalObjectId, ObjectBoundary update) {
+        if ( !objects.containsKey(InternalObjectId) ) {
             throw new RuntimeException("Object not exist");
         }
-        objects.replace(internalObjectId , converter.toEntity(update)) ;
+        objects.replace(InternalObjectId , converter.toEntity(update)) ;
         return update;
     }
 
