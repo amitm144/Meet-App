@@ -18,7 +18,6 @@ public class ObjectIdBoundary {
         this.internalObjectId = internalObjectId;
     }
 
-
     public String getSuperApp() {
         return superApp;
     }
@@ -45,10 +44,8 @@ public class ObjectIdBoundary {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null || this.getClass() != obj.getClass())
-            return false;
+        if (obj == null || this.getClass() != obj.getClass()) return false;
         ObjectIdBoundary objId = (ObjectIdBoundary) obj;
         return this.superApp.equals( objId.superApp) && this.internalObjectId.equals(objId.internalObjectId);
     }
-
 }
