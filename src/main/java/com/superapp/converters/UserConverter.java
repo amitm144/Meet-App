@@ -27,6 +27,7 @@ public class UserConverter {
 
     public UserBoundary toBoundary(UserEntity user) {
         UserBoundary rv = new UserBoundary();
+        rv.setSuperApp(user.getSuperApp());
         rv.setEmail(user.getEmail());
         rv.setRole(user.getRole().name());
         rv.setUsername(user.getUsername());

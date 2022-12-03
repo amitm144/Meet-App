@@ -1,7 +1,8 @@
 package com.superapp.boundaries.user;
 
-public class UserBoundary {
+import org.springframework.beans.factory.annotation.Value;
 
+public class UserBoundary {
     private UserIdBoundary userId;
     private String role;
     private String username;
@@ -17,6 +18,7 @@ public class UserBoundary {
         this.username = username;
         this.avatar = avatar;
     }
+
     public UserBoundary(String superApp , String email, String role, String username, String avatar) {
         this(email, role, username, avatar);
         this.userId = new UserIdBoundary(superApp ,email);
@@ -34,6 +36,18 @@ public class UserBoundary {
 
     public UserIdBoundary getUserId() {
         return userId;
+    }
+
+    public void setUserId(UserIdBoundary userId) {
+        this.userId = userId;
+    }
+
+    @Value("${spring.application.name}")
+    public void setSuperApp(String superApp) {
+        if (this.userId == null)
+            this.userId = new UserIdBoundary();
+
+        this.userId.setSuperApp(superApp);
     }
 
     public void setEmail(String email) {

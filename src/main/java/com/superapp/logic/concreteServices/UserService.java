@@ -14,7 +14,6 @@ import com.superapp.logic.UsersService;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
 @Service
 public class UserService implements UsersService {
 
@@ -51,29 +50,47 @@ public class UserService implements UsersService {
     }
 
     @Override
-    public UserBoundary updateUser(@Value("${spring.application.name}")String userSuperApp, String userEmail, UserBoundary update) {
+    public UserBoundary updateUser(@Value("${spring.application.name}") String userSuperApp, String userEmail, UserBoundary update) {
         UserEntity user = this.users.get(userEmail);
-        if (user == null || !user.getSuperApp().equals(userSuperApp) || !user.getEmail().equals(userEmail))
+        if (user == null || !user.getSuperApp().equals(userSuperApp) || !user.getEmail().equals(userEmail)) {
             throw new RuntimeException("Unknown user");
-
-        try {
-            user.setUsername(update.getUsername());
-            user.setAvatar(update.getAvatar());
-            user.setRole(UserRole.valueOf(update.getRole()));
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot update user " + userEmail);
         }
+
+        String newUserName = update.getUsername();
+        String newAvatar = update.getAvatar();
+        String newRole = update.getRole();
+
+        if (newUserName != null)
+            user.setUsername(newUserName);
+
+        if (newAvatar != null)
+            user.setAvatar(newAvatar);
+
+        if (newRole != null) {
+            try {
+                user.setRole(UserRole.valueOf(newRole));
+            } catch (Exception ignored) { /* for now - ignore role mismatch */ }
+        }
+
+        if (update.getUserId() != null) {
+            String newEmail = update.getUserId().getEmail();
+            if (newEmail != null) {
+                user.setEmail(newEmail);
+                this.users.remove(userEmail);
+                this.users.put(newEmail, user);
+            }
+        }
+
         return this.converter.toBoundary(user); // TODO: update user in DB
     }
 
     @Override
     public List<UserBoundary> getAllUsers() {
-       return this.users.values().stream().map(this.converter::toBoundary).collect(Collectors.toList());
-//        ArrayList<UserBoundary> rv = new ArrayList<>();
-//        this.users.values().forEach(user -> {
-//            rv.add(this.converter.toBoundary(user));
-//        });
-//        return rv;
+       return this.users
+               .values()
+               .stream()
+               .map(this.converter::toBoundary)
+               .collect(Collectors.toList());
     }
 
     @Override

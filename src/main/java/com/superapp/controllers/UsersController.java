@@ -1,6 +1,7 @@
 package com.superapp.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +31,8 @@ public class UsersController {
             method = {RequestMethod.POST},
             produces = {MediaType.APPLICATION_JSON_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE})
-    public Object createUser (@RequestBody UserBoundary user ) {
+    public Object createUser (@RequestBody UserBoundary user, @Value("${spring.application.name}") String superApp) {
+        user.setSuperApp(superApp);
         return this.usersService.createUser(user);
     }
 
