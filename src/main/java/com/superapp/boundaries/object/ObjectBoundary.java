@@ -14,7 +14,7 @@ public class ObjectBoundary {
     private String type;
     private String alias;
     private boolean active;
-    private Date creationTimeStamp;
+    private Date creationTimestamp;
     private UserIdWrapper createdBy;
     private Map<String, Object> objectDetails;
 
@@ -27,7 +27,7 @@ public class ObjectBoundary {
         this.type = type;
         this.alias = alias;
         this.active = true;
-        this.creationTimeStamp = new Date();
+        this.creationTimestamp = new Date();
         this.createdBy = createdBy;
 
         this.objectDetails = objectDetails;
@@ -65,12 +65,12 @@ public class ObjectBoundary {
         this.active = active;
     }
 
-    public Date getCreationTimeStamp() {
-        return creationTimeStamp;
+    public Date getcreationTimestamp() {
+        return creationTimestamp;
     }
 
-    public void setCreationTimeStamp(Date creationTimeStamp) {
-        this.creationTimeStamp = creationTimeStamp;
+    public void setcreationTimestamp(Date creationTimestamp) {
+        this.creationTimestamp = creationTimestamp;
     }
     public UserIdWrapper getCreatedBy() {
         return createdBy;
@@ -110,7 +110,7 @@ public class ObjectBoundary {
                 ", type='" + type + '\'' +
                 ", alias='" + alias + '\'' +
                 ", active=" + active +
-                ", creationTimeStamp=" + creationTimeStamp +
+                ", creationTimestamp=" + creationTimestamp +
                 ", createBy=" + createdBy +
                 ", objectDetails=" + objectDetails +
                 '}';
