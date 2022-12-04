@@ -1,5 +1,6 @@
 package com.superapp.boundaries.command;
 
+import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.boundaries.user.UserBoundary;
 import com.superapp.boundaries.user.UserIdBoundary;
 import com.superapp.util.wrappers.ObjectIdWrapper;

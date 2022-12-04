@@ -1,4 +1,4 @@
-package com.superapp.boundaries.command;
+package com.superapp.boundaries.object;
 
 import java.util.Random;
 
