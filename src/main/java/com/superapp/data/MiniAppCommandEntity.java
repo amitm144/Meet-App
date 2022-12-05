@@ -1,12 +1,5 @@
 package com.superapp.data;
-
-import com.superapp.boundaries.command.MiniAppCommandBoundary;
-import com.superapp.boundaries.command.MiniAppCommandIdBoundary;
-import com.superapp.util.wrappers.ObjectIdWrapper;
-import com.superapp.util.wrappers.UserIdWrapper;
-
 import java.util.Date;
-import java.util.Map;
 
 public class MiniAppCommandEntity {
     private String superApp ;
