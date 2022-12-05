@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class ObjectEntity {
 
-    private Long objectId;
+    private String objectId;
     private String superApp;
     private String type;
     private String alias;
@@ -21,11 +21,11 @@ public class ObjectEntity {
     public ObjectEntity() {
     }
 
-    public Long getObjectId() {
+    public String getObjectId() {
         return objectId;
     }
 
-    public void setObjectId(Long objectId) {
+    public void setObjectId(String objectId) {
         this.objectId = objectId;
     }
 
