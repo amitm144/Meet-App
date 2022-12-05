@@ -68,7 +68,7 @@ public class MiniAppCommandBoundary {
 
     public void setInvokedBy(UserIdWrapper invokedBy) { this.invokedBy = invokedBy; }
 
-    public Object getCommandAttributes() {
+    public Map<String, Object> getCommandAttributes() {
         return commandAttributes;
     }
 

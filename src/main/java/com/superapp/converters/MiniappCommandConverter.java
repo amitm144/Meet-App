@@ -27,7 +27,7 @@ public class MiniappCommandConverter {
         rv.setInvocationTimeStamp(miniApp.getInvocationTimeStamp());
         rv.setInternalObjectId(((ObjectIdWrapper)miniApp.getTargetObject()).getObjectId().getInternalObjectId());
         rv.setEmail(((UserIdWrapper)miniApp.getInvokedBy()).getUserId().getEmail());
-        rv.setCommandAttributes(toEntityAsString((Map<String, Object>) miniApp.getCommandAttributes()));
+        rv.setCommandAttributes(toEntityAsString(miniApp.getCommandAttributes()));
         return rv;
     }
     public String toEntityAsString(Map<String, Object> attributes) {
