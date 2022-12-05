@@ -65,11 +65,11 @@ public class ObjectBoundary {
         this.active = active;
     }
 
-    public Date getcreationTimestamp() {
+    public Date getCreationTimestamp() {
         return creationTimestamp;
     }
 
-    public void setcreationTimestamp(Date creationTimestamp) {
+    public void setCreationTimestamp(Date creationTimestamp) {
         this.creationTimestamp = creationTimestamp;
     }
     public UserIdWrapper getCreatedBy() {

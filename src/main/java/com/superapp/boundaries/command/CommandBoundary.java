@@ -52,11 +52,11 @@ public class CommandBoundary {
         this.command = command;
     }
 
-    public Date getinvocationTimestamp() {
+    public Date getInvocationTimestamp() {
         return invocationTimestamp;
     }
 
-    public void setinvocationTimestamp(Date invocationTimestamp) {
+    public void setInvocationTimestamp(Date invocationTimestamp) {
         this.invocationTimestamp = invocationTimestamp;
     }
 

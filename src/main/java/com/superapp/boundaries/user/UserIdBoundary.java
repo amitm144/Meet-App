@@ -4,11 +4,11 @@ import com.superapp.util.EmailChecker;
 
 public class UserIdBoundary {
 
-    private String superApp ;
+    private String superapp ;
     private String email ;
 
     public UserIdBoundary() {
-        this.superApp = "2023a.noam.levy";
+        this.superapp = "2023a.noam.levy";
     }
 
     public UserIdBoundary(String email) {
@@ -18,21 +18,21 @@ public class UserIdBoundary {
         this.email = email;
     }
 
-    public UserIdBoundary(String superApp, String email) {
+    public UserIdBoundary(String superapp, String email) {
         if (!EmailChecker.isValidEmail(email))
             throw new RuntimeException("invalid email");
-        if (superApp.isBlank())
+        if (superapp.isBlank())
             throw  new RuntimeException("super-app name cannot be empty");
-        this.superApp = superApp;
+        this.superapp = superapp;
         this.email = email;
     }
 
-    public String getSuperApp() {
-        return superApp;
+    public String getSuperapp() {
+        return superapp;
     }
 
-    public void setSuperApp(String superApp) {
-        this.superApp = superApp;
+    public void setSuperapp(String superapp) {
+        this.superapp = superapp;
     }
 
     public String getEmail() {
@@ -48,7 +48,7 @@ public class UserIdBoundary {
     @Override
     public String toString() {
         return "UserIdBoundary{" +
-                "superApp='" + superApp + '\'' +
+                "superapp='" + superapp + '\'' +
                 ", email='" + email + '\'' +
                 '}';
     }
