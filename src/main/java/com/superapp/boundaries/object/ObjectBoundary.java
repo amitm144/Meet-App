@@ -1,11 +1,8 @@
 package com.superapp.boundaries.object;
 
-import com.superapp.boundaries.user.UserIdBoundary;
 import com.superapp.util.wrappers.UserIdWrapper;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 public class ObjectBoundary {
@@ -87,20 +84,7 @@ public class ObjectBoundary {
         this.objectDetails = objectDetails;
     }
 
-    public static ArrayList<ObjectBoundary> getNRandomObjects(int n) {
-        ArrayList<ObjectBoundary> userBoundaries = new ArrayList<ObjectBoundary>();
-        Map<String, Object> map= new HashMap<String, Object>();
-        map.put("key", "value for example");
-        for (int i = 0; i < n; i++) {
-            userBoundaries.add(new ObjectBoundary(
-                    new ObjectIdBoundary(String.format("id%d", i)),
-                    "example-type",
-                    "example-alias",
-                    map,
-                    new UserIdWrapper(new UserIdBoundary(String.format("temp%d@gmail.com", i)))));
-        }
-        return userBoundaries;
-    }
+
 
     @Override
     public String toString() {

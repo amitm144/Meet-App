@@ -12,8 +12,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.superapp.boundaries.object.ObjectBoundary.getNRandomObjects;
-
 @RestController
 public class ObjectsController {
 
@@ -69,5 +67,19 @@ public class ObjectsController {
 
         // For example, we returned some random array data.
         return getNRandomObjects(3);
+    }
+    private ArrayList<ObjectBoundary> getNRandomObjects(int n) {
+        ArrayList<ObjectBoundary> userBoundaries = new ArrayList<ObjectBoundary>();
+        Map<String, Object> map= new HashMap<String, Object>();
+        map.put("key", "value for example");
+        for (int i = 0; i < n; i++) {
+            userBoundaries.add(new ObjectBoundary(
+                    new ObjectIdBoundary(String.format("id%d", i)),
+                    "example-type",
+                    "example-alias",
+                    map,
+                    new UserIdWrapper(new UserIdBoundary(String.format("temp%d@gmail.com", i)))));
+        }
+        return userBoundaries;
     }
 }

@@ -12,7 +12,7 @@ public class AdminController {
             path= {"/superapp/admin/users"},
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    public UserBoundary[] createUsers () { return UserBoundary.getNRandomUsers(5); }
+    public UserBoundary[] createUsers () { return getNRandomUsers(5); }
     @RequestMapping(
             path= {"/superapp/admin/miniapp"},
             method = {RequestMethod.GET},
@@ -41,4 +41,14 @@ public class AdminController {
             path= {"/superapp/admin/miniapp"},
             method = {RequestMethod.DELETE})
     public void deleteMiniApp () {}
+
+    private UserBoundary[] getNRandomUsers(int n) {
+        UserBoundary[] userBoundaries = new UserBoundary[n];
+        for (int i = 0; i < n; i++) {
+            userBoundaries[i] = new UserBoundary(
+                    String.format("random%d@example.com", i),"example",
+                    String.format("random%d", i), String.format("%d", i));
+        }
+        return userBoundaries;
+    }
 }
