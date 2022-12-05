@@ -27,7 +27,7 @@ public class ObjectService implements ObjectsService {
     @Override
     public ObjectBoundary createObject(ObjectBoundary object) {
         if ( objects.containsKey(object.getObjectId().getInternalObjectId()) ) {
-            throw new RuntimeException("Object already exist");
+            throw new RuntimeException("Object already exists");
         }
         objects.put(object.getObjectId().getInternalObjectId() , converter.toEntity(object));
         return object;
@@ -35,8 +35,11 @@ public class ObjectService implements ObjectsService {
 
     @Override
     public ObjectBoundary updateObject(String objectSuperApp, String internalObjectId, ObjectBoundary update) {
-        if ( !objects.containsKey(internalObjectId) ) {
-            throw new RuntimeException("Object not exist");
+        if (!objects.containsKey(internalObjectId)) {
+            throw new RuntimeException("Object does not (or doesn't) exist");
+        }
+        if ( internalObjectId != update.getObjectId().getInternalObjectId() ) {
+            throw new RuntimeException("Cannot change object ID");
         }
         objects.replace(internalObjectId , converter.toEntity(update)) ;
         return update;
@@ -45,7 +48,7 @@ public class ObjectService implements ObjectsService {
     @Override
     public ObjectBoundary getSpecificObject(String objectSuperApp, String internalObjectId) {
         if ( !objects.containsKey(internalObjectId) )
-            throw new RuntimeException("Object not exist");
+            throw new RuntimeException("Object does not (or doesn't) exist");
         return this.converter.toBoundary(objects.get(internalObjectId));
     }
 
