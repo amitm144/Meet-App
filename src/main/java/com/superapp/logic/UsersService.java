@@ -1,7 +1,6 @@
 package com.superapp.logic;
 
 import com.superapp.boundaries.user.UserBoundary;
-
 import java.util.List;
 
 public interface UsersService {

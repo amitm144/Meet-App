@@ -4,7 +4,6 @@ import com.superapp.boundaries.command.CommandBoundary;
 import com.superapp.boundaries.command.CommandIdBoundary;
 import com.superapp.boundaries.user.UserBoundary;
 import com.superapp.logic.UsersService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
