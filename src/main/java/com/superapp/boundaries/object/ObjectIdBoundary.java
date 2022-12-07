@@ -1,6 +1,5 @@
-package com.superapp.boundaries.command;
+package com.superapp.boundaries.object;
 
-import java.util.Objects;
 import java.util.Random;
 
 public class ObjectIdBoundary {
@@ -18,7 +17,6 @@ public class ObjectIdBoundary {
         this();
         this.internalObjectId = internalObjectId;
     }
-
 
     public String getSuperApp() {
         return superApp;

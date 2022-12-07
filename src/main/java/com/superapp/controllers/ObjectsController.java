@@ -1,10 +1,9 @@
 package com.superapp.controllers;
 
-import com.superapp.boundaries.command.ObjectIdBoundary;
+import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.boundaries.object.ObjectBoundary;
 import com.superapp.boundaries.command.user.UserIdBoundary;
 import com.superapp.logic.ObjectsService;
-import com.superapp.logic.UsersService;
 import com.superapp.util.wrappers.UserIdWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -39,13 +38,12 @@ public class ObjectsController {
     @RequestMapping(
             path = {"/superapp/objects/{superapp}/{InternalObjectId}"},
             method = {RequestMethod.PUT},
-            produces = {MediaType.APPLICATION_JSON_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public void updateObject(ObjectBoundary objectBoundary,
+    public void updateObject(@RequestBody ObjectBoundary objectBoundary,
                              @PathVariable String superapp,
                              @PathVariable String InternalObjectId) {
-        //TODO - Update the specific object in DB with the superApp and InternalObjectId vars
+        this.objService.updateObject(superapp, InternalObjectId, objectBoundary);
     }
 
     @RequestMapping(
@@ -71,10 +69,7 @@ public class ObjectsController {
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     @ResponseBody
-    public ArrayList<ObjectBoundary> getAllObjects() {
-        //TODO need to query from the DB to get all objects we want.
-
-        // For example, we returned some random array data.
-        return getNRandomObjects(3);
+    public ObjectBoundary[] getAllObjects() {
+        return (ObjectBoundary[])this.objService.getAllObjects().toArray();
     }
 }

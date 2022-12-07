@@ -1,6 +1,5 @@
 package com.superapp.logic.concreteServices;
 
-import com.superapp.boundaries.command.ObjectIdBoundary;
 import com.superapp.boundaries.object.ObjectBoundary;
 import com.superapp.converters.ObjectConverter;
 import com.superapp.data.ObjectEntity;
@@ -37,7 +36,7 @@ public class ObjectService implements ObjectsService {
     @Override
     public ObjectBoundary updateObject(String objectSuperApp, String internalObjectId, ObjectBoundary update) {
         if (!objects.containsKey(internalObjectId)) {
-            throw new RuntimeException("Object does not (or doesn't) exist");
+            throw new RuntimeException("Object does not exist");
         }
         if ( internalObjectId != update.getObjectId().getInternalObjectId() ) {
             throw new RuntimeException("Cannot change object ID");
@@ -49,7 +48,7 @@ public class ObjectService implements ObjectsService {
     @Override
     public ObjectBoundary getSpecificObject(String objectSuperApp, String internalObjectId) {
         if ( !objects.containsKey(internalObjectId) )
-            throw new RuntimeException("Object does not (or doesn't) exist");
+            throw new RuntimeException("Object does not exist");
         return this.converter.toBoundary(objects.get(internalObjectId));
     }
 

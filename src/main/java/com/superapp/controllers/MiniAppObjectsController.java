@@ -3,7 +3,6 @@ package com.superapp.controllers;
 import com.superapp.boundaries.command.CommandBoundary;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Date;
 
 @RestController
