@@ -2,13 +2,18 @@ package com.superapp.controllers;
 
 import com.superapp.boundaries.object.ObjectBoundary;
 import com.superapp.logic.ObjectsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController
 public class ObjectsController {
     private ObjectsService objService;
+
+    @Autowired
+    public void setObjectService(ObjectsService objService) {
+        this.objService = objService;
+    }
 
     @RequestMapping(
             path = {"/superapp/objects"},
@@ -38,8 +43,7 @@ public class ObjectsController {
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     public ObjectBoundary retrieveObject(@PathVariable String superapp, @PathVariable String InternalObjectId) {
-        //TODO need to query from the DB one object from the superApp parameter and InternalObjectId parameter.
-        return this.objService.getSpecificObject(superapp, InternalObjectId);
+        return this.objService.getSpecificObject(superapp,InternalObjectId);
     }
 
     @RequestMapping(
@@ -48,7 +52,9 @@ public class ObjectsController {
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     @ResponseBody
-    public List<ObjectBoundary> getAllObjects() {
-        return this.objService.getAllObjects();
+    public ObjectBoundary[] getAllObjects() {
+        ObjectBoundary[] allObjArr = new ObjectBoundary[objService.getAllObjects().size()];
+        this.objService.getAllObjects().toArray(allObjArr);
+        return allObjArr;
     }
 }

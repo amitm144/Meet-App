@@ -28,7 +28,6 @@ public class ObjectBoundary {
         this.active = true;
         this.creationTimeStamp = new Date();
         this.createdBy = createdBy;
-
         this.objectDetails = objectDetails;
     }
 

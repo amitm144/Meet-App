@@ -26,7 +26,7 @@ public class ObjectConverter {
         objEntity.setObjectDetails(obj.getObjectDetails());
         objEntity.setType(obj.getType());
         objEntity.setCreatedBy(obj.getCreatedBy());
-        objEntity.setCreationTimeStamp(obj.getCreationTimeStamp());
+        objEntity.setCreationTimeStamp(new Date());
         return objEntity;
     }
 
