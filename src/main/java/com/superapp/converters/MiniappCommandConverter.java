@@ -3,8 +3,8 @@ package com.superapp.converters;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.superapp.boundaries.command.MiniAppCommandBoundary;
 import com.superapp.boundaries.command.MiniAppCommandIdBoundary;
-import com.superapp.boundaries.command.ObjectIdBoundary;
-import com.superapp.boundaries.command.user.UserIdBoundary;
+import com.superapp.boundaries.object.ObjectIdBoundary;
+import com.superapp.boundaries.user.UserIdBoundary;
 import com.superapp.data.MiniAppCommandEntity;
 import com.superapp.util.wrappers.ObjectIdWrapper;
 import com.superapp.util.wrappers.UserIdWrapper;
@@ -20,8 +20,8 @@ public class MiniappCommandConverter {
     }
     public MiniAppCommandEntity toEntity(MiniAppCommandBoundary miniApp) {
         MiniAppCommandEntity rv = new MiniAppCommandEntity();
-        rv.setSuperApp(miniApp.getCommandId().getSuperApp());
-        rv.setMiniApp(miniApp.getCommandId().getMiniApp());
+        rv.setSuperApp(miniApp.getCommandId().getSuperapp());
+        rv.setMiniApp(miniApp.getCommandId().getMiniapp());
         rv.setInternalCommandId(miniApp.getCommandId().getInternalCommandId());
         rv.setCommand(miniApp.getCommand());
         rv.setInvocationTimeStamp(miniApp.getInvocationTimeStamp());
@@ -48,7 +48,7 @@ public class MiniappCommandConverter {
     }
     public MiniAppCommandBoundary toBoundary(MiniAppCommandEntity miniappEntity) {
         MiniAppCommandBoundary rv = new MiniAppCommandBoundary();
-        rv.setCommandId(new MiniAppCommandIdBoundary(miniappEntity.getMiniApp(),miniappEntity.getInternalCommandId()));
+        rv.setCommandId(new MiniAppCommandIdBoundary(miniappEntity.getMiniApp(),miniappEntity.getInternalCommandId(),miniappEntity.getSuperApp()));
         rv.setCommand(miniappEntity.getCommand());
         rv.setCommandAttributes(toBoundaryAsMap(miniappEntity.getCommandAttributes()));
         rv.setInvokedBy(new UserIdWrapper(new UserIdBoundary(miniappEntity.getSuperApp(), miniappEntity.getEmail())));

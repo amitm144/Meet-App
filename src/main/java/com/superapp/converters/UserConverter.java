@@ -1,7 +1,7 @@
 package com.superapp.converters;
 
 //import com.fasterxml.jackson.databind.ObjectMapper;
-import com.superapp.boundaries.command.user.UserBoundary;
+import com.superapp.boundaries.user.UserBoundary;
 import com.superapp.data.UserEntity;
 import com.superapp.data.UserRole;
 import org.springframework.stereotype.Component;
@@ -17,7 +17,7 @@ public class UserConverter {
 
     public UserEntity toEntity(UserBoundary user) {
         UserEntity rv = new UserEntity();
-        rv.setSuperApp(user.getUserId().getSuperApp());
+        rv.setSuperApp(user.getUserId().getSuperapp());
         rv.setEmail(user.getUserId().getEmail());
         rv.setUsername(user.getUsername());
         rv.setRole(UserRole.valueOf(user.getRole()));

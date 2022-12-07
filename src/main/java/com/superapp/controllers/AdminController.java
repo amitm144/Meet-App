@@ -1,6 +1,7 @@
 package com.superapp.controllers;
 
 import com.superapp.boundaries.command.MiniAppCommandBoundary;
+import com.superapp.boundaries.user.UserBoundary;
 import com.superapp.logic.UsersService;
 import com.superapp.logic.concreteServices.MiniAppCommandService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +30,9 @@ public class AdminController {
             path = {"/superapp/admin/users"},
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    public Object getAllUsers() {
-        return this.usersService.getAllUsers();
+    public UserBoundary[] getAllUsers() {
+        List<UserBoundary> list = this.usersService.getAllUsers();
+        return list.toArray(new UserBoundary[list.size()]);
     }
 
     @RequestMapping(

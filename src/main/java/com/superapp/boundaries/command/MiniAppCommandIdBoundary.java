@@ -1,46 +1,43 @@
 package com.superapp.boundaries.command;
 
-import java.util.Random;
+
+import org.springframework.beans.factory.annotation.Value;
 
 public class MiniAppCommandIdBoundary {
 
-    private String superApp ;
-    private String miniApp ;
+    private String superapp ;
+    private String miniapp ;
     private String internalCommandId;
 
     public MiniAppCommandIdBoundary() {
-        this.superApp = "2023a.noam.levy";
-        int id = new Random().nextInt(1000);
-        this.internalCommandId = Integer.toString(id);
     }
 
-    public MiniAppCommandIdBoundary(String miniApp, String internalCommandId) {
+    public MiniAppCommandIdBoundary(String miniApp, String internalCommandId,@Value("${spring.application.name}") String superapp) {
         if (miniApp.isBlank() || internalCommandId.isBlank())
             throw new RuntimeException("command id or miniApp name cannot be blank");
-        this.miniApp = miniApp;
-        this.superApp = "2023a.noam.levy";
+        this.miniapp = miniApp;
+        this.superapp = superapp;
         this.internalCommandId = internalCommandId;
     }
 
     public MiniAppCommandIdBoundary(String miniApp) {
-        this();
-        this.miniApp = miniApp;
+        this.miniapp = miniapp;
     }
 
-    public String getSuperApp() {
-        return superApp;
+    public String getSuperapp() {
+        return superapp;
+    }
+    @Value("${spring.application.name}")
+    public void setSuperapp(String superapp) {
+        this.superapp = superapp;
     }
 
-    public void setSuperApp(String superApp) {
-        this.superApp = superApp;
+    public String getMiniapp() {
+        return miniapp;
     }
 
-    public String getMiniApp() {
-        return miniApp;
-    }
-
-    public void setMiniApp(String miniApp) {
-        this.miniApp = miniApp;
+    public void setMiniapp(String miniapp) {
+        this.miniapp = miniapp;
     }
 
     public String getInternalCommandId() {
@@ -54,8 +51,8 @@ public class MiniAppCommandIdBoundary {
     @Override
     public String toString() {
         return "CommandIdBoundary{" +
-                "superApp='" + superApp + '\'' +
-                ", miniApp='" + miniApp + '\'' +
+                "superapp='" + superapp + '\'' +
+                ", miniapp='" + miniapp + '\'' +
                 ", internalCommandId='" + internalCommandId + '\'' +
                 '}';
     }
