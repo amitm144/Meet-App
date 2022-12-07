@@ -2,12 +2,7 @@ package com.superapp.controllers;
 
 import com.superapp.boundaries.command.CommandBoundary;
 import com.superapp.boundaries.command.CommandIdBoundary;
-import com.superapp.boundaries.command.user.UserBoundary;
 import com.superapp.logic.UsersService;
-import org.springframework.beans.factory.annotation.Autowired;
-import com.superapp.boundaries.command.user.UserBoundary;
-import com.superapp.logic.UsersService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -41,7 +36,7 @@ public class AdminController {
     public CommandBoundary[] exportSpecificMiniAppsCommands(@PathVariable("miniAppName") String miniAppName) {
         CommandBoundary[] c = CommandBoundary.getNcommandBoundries(1);
         CommandIdBoundary b = c[0].getCommandId();
-        b.setMiniApp(miniAppName);
+        b.setMiniapp(miniAppName);
         c[0].setCommandId(b);
         return c;
     }
