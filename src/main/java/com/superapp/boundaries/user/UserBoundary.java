@@ -3,6 +3,7 @@ package com.superapp.boundaries.user;
 import org.springframework.beans.factory.annotation.Value;
 
 public class UserBoundary {
+
     private UserIdBoundary userId;
     private String role;
     private String username;
@@ -19,9 +20,9 @@ public class UserBoundary {
         this.avatar = avatar;
     }
 
-    public UserBoundary(String superApp , String email, String role, String username, String avatar) {
+    public UserBoundary(String superapp , String email, String role, String username, String avatar) {
         this(email, role, username, avatar);
-        this.userId = new UserIdBoundary(superApp ,email);
+        this.userId = new UserIdBoundary(superapp ,email);
     }
 
     public static UserBoundary[] getNRandomUsers(int n) {
@@ -47,7 +48,7 @@ public class UserBoundary {
         if (this.userId == null)
             this.userId = new UserIdBoundary();
 
-        this.userId.setSuperApp(superApp);
+        this.userId.setSuperapp(superApp);
     }
 
     public void setEmail(String email) {
@@ -80,6 +81,7 @@ public class UserBoundary {
     public void setUsername(String username) {
         this.username = username;
     }
+
 
     @Override
     public String toString() {

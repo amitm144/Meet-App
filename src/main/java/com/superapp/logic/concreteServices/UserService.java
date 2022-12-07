@@ -43,7 +43,7 @@ public class UserService implements UsersService {
     @Override
     public UserBoundary login(@Value("${spring.application.name}") String userSuperApp, String userEmail) {
         UserEntity user = this.users.get(userEmail);
-        if (user == null || !user.getSuperApp().equals(userSuperApp) || !user.getEmail().equals(userEmail))
+        if (user == null || !user.getSuperapp().equals(userSuperApp) || !user.getEmail().equals(userEmail))
             throw new RuntimeException("Unknown user");
 
         return this.converter.toBoundary(user);
@@ -52,7 +52,7 @@ public class UserService implements UsersService {
     @Override
     public UserBoundary updateUser(@Value("${spring.application.name}") String userSuperApp, String userEmail, UserBoundary update) {
         UserEntity user = this.users.get(userEmail);
-        if (user == null || !user.getSuperApp().equals(userSuperApp) || !user.getEmail().equals(userEmail)) {
+        if (user == null || !user.getSuperapp().equals(userSuperApp) || !user.getEmail().equals(userEmail)) {
             throw new RuntimeException("Unknown user");
         }
 

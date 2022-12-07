@@ -4,42 +4,42 @@ import java.util.Random;
 
 public class CommandIdBoundary {
 
-    private String superApp ;
-    private String miniApp ;
+    private String superapp ;
+    private String miniapp ;
     private String internalCommandId;
 
     public CommandIdBoundary() {
-        this.superApp = "2023a.noam.levy";
+        this.superapp = "2023a.noam.levy";
         int id = new Random().nextInt(1000);
         this.internalCommandId = Integer.toString(id);
     }
 
-    public CommandIdBoundary(String miniApp, String internalCommandId) {
-        if (miniApp.isBlank() || internalCommandId.isBlank())
-            throw new RuntimeException("command id or miniApp name cannot be blank");
-        this.miniApp = miniApp;
+    public CommandIdBoundary(String miniapp, String internalCommandId) {
+        if (miniapp.isBlank() || internalCommandId.isBlank())
+            throw new RuntimeException("command id or miniapp name cannot be blank");
+        this.miniapp = miniapp;
         this.internalCommandId = internalCommandId;
     }
 
-    public CommandIdBoundary(String miniApp) {
+    public CommandIdBoundary(String miniapp) {
         this();
-        this.miniApp = miniApp;
+        this.miniapp = miniapp;
     }
 
-    public String getSuperApp() {
-        return superApp;
+    public String getSuperapp() {
+        return superapp;
     }
 
-    public void setSuperApp(String superApp) {
-        this.superApp = superApp;
+    public void setSuperapp(String superapp) {
+        this.superapp = superapp;
     }
 
-    public String getMiniApp() {
-        return miniApp;
+    public String getMiniapp() {
+        return miniapp;
     }
 
-    public void setMiniApp(String miniApp) {
-        this.miniApp = miniApp;
+    public void setMiniapp(String miniApp) {
+        this.miniapp = miniapp;
     }
 
     public String getInternalCommandId() {
@@ -53,8 +53,8 @@ public class CommandIdBoundary {
     @Override
     public String toString() {
         return "CommandIdBoundary{" +
-                "superApp='" + superApp + '\'' +
-                ", miniApp='" + miniApp + '\'' +
+                "superapp='" + superapp + '\'' +
+                ", miniapp='" + miniapp + '\'' +
                 ", internalCommandId='" + internalCommandId + '\'' +
                 '}';
     }

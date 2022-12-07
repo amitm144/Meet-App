@@ -1,16 +1,15 @@
 package com.superapp.controllers;
 
 import com.superapp.boundaries.user.UserBoundary;
+import com.superapp.logic.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import com.superapp.logic.UsersService;
-
-
 @RestController
 public class UsersController {
+
     private UsersService usersService;
 
     @Autowired

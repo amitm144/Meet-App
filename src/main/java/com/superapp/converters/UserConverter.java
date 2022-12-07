@@ -17,7 +17,7 @@ public class UserConverter {
 
     public UserEntity toEntity(UserBoundary user) {
         UserEntity rv = new UserEntity();
-        rv.setSuperApp(user.getUserId().getSuperApp());
+        rv.setSuperapp(user.getUserId().getSuperapp());
         rv.setEmail(user.getUserId().getEmail());
         rv.setUsername(user.getUsername());
         rv.setRole(UserRole.valueOf(user.getRole()));
@@ -27,7 +27,7 @@ public class UserConverter {
 
     public UserBoundary toBoundary(UserEntity user) {
         UserBoundary rv = new UserBoundary();
-        rv.setSuperApp(user.getSuperApp());
+        rv.setSuperApp(user.getSuperapp());
         rv.setEmail(user.getEmail());
         rv.setRole(user.getRole().name());
         rv.setUsername(user.getUsername());

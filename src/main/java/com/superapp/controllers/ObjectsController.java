@@ -26,7 +26,7 @@ public class ObjectsController {
     @ResponseBody
     public ObjectBoundary createObject(@RequestBody ObjectBoundary objectBoundary) {
         objectBoundary.setObjectId(new ObjectIdBoundary());
-        objectBoundary.setCreationTimeStamp(new Date());
+        objectBoundary.setCreationTimestamp(new Date());
         return objectBoundary;
     }
 
@@ -38,21 +38,21 @@ public class ObjectsController {
     public void updateObject(ObjectBoundary objectBoundary,
                              @PathVariable String superapp,
                              @PathVariable String InternalObjectId) {
-        //TODO - Update the specific object in DB with the superApp and InternalObjectId vars
+        //TODO - Update the specific object in DB with the superapp and InternalObjectId vars
     }
 
     @RequestMapping(
-            path = {"/superapp/objects/{superapp}/{InternalObjectd}"},
+            path = {"/superapp/objects/{superapp}/{InternalObjectId}"},
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
-    public ObjectBoundary retrieveObject(@PathVariable String superapp, @PathVariable String InternalObjectd) {
-        //TODO need to query from the DB one object from the superApp parameter and InternalObjectId parameter.
+    public ObjectBoundary retrieveObject(@PathVariable String superapp, @PathVariable String InternalObjectId) {
+        //TODO need to query from the DB one object from the superapp parameter and InternalObjectId parameter.
         Map<String, Object> tempMap = new HashMap<>();
         tempMap.put("key", "temp");
         tempMap.put("key2", "temp2");
         // For Example, I created an object to show some data.
-        return new ObjectBoundary((new ObjectIdBoundary(InternalObjectd)),
+        return new ObjectBoundary((new ObjectIdBoundary(InternalObjectId)),
                 "example-type", "a", tempMap,
                 new UserIdWrapper(new UserIdBoundary("dvir.tayeb@gmail.com"))
         );
@@ -65,9 +65,7 @@ public class ObjectsController {
     )
     @ResponseBody
     public ArrayList<ObjectBoundary> getAllObjects() {
-        //TODO need to query from the DB to get all objects we want.
-
-        // For example, we returned some random array data.
+        //TODO query from the DB to get all objects we want.
         return getNRandomObjects(3);
     }
 }
