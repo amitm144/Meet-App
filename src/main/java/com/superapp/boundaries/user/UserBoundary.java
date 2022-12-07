@@ -17,9 +17,9 @@ public class UserBoundary {
         this.username = username;
         this.avatar = avatar;
     }
-    public UserBoundary(String superApp , String email, String role, String username, String avatar) {
+    public UserBoundary(String superapp , String email, String role, String username, String avatar) {
         this(email, role, username, avatar);
-        this.userId = new UserIdBoundary(superApp ,email);
+        this.userId = new UserIdBoundary(superapp ,email);
     }
 
     public static UserBoundary[] getNRandomUsers(int n) {
