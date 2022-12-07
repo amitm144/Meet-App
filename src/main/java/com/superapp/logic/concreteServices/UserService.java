@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 
-import com.superapp.boundaries.command.user.UserBoundary;
+import com.superapp.boundaries.user.UserBoundary;
 import com.superapp.logic.UsersService;
 
 import java.util.*;

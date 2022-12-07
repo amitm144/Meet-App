@@ -1,7 +1,6 @@
 package com.superapp.boundaries.object;
 
-import com.superapp.boundaries.command.ObjectIdBoundary;
-import com.superapp.boundaries.command.user.UserIdBoundary;
+import com.superapp.boundaries.user.UserIdBoundary;
 import com.superapp.util.wrappers.UserIdWrapper;
 
 import java.util.ArrayList;
@@ -13,8 +12,8 @@ public class ObjectBoundary {
     private ObjectIdBoundary objectId;
     private String type;
     private String alias;
-    private Boolean active;
-    private Date creationTimeStamp;
+    private boolean active;
+    private Date creationTimestamp;
     private UserIdWrapper createdBy;
     private Map<String, Object> objectDetails;
 
@@ -27,7 +26,7 @@ public class ObjectBoundary {
         this.type = type;
         this.alias = alias;
         this.active = true;
-        this.creationTimeStamp = new Date();
+        this.creationTimestamp = new Date();
         this.createdBy = createdBy;
 
         this.objectDetails = objectDetails;
@@ -57,7 +56,7 @@ public class ObjectBoundary {
         this.alias = alias;
     }
 
-    public Boolean getActive() {
+    public boolean getActive() {
         return active;
     }
 
@@ -65,12 +64,12 @@ public class ObjectBoundary {
         this.active = active;
     }
 
-    public Date getCreationTimeStamp() {
-        return creationTimeStamp;
+    public Date getCreationTimestamp() {
+        return creationTimestamp;
     }
 
-    public void setCreationTimeStamp(Date creationTimeStamp) {
-        this.creationTimeStamp = creationTimeStamp;
+    public void setCreationTimestamp(Date creationTimestamp) {
+        this.creationTimestamp = creationTimestamp;
     }
     public UserIdWrapper getCreatedBy() {
         return createdBy;
@@ -110,7 +109,7 @@ public class ObjectBoundary {
                 ", type='" + type + '\'' +
                 ", alias='" + alias + '\'' +
                 ", active=" + active +
-                ", creationTimeStamp=" + creationTimeStamp +
+                ", creationTimestamp=" + creationTimestamp +
                 ", createBy=" + createdBy +
                 ", objectDetails=" + objectDetails +
                 '}';

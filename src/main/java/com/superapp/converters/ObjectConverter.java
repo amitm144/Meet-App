@@ -18,13 +18,13 @@ public class ObjectConverter {
     public ObjectEntity toEntity(ObjectBoundary obj) {
         ObjectEntity objEntity = new ObjectEntity();
         objEntity.setObjectId(obj.getObjectId().getInternalObjectId());
-        objEntity.setSuperApp(obj.getObjectId().getSuperApp());
+        objEntity.setSuperApp(obj.getObjectId().getSuperapp());
         objEntity.setActive(obj.getActive());
         objEntity.setAlias(obj.getAlias());
         objEntity.setObjectDetails(obj.getObjectDetails());
         objEntity.setType(obj.getType());
         objEntity.setCreatedBy(obj.getCreatedBy());
-        objEntity.setCreationTimeStamp(obj.getCreationTimeStamp());
+        objEntity.setCreationTimeStamp(obj.getCreationTimestamp());
         return objEntity;
     }
     public ObjectBoundary toBoundary(ObjectEntity obj) {
@@ -35,14 +35,14 @@ public class ObjectConverter {
         objBoundary.setObjectDetails(obj.getObjectDetails());
         objBoundary.setType(obj.getType());
         objBoundary.setCreatedBy(obj.getCreatedBy());
-        objBoundary.setCreationTimeStamp(new Date());
+        objBoundary.setCreationTimestamp(new Date());
         return objBoundary;
     }
     public ObjectIdBoundary idEntityToBoundary(ObjectEntity obj){
         ObjectIdBoundary objIdBoundary = new ObjectIdBoundary();
         try {
             objIdBoundary.setInternalObjectId(mapper.writeValueAsString(obj.getObjectId()));
-            objIdBoundary.setSuperApp(obj.getSuperApp());
+            objIdBoundary.setSuperapp(obj.getSuperApp());
             return objIdBoundary;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);

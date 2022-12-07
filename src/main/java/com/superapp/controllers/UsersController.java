@@ -5,7 +5,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import com.superapp.logic.UsersService;
-import com.superapp.boundaries.command.user.UserBoundary;
+import com.superapp.boundaries.user.UserBoundary;
 
 
 @RestController

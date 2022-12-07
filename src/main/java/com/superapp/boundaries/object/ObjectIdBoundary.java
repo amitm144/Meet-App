@@ -4,11 +4,11 @@ import java.util.Random;
 
 public class ObjectIdBoundary {
 
-    private String superApp ;
+    private String superapp ;
     private String internalObjectId;
 
     public ObjectIdBoundary() {
-        this.superApp = "2023a.noam.levy";
+        this.superapp = "2023a.noam.levy";
         int id = new Random().nextInt(1000);
         this.internalObjectId = Integer.toString(id);
     }
@@ -18,12 +18,12 @@ public class ObjectIdBoundary {
         this.internalObjectId = internalObjectId;
     }
 
-    public String getSuperApp() {
-        return superApp;
+    public String getSuperapp() {
+        return superapp;
     }
 
-    public void setSuperApp(String superApp) {
-        this.superApp = superApp;
+    public void setSuperapp(String superapp) {
+        this.superapp = superapp;
     }
 
     public String getInternalObjectId() {
@@ -37,7 +37,7 @@ public class ObjectIdBoundary {
     @Override
     public String toString() {
         return "ObjectIdBoundary{" +
-                "superApp='" + superApp + '\'' +
+                "superapp='" + superapp + '\'' +
                 ", internalObjectId='" + internalObjectId + '\'' +
                 '}';
     }
@@ -47,7 +47,7 @@ public class ObjectIdBoundary {
         if (obj == null || this.getClass() != obj.getClass())
             return false;
         ObjectIdBoundary objId = (ObjectIdBoundary) obj;
-        return this.superApp.equals( objId.superApp) && this.internalObjectId.equals(objId.internalObjectId);
+        return this.superapp.equals( objId.superapp) && this.internalObjectId.equals(objId.internalObjectId);
     }
 
 }
