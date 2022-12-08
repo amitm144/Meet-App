@@ -3,10 +3,10 @@ package com.superapp.boundaries.object;
 
 import com.superapp.util.wrappers.UserIdWrapper;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ObjectBoundary {
-
     private ObjectIdBoundary objectId;
     private String type;
     private String alias;
@@ -65,7 +65,6 @@ public class ObjectBoundary {
     public void setCreationTimestamp(Date creationTimestamp) {
         this.creationTimestamp = creationTimestamp;
     }
-
     public UserIdWrapper getCreatedBy() {
         return createdBy;
     }
@@ -81,6 +80,8 @@ public class ObjectBoundary {
     public void setObjectDetails(Map<String, Object> objectDetails) {
         this.objectDetails = objectDetails;
     }
+
+
 
     @Override
     public String toString() {

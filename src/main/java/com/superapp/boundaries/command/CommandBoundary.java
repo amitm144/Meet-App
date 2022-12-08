@@ -1,5 +1,6 @@
 package com.superapp.boundaries.command;
 
+import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.boundaries.user.UserBoundary;
 import com.superapp.boundaries.user.UserIdBoundary;
 import com.superapp.boundaries.object.ObjectIdBoundary;
@@ -76,19 +77,6 @@ public class CommandBoundary {
         this.commandAttributes = commandAttributes;
     }
 
-    public static CommandBoundary[] getNcommandBoundries(int n ){
-        Map<String,Object> commandAttributes;
-        String commandName = "CommandName num :";
-        CommandBoundary[] commandArray = new CommandBoundary[n];
-        for(int i=0; i<n ;i++){
-            commandAttributes = new HashMap<String,Object>();
-            commandAttributes.put("key "+i,i);
-            UserBoundary user = UserBoundary.getNRandomUsers(1)[0];
-            commandArray[i] = new CommandBoundary(new CommandIdBoundary("mini :" + i),
-                    commandName+i,new ObjectIdBoundary(),user.getUserId(),commandAttributes);
-        }
-        return commandArray;
-    }
     @Override
     public String toString() {
         return "CommandBoundary{" +
