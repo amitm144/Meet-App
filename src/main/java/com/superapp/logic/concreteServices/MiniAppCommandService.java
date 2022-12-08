@@ -2,7 +2,7 @@ package com.superapp.logic.concreteServices;
 
 import com.superapp.boundaries.command.MiniAppCommandBoundary;
 import com.superapp.converters.MiniappCommandConverter;
-import com.superapp.data.MiniAppCommandEntity;
+import com.superapp.boundaries.data.MiniAppCommandEntity;
 import com.superapp.logic.MiniAppCommandsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,13 +25,11 @@ public class MiniAppCommandService implements MiniAppCommandsService {
 
     @Override
     public Object invokeCommand(MiniAppCommandBoundary command) {
-
-        if(miniAppsCommands.get(command.getCommandId().getMiniapp()) == null){
+        if (miniAppsCommands.get(command.getCommandId().getMiniapp()) == null) {
             ArrayList<MiniAppCommandEntity> commandList = new ArrayList<MiniAppCommandEntity>();
             commandList.add(this.miniAppConverter.toEntity(command));
             miniAppsCommands.put(command.getCommandId().getMiniapp(),commandList);
-        }
-        else
+        } else
             miniAppsCommands.get(command.getCommandId().getMiniapp()).add(this.miniAppConverter.toEntity(command));
         return command;
     }

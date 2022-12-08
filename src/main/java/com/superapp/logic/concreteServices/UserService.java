@@ -2,8 +2,8 @@ package com.superapp.logic.concreteServices;
 
 import com.superapp.boundaries.user.UserIdBoundary;
 import com.superapp.converters.UserConverter;
-import com.superapp.data.UserEntity;
-import com.superapp.data.UserRole;
+import com.superapp.boundaries.data.UserEntity;
+import com.superapp.boundaries.data.UserRole;
 import com.superapp.util.EmailChecker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

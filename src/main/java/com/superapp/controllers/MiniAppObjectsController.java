@@ -3,6 +3,7 @@ package com.superapp.controllers;
 import com.superapp.boundaries.command.MiniAppCommandBoundary;
 import com.superapp.boundaries.command.MiniAppCommandIdBoundary;
 import com.superapp.boundaries.object.ObjectIdBoundary;
+import com.superapp.boundaries.user.UserIdBoundary;
 import com.superapp.logic.concreteServices.MiniAppCommandService;
 import com.superapp.util.SuperappChecker;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,10 +32,14 @@ public class MiniAppObjectsController {
                                         @PathVariable("miniAppName") String miniAppName)
     {
         MiniAppCommandIdBoundary id = command.getCommandId();
-        if (id != null && !checker.isValidSuperapp(id.getSuperapp()))
+        UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
+        ObjectIdBoundary targetObject = command.getTargetObject().getObjectId();
+        if (id != null && !checker.isValidSuperapp(id.getSuperapp()) ||
+                invokedBy != null && !checker.isValidSuperapp(invokedBy.getSuperapp()) ||
+                targetObject != null && !checker.isValidSuperapp(targetObject.getSuperapp()))
             throw new RuntimeException("Incorrect superapp");
 
-        command.setInvocationTimeStamp(new Date());
+        command.setInvocationTimestamp(new Date());
         command.getCommandId().setMiniapp(miniAppName); // TODO: check if miniapp exists
         return this.miniAppCommandService.invokeCommand(command);
     }

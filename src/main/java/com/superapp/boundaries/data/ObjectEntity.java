@@ -1,4 +1,4 @@
-package com.superapp.data;
+package com.superapp.boundaries.data;
 
 
 import com.superapp.util.wrappers.UserIdWrapper;

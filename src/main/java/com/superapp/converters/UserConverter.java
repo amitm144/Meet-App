@@ -2,8 +2,8 @@ package com.superapp.converters;
 
 //import com.fasterxml.jackson.databind.ObjectMapper;
 import com.superapp.boundaries.user.UserBoundary;
-import com.superapp.data.UserEntity;
-import com.superapp.data.UserRole;
+import com.superapp.boundaries.data.UserEntity;
+import com.superapp.boundaries.data.UserRole;
 import org.springframework.stereotype.Component;
 
 @Component

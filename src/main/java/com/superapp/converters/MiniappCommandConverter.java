@@ -5,7 +5,7 @@ import com.superapp.boundaries.command.MiniAppCommandBoundary;
 import com.superapp.boundaries.command.MiniAppCommandIdBoundary;
 import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.boundaries.user.UserIdBoundary;
-import com.superapp.data.MiniAppCommandEntity;
+import com.superapp.boundaries.data.MiniAppCommandEntity;
 import com.superapp.util.wrappers.ObjectIdWrapper;
 import com.superapp.util.wrappers.UserIdWrapper;
 import org.springframework.stereotype.Component;
@@ -26,9 +26,9 @@ public class MiniappCommandConverter {
         rv.setMiniApp(miniApp.getCommandId().getMiniapp());
         rv.setInternalCommandId(miniApp.getCommandId().getInternalCommandId());
         rv.setCommand(miniApp.getCommand());
-        rv.setInvocationTimeStamp(miniApp.getInvocationTimeStamp());
+        rv.setInvocationTimestamp(miniApp.getInvocationTimestamp());
         rv.setInternalObjectId(((ObjectIdWrapper)miniApp.getTargetObject()).getObjectId().getInternalObjectId());
-        rv.setEmail(((UserIdWrapper)miniApp.getInvokedBy()).getUserId().getEmail());
+        rv.setEmail((miniApp.getInvokedBy()).getUserId().getEmail());
         rv.setCommandAttributes(toEntityAsString(miniApp.getCommandAttributes()));
         return rv;
     }
@@ -53,7 +53,7 @@ public class MiniappCommandConverter {
         rv.setCommandAttributes(toBoundaryAsMap(miniappEntity.getCommandAttributes()));
         rv.setInvokedBy(new UserIdWrapper(new UserIdBoundary(miniappEntity.getSuperApp(), miniappEntity.getEmail())));
         rv.setTargetObject(new ObjectIdWrapper(new ObjectIdBoundary(miniappEntity.getSuperApp(), miniappEntity.getInternalObjectId())));
-        rv.setInvocationTimeStamp(miniappEntity.getInvocationTimeStamp());
+        rv.setInvocationTimestamp(miniappEntity.getInvocationTimestamp());
         return rv;
     }
 }

@@ -11,7 +11,7 @@ public class MiniAppCommandBoundary {
     private MiniAppCommandIdBoundary commandId ;
     private String command;
     private ObjectIdWrapper targetObject;
-    private Date invocationTimeStamp;
+    private Date invocationTimestamp;
     private UserIdWrapper invokedBy;
     private Map<String, Object> commandAttributes;
 
@@ -25,7 +25,7 @@ public class MiniAppCommandBoundary {
         this.commandId = commandId;
         this.command = command;
         this.commandAttributes = commandAttributes;
-        this.invocationTimeStamp = new Date();
+        this.invocationTimestamp = new Date();
         this.targetObject = new ObjectIdWrapper(targetObject);
         this.invokedBy = new UserIdWrapper(invokedBy);
     }
@@ -38,9 +38,7 @@ public class MiniAppCommandBoundary {
         this.commandId = commandId;
     }
 
-    public Object getTargetObject() {
-        return targetObject;
-    }
+    public ObjectIdWrapper getTargetObject() { return targetObject; }
 
     public void setTargetObject(ObjectIdWrapper targetObject) { this.targetObject = targetObject; }
 
@@ -52,17 +50,15 @@ public class MiniAppCommandBoundary {
         this.command = command;
     }
 
-    public Date getInvocationTimeStamp() {
-        return invocationTimeStamp;
+    public Date getInvocationTimestamp() {
+        return invocationTimestamp;
     }
 
-    public void setInvocationTimeStamp(Date invocationTimeStamp) {
-        this.invocationTimeStamp = invocationTimeStamp;
+    public void setInvocationTimestamp(Date invocationTimeStamp) {
+        this.invocationTimestamp = invocationTimeStamp;
     }
 
-    public Object getInvokedBy() {
-        return invokedBy;
-    }
+    public UserIdWrapper getInvokedBy() { return invokedBy; }
 
     public void setInvokedBy(UserIdWrapper invokedBy) { this.invokedBy = invokedBy; }
 
@@ -79,7 +75,7 @@ public class MiniAppCommandBoundary {
         return "CommandBoundary{" +
                 "command='" + command + '\'' +
                 ", targetObject=" + targetObject +
-                ", invocationTimeStamp=" + invocationTimeStamp +
+                ", invocationTimeStamp=" + invocationTimestamp +
                 ", invokedBy=" + invokedBy +
                 ", commandAttributes=" + commandAttributes +
                 '}';

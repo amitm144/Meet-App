@@ -1,4 +1,4 @@
-package com.superapp.data;
+package com.superapp.boundaries.data;
 import java.util.Date;
 
 public class MiniAppCommandEntity {
@@ -46,8 +46,8 @@ public class MiniAppCommandEntity {
         this.internalObjectId = internalObjectId;
     }
 
-    public void setInvocationTimeStamp(Date invocationTimeStamp) {
-        this.invocationTimestamp = invocationTimeStamp;
+    public void setInvocationTimestamp(Date invocationTimestamp) {
+        this.invocationTimestamp = invocationTimestamp;
     }
 
     public void setEmail(String email) {
@@ -78,7 +78,7 @@ public class MiniAppCommandEntity {
         return internalObjectId;
     }
 
-    public Date getInvocationTimeStamp() {
+    public Date getInvocationTimestamp() {
         return invocationTimestamp;
     }
 
