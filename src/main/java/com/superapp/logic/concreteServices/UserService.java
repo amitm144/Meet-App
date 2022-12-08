@@ -38,7 +38,7 @@ public class UserService implements UsersService {
             throw new RuntimeException("User already exists");
 
         UserIdBoundary userId = user.getUserId();
-        if (userId == null || userId.getEmail() == null || EmailChecker.isValidEmail(userId.getEmail()))
+        if (userId == null || userId.getEmail() == null || !EmailChecker.isValidEmail(userId.getEmail()))
             throw new RuntimeException("Invalid User details");
 
         users.put(user.getUserId().getEmail(), this.converter.toEntity(user));

@@ -1,7 +1,7 @@
 package com.superapp.boundaries.command;
 
 import com.superapp.boundaries.object.ObjectIdBoundary;
-import com.superapp.boundaries.command.user.UserIdBoundary;
+import com.superapp.boundaries.user.UserIdBoundary;
 import com.superapp.util.wrappers.ObjectIdWrapper;
 import com.superapp.util.wrappers.UserIdWrapper;
 import java.util.Date;
@@ -18,7 +18,7 @@ public class MiniAppCommandBoundary {
     public MiniAppCommandBoundary() {}
 
     public MiniAppCommandBoundary(MiniAppCommandIdBoundary commandId, String command,
-                                  ObjectIdBoundary targetObject,UserIdBoundary invokedBy,
+                                  ObjectIdBoundary targetObject, UserIdBoundary invokedBy,
                                   Map<String, Object> commandAttributes)
     {
         this();

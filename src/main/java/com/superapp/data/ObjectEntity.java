@@ -33,7 +33,6 @@ public class ObjectEntity {
         return superapp;
     }
 
-    @Value("${spring.application.name}")
     public void setSuperapp(String superapp) {
         this.superapp = superapp;
     }

@@ -44,14 +44,4 @@ public class UsersController {
             @RequestBody UserBoundary update) {
         this.usersService.updateUser(superapp, email, update);
     }
-
-    public static UserBoundary[] getNRandomUsers(int n) {
-        UserBoundary[] userBoundaries = new UserBoundary[n];
-        for (int i = 0; i < n; i++) {
-            userBoundaries[i] = new UserBoundary(
-                    String.format("random%d@example.com", i),"example",
-                    String.format("random%d", i), String.format("%d", i));
-        }
-        return userBoundaries;
-    }
 }

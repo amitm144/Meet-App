@@ -1,7 +1,10 @@
 package com.superapp.controllers;
 
 import com.superapp.boundaries.command.MiniAppCommandBoundary;
+import com.superapp.boundaries.command.MiniAppCommandIdBoundary;
+import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.logic.concreteServices.MiniAppCommandService;
+import com.superapp.util.SuperappChecker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -10,7 +13,9 @@ import java.util.Date;
 
 @RestController
 public class MiniAppObjectsController {
+
     private MiniAppCommandService miniAppCommandService;
+    private final SuperappChecker checker = new SuperappChecker();
 
     @Autowired
     public void MiniAppCommandService(MiniAppCommandService miniappservice) {
@@ -25,9 +30,12 @@ public class MiniAppObjectsController {
     public Object invokeMiniAppCommand (@RequestBody MiniAppCommandBoundary command,
                                         @PathVariable("miniAppName") String miniAppName)
     {
-        // TODO: CHECK
+        MiniAppCommandIdBoundary id = command.getCommandId();
+        if (id != null && !checker.isValidSuperapp(id.getSuperapp()))
+            throw new RuntimeException("Incorrect superapp");
+
         command.setInvocationTimeStamp(new Date());
-        command.getCommandId().setMiniapp(miniAppName);
+        command.getCommandId().setMiniapp(miniAppName); // TODO: check if miniapp exists
         return this.miniAppCommandService.invokeCommand(command);
     }
 }

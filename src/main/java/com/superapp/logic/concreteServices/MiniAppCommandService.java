@@ -50,6 +50,7 @@ public class MiniAppCommandService implements MiniAppCommandsService {
         ArrayList<MiniAppCommandEntity> mini_app_command_list = this.miniAppsCommands.get(miniAppName);
         if(mini_app_command_list == null)
             throw new RuntimeException("Unknown miniApp");
+
         ArrayList<MiniAppCommandBoundary> rv = new ArrayList<>();
         for (MiniAppCommandEntity command:mini_app_command_list) {
             rv.add(this.miniAppConverter.toBoundary(command));
