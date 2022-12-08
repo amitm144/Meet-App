@@ -1,13 +1,14 @@
-package com.superapp.data;
+package com.superapp.boundaries.data;
 import java.util.Date;
 
 public class MiniAppCommandEntity {
-    private String superApp ;
-    private String miniApp ;
+
+    private String superapp ;
+    private String miniapp ;
     private String internalCommandId;
     private String command;
     private String internalObjectId; // ObjectID
-    private Date invocationTimeStamp;
+    private Date invocationTimestamp;
     private String email ; // USERID
     private String commandAttributes;
 
@@ -15,22 +16,22 @@ public class MiniAppCommandEntity {
     }
     public MiniAppCommandEntity(String superApp, String miniApp, String internalCommandId, String command, String internalObjectId, Date invocationTimeStamp, String email, String commandAttributes) {
         this();
-        this.superApp = superApp;
-        this.miniApp = miniApp;
+        this.superapp = superApp;
+        this.miniapp = miniApp;
         this.internalCommandId = internalCommandId;
         this.command = command;
         this.internalObjectId = internalObjectId;
-        this.invocationTimeStamp = invocationTimeStamp;
+        this.invocationTimestamp = invocationTimeStamp;
         this.email = email;
         this.commandAttributes = commandAttributes;
     }
 
     public void setSuperApp(String superApp) {
-        this.superApp = superApp;
+        this.superapp = superApp;
     }
 
     public void setMiniApp(String miniApp) {
-        this.miniApp = miniApp;
+        this.miniapp = miniApp;
     }
 
     public void setInternalCommandId(String internalCommandId) {
@@ -45,8 +46,8 @@ public class MiniAppCommandEntity {
         this.internalObjectId = internalObjectId;
     }
 
-    public void setInvocationTimeStamp(Date invocationTimeStamp) {
-        this.invocationTimeStamp = invocationTimeStamp;
+    public void setInvocationTimestamp(Date invocationTimestamp) {
+        this.invocationTimestamp = invocationTimestamp;
     }
 
     public void setEmail(String email) {
@@ -58,11 +59,11 @@ public class MiniAppCommandEntity {
     }
 
     public String getSuperApp() {
-        return superApp;
+        return superapp;
     }
 
     public String getMiniApp() {
-        return miniApp;
+        return miniapp;
     }
 
     public String getInternalCommandId() {
@@ -77,8 +78,8 @@ public class MiniAppCommandEntity {
         return internalObjectId;
     }
 
-    public Date getInvocationTimeStamp() {
-        return invocationTimeStamp;
+    public Date getInvocationTimestamp() {
+        return invocationTimestamp;
     }
 
     public String getEmail() {
@@ -92,12 +93,12 @@ public class MiniAppCommandEntity {
     @Override
     public String toString() {
         return "MiniAppCommandEntity{" +
-                "superApp='" + superApp + '\'' +
-                ", miniApp='" + miniApp + '\'' +
+                "superApp='" + superapp + '\'' +
+                ", miniApp='" + miniapp + '\'' +
                 ", internalCommandId='" + internalCommandId + '\'' +
                 ", command='" + command + '\'' +
                 ", internalObjectId='" + internalObjectId + '\'' +
-                ", invocationTimeStamp=" + invocationTimeStamp +
+                ", invocationTimeStamp=" + invocationTimestamp +
                 ", email='" + email + '\'' +
                 ", commandAttributes=" + commandAttributes +
                 '}';

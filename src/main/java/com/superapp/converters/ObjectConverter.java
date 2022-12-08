@@ -3,7 +3,7 @@ package com.superapp.converters;
 //import com.fasterxml.jackson.databind.ObjectMapper;
 import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.boundaries.object.ObjectBoundary;
-import com.superapp.data.ObjectEntity;
+import com.superapp.boundaries.data.ObjectEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;

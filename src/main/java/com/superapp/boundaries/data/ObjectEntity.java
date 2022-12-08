@@ -1,4 +1,4 @@
-package com.superapp.data;
+package com.superapp.boundaries.data;
 
 
 import com.superapp.util.wrappers.UserIdWrapper;
@@ -33,7 +33,6 @@ public class ObjectEntity {
         return superapp;
     }
 
-    @Value("${spring.application.name}")
     public void setSuperapp(String superapp) {
         this.superapp = superapp;
     }

@@ -1,5 +1,7 @@
 package com.superapp.boundaries.user;
 
+import org.springframework.beans.factory.annotation.Value;
+
 public class UserBoundary {
 
     private UserIdBoundary userId;
@@ -17,15 +19,36 @@ public class UserBoundary {
         this.username = username;
         this.avatar = avatar;
     }
+
     public UserBoundary(String superapp , String email, String role, String username, String avatar) {
         this(email, role, username, avatar);
         this.userId = new UserIdBoundary(superapp ,email);
     }
 
-
+    public static UserBoundary[] getNRandomUsers(int n) {
+        UserBoundary[] userBoundaries = new UserBoundary[n];
+        for (int i = 0; i < n; i++) {
+            userBoundaries[i] = new UserBoundary(
+                    String.format("random%d@example.com", i),"example",
+                    String.format("random%d", i), String.format("%d", i));
+        }
+        return userBoundaries;
+    }
 
     public UserIdBoundary getUserId() {
         return userId;
+    }
+
+    public void setUserId(UserIdBoundary userId) {
+        this.userId = userId;
+    }
+
+    @Value("${spring.application.name}")
+    public void setSuperApp(String superApp) {
+        if (this.userId == null)
+            this.userId = new UserIdBoundary();
+
+        this.userId.setSuperapp(superApp);
     }
 
     public void setEmail(String email) {
@@ -58,6 +81,7 @@ public class UserBoundary {
     public void setUsername(String username) {
         this.username = username;
     }
+
 
     @Override
     public String toString() {

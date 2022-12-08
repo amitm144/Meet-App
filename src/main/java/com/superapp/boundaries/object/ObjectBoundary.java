@@ -1,11 +1,8 @@
 package com.superapp.boundaries.object;
 
-import com.superapp.boundaries.user.UserIdBoundary;
 import com.superapp.util.wrappers.UserIdWrapper;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 public class ObjectBoundary {

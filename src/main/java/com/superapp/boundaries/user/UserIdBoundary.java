@@ -1,20 +1,20 @@
-package com.superapp.boundaries.command.user;
+package com.superapp.boundaries.user;
 
 import com.superapp.util.EmailChecker;
+import org.springframework.beans.factory.annotation.Value;
 
 public class UserIdBoundary {
 
     private String superapp ;
     private String email ;
 
-    public UserIdBoundary() {
-        this.superapp = "2023a.noam.levy"; // TODO: change to super app name from application.properties
-    }
+    public UserIdBoundary() {}
 
     public UserIdBoundary(String email) {
         this();
         if (!EmailChecker.isValidEmail(email))
             throw new RuntimeException("invalid email");
+
         this.email = email;
     }
 
@@ -23,6 +23,7 @@ public class UserIdBoundary {
             throw new RuntimeException("invalid email");
         if (superapp.isBlank())
             throw  new RuntimeException("super-app name cannot be empty");
+
         this.superapp = superapp;
         this.email = email;
     }
@@ -31,8 +32,9 @@ public class UserIdBoundary {
         return superapp;
     }
 
-    public void setSuperapp(String superApp) {
-        this.superapp = superApp;
+    @Value("${spring.application.name}")
+    public void setSuperapp(String superapp) {
+        this.superapp = superapp;
     }
 
     public String getEmail() {

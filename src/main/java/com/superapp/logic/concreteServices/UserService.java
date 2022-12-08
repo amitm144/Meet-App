@@ -1,9 +1,12 @@
 package com.superapp.logic.concreteServices;
 
+import com.superapp.boundaries.user.UserIdBoundary;
 import com.superapp.converters.UserConverter;
-import com.superapp.data.UserEntity;
-import com.superapp.data.UserRole;
+import com.superapp.boundaries.data.UserEntity;
+import com.superapp.boundaries.data.UserRole;
+import com.superapp.util.EmailChecker;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 
@@ -11,7 +14,7 @@ import com.superapp.boundaries.user.UserBoundary;
 import com.superapp.logic.UsersService;
 
 import java.util.*;
-
+import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UsersService {
@@ -34,47 +37,66 @@ public class UserService implements UsersService {
         if (users.containsKey(user.getUserId().getEmail()))
             throw new RuntimeException("User already exists");
 
+        UserIdBoundary userId = user.getUserId();
+        if (userId == null || userId.getEmail() == null || !EmailChecker.isValidEmail(userId.getEmail()))
+            throw new RuntimeException("Invalid User details");
+
         users.put(user.getUserId().getEmail(), this.converter.toEntity(user));
         //TODO: add newly created user to DB
         return user;
     }
 
     @Override
-    public UserBoundary login(String userSuperApp, String userEmail) {
-        if (!userSuperApp.equals("2023a.noam.levy")) // TODO: change to super app name from application.properties
-            throw new RuntimeException("Unknown superApp");
+    public UserBoundary login(@Value("${spring.application.name}") String userSuperApp, String userEmail) {
         UserEntity user = this.users.get(userEmail);
-        if (user == null || !user.getSuperApp().equals(userSuperApp) || !user.getEmail().equals(userEmail))
+        if (user == null || !user.getSuperapp().equals(userSuperApp) || !user.getEmail().equals(userEmail))
             throw new RuntimeException("Unknown user");
 
         return this.converter.toBoundary(user);
     }
 
     @Override
-    public UserBoundary updateUser(String userSuperApp, String userEmail, UserBoundary update) {
-        if (!userSuperApp.equals("2023a.noam.levy")) // TODO: change to super app name from application.properties
-            throw new RuntimeException("Unknown superApp");
+    public UserBoundary updateUser(@Value("${spring.application.name}") String userSuperApp, String userEmail, UserBoundary update) {
         UserEntity user = this.users.get(userEmail);
-        if (user == null || !user.getSuperApp().equals(userSuperApp) || !user.getEmail().equals(userEmail))
+        if (user == null || !user.getSuperapp().equals(userSuperApp) || !user.getEmail().equals(userEmail)) {
             throw new RuntimeException("Unknown user");
-
-        try {
-            user.setUsername(update.getUsername());
-            user.setAvatar(update.getAvatar());
-            user.setRole(UserRole.valueOf(update.getRole()));
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot update user " + userEmail);
         }
+
+        String newUserName = update.getUsername();
+        String newAvatar = update.getAvatar();
+        String newRole = update.getRole();
+
+        if (newUserName != null)
+            user.setUsername(newUserName);
+
+        if (newAvatar != null)
+            user.setAvatar(newAvatar);
+
+        if (newRole != null) {
+            try {
+                user.setRole(UserRole.valueOf(newRole));
+            } catch (Exception ignored) { /* for now - ignore role mismatch */ }
+        }
+
+        if (update.getUserId() != null) {
+            String newEmail = update.getUserId().getEmail();
+            if (newEmail != null) {
+                user.setEmail(newEmail);
+                this.users.remove(userEmail);
+                this.users.put(newEmail, user);
+            }
+        }
+
         return this.converter.toBoundary(user); // TODO: update user in DB
     }
 
     @Override
     public List<UserBoundary> getAllUsers() {
-        ArrayList<UserBoundary> rv = new ArrayList<>();
-        this.users.values().forEach(user -> {
-            rv.add(this.converter.toBoundary(user));
-        });
-        return rv;
+       return this.users
+               .values()
+               .stream()
+               .map(this.converter::toBoundary)
+               .collect(Collectors.toList());
     }
 
     @Override
