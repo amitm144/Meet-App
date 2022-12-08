@@ -1,8 +1,7 @@
 package com.superapp.controllers;
 
-import com.superapp.boundaries.object.ObjectBoundary;
 import com.superapp.boundaries.object.ObjectIdBoundary;
-import com.superapp.boundaries.user.UserIdBoundary;
+import com.superapp.boundaries.object.ObjectBoundary;
 import com.superapp.logic.ObjectsService;
 import com.superapp.util.wrappers.UserIdWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,24 +63,5 @@ public class ObjectsController {
     public ObjectBoundary[] getAllObjects() {
         List<ObjectBoundary> l = this.objService.getAllObjects();
         return l.toArray(new ObjectBoundary[0]);
-    }
-    private ArrayList<ObjectBoundary> getNRandomObjects(int n) {
-        ArrayList<ObjectBoundary> userBoundaries = new ArrayList<ObjectBoundary>();
-        Map<String, Object> map= new HashMap<String, Object>();
-        map.put("key", "value for example");
-        for (int i = 0; i < n; i++) {
-            userBoundaries.add(
-                new ObjectBoundary(
-                        new ObjectIdBoundary(
-                                "2023a.noam.levy",
-                                String.format("id%d", i)),
-                        "example-type",
-                        "example-alias",
-                        map,
-                        new UserIdWrapper(new UserIdBoundary(String.format("temp%d@gmail.com", i)))
-                )
-            );
-        }
-        return userBoundaries;
     }
 }
