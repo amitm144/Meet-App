@@ -1,8 +1,10 @@
 package com.superapp.logic.concreteServices;
 
+import com.superapp.boundaries.user.UserIdBoundary;
 import com.superapp.converters.UserConverter;
 import com.superapp.data.UserEntity;
 import com.superapp.data.UserRole;
+import com.superapp.util.EmailChecker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,10 @@ public class UserService implements UsersService {
     public UserBoundary createUser(UserBoundary user) {
         if (users.containsKey(user.getUserId().getEmail()))
             throw new RuntimeException("User already exists");
+
+        UserIdBoundary userId = user.getUserId();
+        if (userId == null || userId.getEmail() == null || EmailChecker.isValidEmail(userId.getEmail()))
+            throw new RuntimeException("Invalid User details");
 
         users.put(user.getUserId().getEmail(), this.converter.toEntity(user));
         //TODO: add newly created user to DB
