@@ -1,5 +1,7 @@
 package com.superapp.boundaries.command;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import java.util.Random;
 
 public class CommandIdBoundary {
@@ -30,6 +32,7 @@ public class CommandIdBoundary {
         return superapp;
     }
 
+    @Value("${spring.application.name}")
     public void setSuperapp(String superapp) {
         this.superapp = superapp;
     }

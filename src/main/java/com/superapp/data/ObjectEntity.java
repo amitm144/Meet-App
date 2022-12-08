@@ -10,7 +10,7 @@ import java.util.Map;
 public class ObjectEntity {
 
     private String objectId;
-    private String superApp;
+    private String superapp;
     private String type;
     private String alias;
     private boolean active;
@@ -29,13 +29,13 @@ public class ObjectEntity {
         this.objectId = objectId;
     }
 
-    public String getSuperApp() {
-        return superApp;
+    public String getSuperapp() {
+        return superapp;
     }
 
     @Value("${spring.application.name}")
-    public void setSuperApp(String superApp) {
-        this.superApp = superApp;
+    public void setSuperapp(String superapp) {
+        this.superapp = superapp;
     }
 
     public String getType() {
@@ -91,11 +91,11 @@ public class ObjectEntity {
     public String toString() {
         return "ObjectEntity{" +
                 "objectId=" + objectId +
-                ", superApp='" + superApp + '\'' +
+                ", superApp='" + superapp + '\'' +
                 ", type='" + type + '\'' +
                 ", alias='" + alias + '\'' +
                 ", active=" + active +
-                ", creationTimeStamp=" + creationTimestamp +
+                ", creationTimestamp=" + creationTimestamp +
                 ", createdBy=" + createdBy +
                 ", objectDetails=" + objectDetails +
                 '}';

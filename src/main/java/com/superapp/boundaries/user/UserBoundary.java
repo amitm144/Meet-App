@@ -67,7 +67,6 @@ public class UserBoundary {
         this.username = username;
     }
 
-
     @Override
     public String toString() {
         return "UserBoundary {" +

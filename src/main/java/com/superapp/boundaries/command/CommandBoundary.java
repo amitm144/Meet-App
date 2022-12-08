@@ -75,6 +75,7 @@ public class CommandBoundary {
     public void setCommandAttributes(Map<String, Object> commandAttributes) {
         this.commandAttributes = commandAttributes;
     }
+
     public static CommandBoundary[] getNcommandBoundries(int n ){
         Map<String,Object> commandAttributes;
         String commandName = "CommandName num :";

@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 public class ObjectIdBoundary {
 
-    private String superapp ;
+    private String superapp;
     private String internalObjectId;
 
     public ObjectIdBoundary() {}
@@ -46,7 +46,7 @@ public class ObjectIdBoundary {
         if (obj == null || this.getClass() != obj.getClass())
             return false;
         ObjectIdBoundary objId = (ObjectIdBoundary) obj;
-        return this.superapp.equals( objId.superapp) && this.internalObjectId.equals(objId.internalObjectId);
+        return this.superapp.equals(objId.superapp) && this.internalObjectId.equals(objId.internalObjectId);
     }
 
 }
