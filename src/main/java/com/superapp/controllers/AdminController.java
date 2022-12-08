@@ -22,7 +22,7 @@ public class AdminController {
             path= {"/superapp/admin/users"},
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    public UserBoundary[] createUsers () { return UserBoundary.getNRandomUsers(5); }
+    public UserBoundary[] getUsers() { return this.usersService.getAllUsers().toArray(new UserBoundary[0]); }
 
     @RequestMapping(
             path= {"/superapp/admin/miniapp"},
@@ -45,15 +45,15 @@ public class AdminController {
     @RequestMapping(
                 path= {"/superapp/admin/users"},
                 method = {RequestMethod.DELETE})
-    public void deleteUsers () { this.usersService.deleteAllUsers(); }
+    public void deleteUsers() { this.usersService.deleteAllUsers(); }
 
     @RequestMapping(
             path= {"/superapp/admin/objects"},
             method = {RequestMethod.DELETE})
-    public void deleteObjects () {}
+    public void deleteObjects() {}
 
     @RequestMapping(
             path= {"/superapp/admin/miniapp"},
             method = {RequestMethod.DELETE})
-    public void deleteMiniapp () {}
+    public void deleteMiniapp() {}
 }
