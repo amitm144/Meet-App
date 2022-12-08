@@ -11,10 +11,13 @@ import java.util.Date;
 
 @Component
 public class ObjectConverter {
+
     private ObjectMapper mapper;
-    public ObjectConverter(ObjectMapper jackson) {
+
+    public ObjectConverter() {
         this.mapper = new ObjectMapper();
     }
+
     public ObjectEntity toEntity(ObjectBoundary obj) {
         ObjectEntity objEntity = new ObjectEntity();
         objEntity.setObjectId(obj.getObjectId().getInternalObjectId());
@@ -24,9 +27,10 @@ public class ObjectConverter {
         objEntity.setObjectDetails(obj.getObjectDetails());
         objEntity.setType(obj.getType());
         objEntity.setCreatedBy(obj.getCreatedBy());
-        objEntity.setCreationTimeStamp(obj.getCreationTimestamp());
+        objEntity.setCreationTimestamp(obj.getCreationTimestamp());
         return objEntity;
     }
+
     public ObjectBoundary toBoundary(ObjectEntity obj) {
         ObjectBoundary objBoundary = new ObjectBoundary();
         objBoundary.setObjectId(idEntityToBoundary(obj));
@@ -38,7 +42,8 @@ public class ObjectConverter {
         objBoundary.setCreationTimestamp(new Date());
         return objBoundary;
     }
-    public ObjectIdBoundary idEntityToBoundary(ObjectEntity obj){
+
+    public ObjectIdBoundary idEntityToBoundary(ObjectEntity obj) {
         ObjectIdBoundary objIdBoundary = new ObjectIdBoundary();
         try {
             objIdBoundary.setInternalObjectId(mapper.writeValueAsString(obj.getObjectId()));

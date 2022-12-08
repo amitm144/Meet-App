@@ -2,6 +2,7 @@ package com.superapp.data;
 
 
 import com.superapp.util.wrappers.UserIdWrapper;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Date;
 import java.util.Map;
@@ -13,13 +14,12 @@ public class ObjectEntity {
     private String type;
     private String alias;
     private boolean active;
-    private Date creationTimeStamp;
+    private Date creationTimestamp;
     private UserIdWrapper createdBy;
     private Map<String, Object> objectDetails;
 
 
-    public ObjectEntity() {
-    }
+    public ObjectEntity() {}
 
     public String getObjectId() {
         return objectId;
@@ -33,6 +33,7 @@ public class ObjectEntity {
         return superApp;
     }
 
+    @Value("${spring.application.name}")
     public void setSuperApp(String superApp) {
         this.superApp = superApp;
     }
@@ -61,12 +62,12 @@ public class ObjectEntity {
         this.active = active;
     }
 
-    public Date getCreationTimeStamp() {
-        return creationTimeStamp;
+    public Date getCreationTimestamp() {
+        return creationTimestamp;
     }
 
-    public void setCreationTimeStamp(Date creationTimeStamp) {
-        this.creationTimeStamp = creationTimeStamp;
+    public void setCreationTimestamp(Date creationTimestamp) {
+        this.creationTimestamp = creationTimestamp;
     }
 
     public UserIdWrapper getCreatedBy() {
@@ -94,7 +95,7 @@ public class ObjectEntity {
                 ", type='" + type + '\'' +
                 ", alias='" + alias + '\'' +
                 ", active=" + active +
-                ", creationTimeStamp=" + creationTimeStamp +
+                ", creationTimeStamp=" + creationTimestamp +
                 ", createdBy=" + createdBy +
                 ", objectDetails=" + objectDetails +
                 '}';

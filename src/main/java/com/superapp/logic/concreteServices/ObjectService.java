@@ -38,7 +38,7 @@ public class ObjectService implements ObjectsService {
         if (!objects.containsKey(internalObjectId)) {
             throw new RuntimeException("Object does not exist");
         }
-        if ( internalObjectId != update.getObjectId().getInternalObjectId() ) {
+        if (!internalObjectId.equals(update.getObjectId().getInternalObjectId())) {
             throw new RuntimeException("Cannot change object ID");
         }
         objects.replace(internalObjectId , converter.toEntity(update)) ;

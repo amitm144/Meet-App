@@ -1,18 +1,16 @@
 package com.superapp.controllers;
 
-import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.boundaries.object.ObjectBoundary;
-import com.superapp.boundaries.user.UserIdBoundary;
 import com.superapp.logic.ObjectsService;
-import com.superapp.util.wrappers.UserIdWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.util.List;
 
 @RestController
 public class ObjectsController {
+
     private ObjectsService objService;
 
     @Autowired
@@ -48,15 +46,7 @@ public class ObjectsController {
             produces = {MediaType.APPLICATION_JSON_VALUE}
     )
     public ObjectBoundary retrieveObject(@PathVariable String superapp, @PathVariable String InternalObjectId) {
-        //TODO need to query from the DB one object from the superapp parameter and InternalObjectId parameter.
-        Map<String, Object> tempMap = new HashMap<>();
-        tempMap.put("key", "temp");
-        tempMap.put("key2", "temp2");
-        // For Example, I created an object to show some data.
-        return new ObjectBoundary((new ObjectIdBoundary(InternalObjectId)),
-                "example-type", "a", tempMap,
-                new UserIdWrapper(new UserIdBoundary("dvir.tayeb@gmail.com"))
-        );
+        return this.objService.getSpecificObject(superapp,InternalObjectId);
     }
 
     @RequestMapping(
@@ -66,6 +56,7 @@ public class ObjectsController {
     )
     @ResponseBody
     public ObjectBoundary[] getAllObjects() {
-        return (ObjectBoundary[])this.objService.getAllObjects().toArray();
+        List<ObjectBoundary> l = this.objService.getAllObjects();
+        return l.toArray(new ObjectBoundary[0]);
     }
 }

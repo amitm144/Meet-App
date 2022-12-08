@@ -1,20 +1,18 @@
 package com.superapp.boundaries.object;
 
-import java.util.Random;
+
+import org.springframework.beans.factory.annotation.Value;
 
 public class ObjectIdBoundary {
 
     private String superapp ;
     private String internalObjectId;
 
-    public ObjectIdBoundary() {
-        this.superapp = "2023a.noam.levy";
-        int id = new Random().nextInt(1000);
-        this.internalObjectId = Integer.toString(id);
-    }
+    public ObjectIdBoundary() {}
 
-    public ObjectIdBoundary(String internalObjectId) {
-        this();
+    public ObjectIdBoundary(@Value("${spring.application.name}") String superapp,
+                            String internalObjectId) {
+        this.superapp = superapp;
         this.internalObjectId = internalObjectId;
     }
 
@@ -22,6 +20,7 @@ public class ObjectIdBoundary {
         return superapp;
     }
 
+    @Value("${spring.application.name}")
     public void setSuperapp(String superapp) {
         this.superapp = superapp;
     }

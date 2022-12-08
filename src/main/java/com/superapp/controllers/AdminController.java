@@ -4,11 +4,11 @@ import com.superapp.boundaries.command.CommandBoundary;
 import com.superapp.boundaries.command.CommandIdBoundary;
 import com.superapp.boundaries.user.UserBoundary;
 import com.superapp.logic.UsersService;
-
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class AdminController {
@@ -24,13 +24,17 @@ public class AdminController {
             path= {"/superapp/admin/users"},
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    public UserBoundary[] getAllUsers () { return (UserBoundary[])this.usersService.getAllUsers().toArray(); }
+    public UserBoundary[] getAllUsers () {
+        List<UserBoundary> l = this.usersService.getAllUsers();
+        return l.toArray(new UserBoundary[0]);
+    }
 
     @RequestMapping(
             path= {"/superapp/admin/miniapp"},
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public CommandBoundary[] exportMiniappsCommands () { return CommandBoundary.getNcommandBoundries(5); }
+
     @RequestMapping(
             path= {"/superapp/admin/miniapp/{miniAppName}"},
             method = {RequestMethod.GET},
@@ -56,5 +60,5 @@ public class AdminController {
     @RequestMapping(
             path= {"/superapp/admin/miniapp"},
             method = {RequestMethod.DELETE})
-    public void deleteMiniapp () {}
+    public void deleteMiniapps () {}
 }

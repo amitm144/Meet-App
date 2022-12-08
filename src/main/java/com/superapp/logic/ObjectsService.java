@@ -7,7 +7,7 @@ import java.util.List;
 public interface ObjectsService {
     ObjectBoundary createObject(ObjectBoundary object);
 
-    ObjectBoundary updateObject(String objectSuperApp, String internalObjectId, ObjectBoundary update);
+    ObjectBoundary updateObject(String objectSuperapp, String internalObjectId, ObjectBoundary update);
 
     ObjectBoundary getSpecificObject(String objectSuperApp, String internalObjectId);
 
