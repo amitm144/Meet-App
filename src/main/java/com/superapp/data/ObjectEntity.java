@@ -1,39 +1,41 @@
-package com.superapp.boundaries.object;
+package com.superapp.data;
 
 
 import com.superapp.util.wrappers.UserIdWrapper;
+import org.springframework.beans.factory.annotation.Value;
+
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
-public class ObjectBoundary {
-    private ObjectIdBoundary objectId;
+public class ObjectEntity {
+
+    private String objectId;
+    private String superapp;
     private String type;
     private String alias;
-    private Boolean active;
+    private boolean active;
     private Date creationTimestamp;
     private UserIdWrapper createdBy;
     private Map<String, Object> objectDetails;
 
-    public ObjectBoundary() {}
 
-    public ObjectBoundary(ObjectIdBoundary objectId, String type, String alias,
-                          Map<String, Object> objectDetails, UserIdWrapper createdBy){
-        this.objectId = objectId;
-        this.type = type;
-        this.alias = alias;
-        this.active = true;
-        this.creationTimestamp = new Date();
-        this.createdBy = createdBy;
-        this.objectDetails = objectDetails;
-    }
+    public ObjectEntity() {}
 
-    public ObjectIdBoundary getObjectId() {
+    public String getObjectId() {
         return objectId;
     }
 
-    public void setObjectId(ObjectIdBoundary objectId) {
+    public void setObjectId(String objectId) {
         this.objectId = objectId;
+    }
+
+    public String getSuperapp() {
+        return superapp;
+    }
+
+    @Value("${spring.application.name}")
+    public void setSuperapp(String superapp) {
+        this.superapp = superapp;
     }
 
     public String getType() {
@@ -52,7 +54,9 @@ public class ObjectBoundary {
         this.alias = alias;
     }
 
-    public Boolean getActive() { return active; }
+    public boolean getActive() {
+        return active;
+    }
 
     public void setActive(boolean active) {
         this.active = active;
@@ -65,6 +69,7 @@ public class ObjectBoundary {
     public void setCreationTimestamp(Date creationTimestamp) {
         this.creationTimestamp = creationTimestamp;
     }
+
     public UserIdWrapper getCreatedBy() {
         return createdBy;
     }
@@ -82,16 +87,16 @@ public class ObjectBoundary {
     }
 
 
-
     @Override
     public String toString() {
-        return "ObjectBoundary{" +
-                "objectId='" + objectId + '\'' +
+        return "ObjectEntity{" +
+                "objectId=" + objectId +
+                ", superApp='" + superapp + '\'' +
                 ", type='" + type + '\'' +
                 ", alias='" + alias + '\'' +
                 ", active=" + active +
-                ", creationTimeStamp=" + creationTimestamp +
-                ", createBy=" + createdBy +
+                ", creationTimestamp=" + creationTimestamp +
+                ", createdBy=" + createdBy +
                 ", objectDetails=" + objectDetails +
                 '}';
     }

@@ -1,14 +1,14 @@
-package com.superapp.boundaries.command.user;
+package com.superapp.boundaries.user;
 
 import com.superapp.util.EmailChecker;
 
 public class UserIdBoundary {
 
-    private String superApp ;
+    private String superapp ;
     private String email ;
 
     public UserIdBoundary() {
-        this.superApp = "2023a.noam.levy"; // TODO: change to super app name from application.properties
+        this.superapp = "2023a.noam.levy"; // TODO: change to super app name from application.properties
     }
 
     public UserIdBoundary(String email) {
@@ -23,16 +23,16 @@ public class UserIdBoundary {
             throw new RuntimeException("invalid email");
         if (superApp.isBlank())
             throw  new RuntimeException("super-app name cannot be empty");
-        this.superApp = superApp;
+        this.superapp = superApp;
         this.email = email;
     }
 
-    public String getSuperApp() {
-        return superApp;
+    public String getSuperapp() {
+        return superapp;
     }
 
-    public void setSuperApp(String superApp) {
-        this.superApp = superApp;
+    public void setSuperapp(String superApp) {
+        this.superapp = superApp;
     }
 
     public String getEmail() {
@@ -48,8 +48,18 @@ public class UserIdBoundary {
     @Override
     public String toString() {
         return "UserIdBoundary{" +
-                "superApp='" + superApp + '\'' +
+                "superApp='" + superapp + '\'' +
                 ", email='" + email + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        UserIdBoundary that = (UserIdBoundary)o;
+        return this.superapp.equals(that.getSuperapp()) && this.email.equals(that.getEmail());
     }
 }
