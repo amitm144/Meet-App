@@ -26,13 +26,13 @@ public class MiniAppCommandService implements MiniAppCommandsService {
     @Override
     public Object invokeCommand(MiniAppCommandBoundary command) {
 
-        if(miniAppsCommands.get(command.getCommandId().getMiniApp()) == null){
+        if(miniAppsCommands.get(command.getCommandId().getMiniapp()) == null){
             ArrayList<MiniAppCommandEntity> commandList = new ArrayList<MiniAppCommandEntity>();
             commandList.add(this.miniAppConverter.toEntity(command));
-            miniAppsCommands.put(command.getCommandId().getMiniApp(),commandList);
+            miniAppsCommands.put(command.getCommandId().getMiniapp(),commandList);
         }
         else
-            miniAppsCommands.get(command.getCommandId().getMiniApp()).add(this.miniAppConverter.toEntity(command));
+            miniAppsCommands.get(command.getCommandId().getMiniapp()).add(this.miniAppConverter.toEntity(command));
         return command;
     }
 

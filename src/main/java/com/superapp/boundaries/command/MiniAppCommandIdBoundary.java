@@ -1,8 +1,7 @@
 package com.superapp.boundaries.command;
 
-import org.springframework.beans.factory.annotation.Value;
 
-import java.util.Random;
+import org.springframework.beans.factory.annotation.Value;
 
 public class MiniAppCommandIdBoundary {
 
@@ -10,18 +9,19 @@ public class MiniAppCommandIdBoundary {
     private String miniapp ;
     private String internalCommandId;
 
-    public MiniAppCommandIdBoundary() { }
+    public MiniAppCommandIdBoundary() {}
 
-    public MiniAppCommandIdBoundary(String miniApp, String internalCommandId) {
+    public MiniAppCommandIdBoundary(String miniApp,
+                                    String internalCommandId,
+                                    @Value("${spring.application.name}") String superapp) {
         if (miniApp.isBlank() || internalCommandId.isBlank())
             throw new RuntimeException("command id or miniApp name cannot be blank");
         this.miniapp = miniApp;
-        this.superapp = "2023a.noam.levy";
+        this.superapp = superapp;
         this.internalCommandId = internalCommandId;
     }
 
     public MiniAppCommandIdBoundary(String miniApp) {
-        this();
         this.miniapp = miniapp;
     }
 
@@ -38,7 +38,7 @@ public class MiniAppCommandIdBoundary {
         return miniapp;
     }
 
-    public void setMiniapp(String miniApp) {
+    public void setMiniapp(String miniapp) {
         this.miniapp = miniapp;
     }
 

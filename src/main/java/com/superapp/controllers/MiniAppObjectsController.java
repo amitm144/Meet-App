@@ -5,12 +5,12 @@ import com.superapp.logic.concreteServices.MiniAppCommandService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Date;
 
 @RestController
 public class MiniAppObjectsController {
     private MiniAppCommandService miniAppCommandService;
+
     @Autowired
     public void MiniAppCommandService(MiniAppCommandService miniappservice) {
         this.miniAppCommandService = miniappservice;
@@ -24,7 +24,9 @@ public class MiniAppObjectsController {
     public Object invokeMiniAppCommand (@RequestBody MiniAppCommandBoundary command,
                                         @PathVariable("miniAppName") String miniAppName)
     {
-    command.getCommandId().setMiniApp(miniAppName);
+        // TODO: CHECK
+        command.setInvocationTimeStamp(new Date());
+        command.getCommandId().setMiniapp(miniAppName);
         return this.miniAppCommandService.invokeCommand(command);
     }
 }
