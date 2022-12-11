@@ -3,13 +3,49 @@ package com.superapp.boundaries.data.split;
 import com.superapp.boundaries.data.MiniAppCommandEntity;
 import com.superapp.boundaries.data.UserEntity;
 import com.superapp.boundaries.data.split.Group.GroupEntity;
-import com.superapp.boundaries.data.splt.Group.*;
 
 import java.util.HashMap;
 
 public class splitEntity {
 
     private HashMap<GroupSplitEntity,Double> groups;
+
+
+    public splitEntity(){
+        this.groups = new HashMap<GroupSplitEntity,Double>();
+    }
+    public void openNewGroup(MiniAppCommandEntity command){
+
+        HashMap<UserEntity,Double> balances = new HashMap<UserEntity,Double>();
+
+        this.groups.put(new GroupEntity( new HashMap<UserEntity,Double>group.getMembers(),))
+    }
+
+
+//    private void computeBalances(){
+//        for (GroupSplitEntity splitGroup:groups.keySet()) { // total
+//            double total_expenses = splitGroup.getTotal_expenses();
+//            for (UserEntity user: splitGroup.getBalances()) {
+//               double balance = splitGroup.getBalances().get(user);
+//               double new_balance = balance - total_expenses / splitGroup.getGroup().getMembers().size();
+//                splitGroup.getBalances().put(user,new_balance);
+//            }
+//        }
+//    }
+//
+
+//
+//
+//    private void computeBalances(){
+//        for (GroupSplitEntity splitGroup:groups.keySet()) { // total
+//            double total_expenses = splitGroup.getTotal_expenses();
+//            for (UserEntity user: splitGroup.getBalances()) {
+//                double balance = splitGroup.getBalances().get(user);
+//                double new_balance = balance - total_expenses / splitGroup.getGroup().getMembers().size();
+//                splitGroup.getBalances().put(user,new_balance);
+//            }
+//        }
+//    }
 //    export function computeBalances(allExpensesObject, allMembers, allDonePaymentsObject) {
 //        let allExpenses = Object.entries(allExpensesObject);
 //        let allDonePayments = Object.entries(allDonePaymentsObject);
@@ -40,28 +76,4 @@ public class splitEntity {
 //
 //    // console.debug(eachUserBalance);
 //    return Object.entries(eachUserBalance).sort((a, b) => b[1] - a[1]);
-
-    public splitEntity(){
-        this.groups = new HashMap<GroupSplitEntity,Double>();
-    }
-    public void openNewGroup(MiniAppCommandEntity command){
-
-        HashMap<UserEntity,Double> balances = new HashMap<UserEntity,Double>();
-
-        this.groups.put(new GroupEntity( new HashMap<UserEntity,Double>group.getMembers(),))
-    }
-    public void
-
-    private void computeBalances(){
-        for (GroupSplitEntity splitGroup:groups.keySet()) { // total
-            double total_expenses = splitGroup.getTotal_expenses();
-            for (UserEntity user: splitGroup.getBalances()) {
-               double balance = splitGroup.getBalances().get(user);
-               double new_balance = balance - total_expenses / splitGroup.getGroup().getMembers().size();
-                splitGroup.getBalances().put(user,new_balance);
-            }
-        }
-    }
-
-
 }

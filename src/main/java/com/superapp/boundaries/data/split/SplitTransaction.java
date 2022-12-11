@@ -1,30 +1,45 @@
 package com.superapp.boundaries.data.split;
 
 import com.superapp.boundaries.data.UserEntity;
+import com.superapp.boundaries.data.split.Group.GroupEntity;
 
 import java.util.Date;
 
 public class SplitTransaction {
 
-    private String groupId;
-    private UserEntity user;
+    private GroupEntity group;
+    private UserEntity userPaid;
     private Date timestamp;
     private String description;
     private double balance;
 
-    public SplitTransaction(UserEntity user, Date timestamp, String description, double balance) {
-        this.user = user;
+    double percentageToBeReturned;
+    double percentageEachPay;
+;
+
+
+
+
+    public SplitTransaction(GroupEntity group, UserEntity user, Date timestamp, String description, double balance) { //balance must be greater than 0
+        this.group = group;
+        this.userPaid = user;
         this.timestamp = timestamp;
         this.description = description;
         this.balance = balance;
+        this.percentageToBeReturned = group.getMembers().size()-1/group.getMembers().size();
+        this.percentageEachPay = -1/group.getMembers().size();
+
+
+
+
     }
 
-    public UserEntity getUser() {
-        return user;
+    public UserEntity getUserPaid() {
+        return userPaid;
     }
 
-    public void setUser(UserEntity user) {
-        this.user = user;
+    public void setUserPaid(UserEntity user) {
+        this.userPaid = userPaid;
     }
 
     public Date getTimestamp() {
@@ -51,5 +66,32 @@ public class SplitTransaction {
         this.balance = balance;
     }
 
+    public GroupEntity getGroup() {
+        return group;
+    }
 
+    public void setGroup(GroupEntity group) {
+        this.group = group;
+    }
+
+    public double getPercentageToBeReturned() {
+        return percentageToBeReturned;
+    }
+
+    public void setPercentageToBeReturned(double percentageToBeReturned) {
+        this.percentageToBeReturned = percentageToBeReturned;
+    }
+
+    public double getPercentageEachPay() {
+        return percentageEachPay;
+    }
+
+    public void setPercentageEachPay(double percentageEachPay) {
+        this.percentageEachPay = percentageEachPay;
+    }
+
+    @Override
+    public String toString() {
+        return "$"+balance+"/"+group.getMembers()+" per member || "+ getDescription() + "|| paid by "+ getUserPaid() + "|| At " + getTimestamp();
+    }
 }
