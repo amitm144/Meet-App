@@ -1,79 +1,49 @@
 package com.superapp.boundaries.data.split;
 
+import com.superapp.boundaries.command.MiniAppCommandBoundary;
 import com.superapp.boundaries.data.MiniAppCommandEntity;
 import com.superapp.boundaries.data.UserEntity;
-import com.superapp.boundaries.data.split.Group.GroupEntity;
+import com.superapp.boundaries.data.Group.GroupEntity;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class splitEntity {
 
-    private HashMap<GroupSplitEntity,Double> groups;
+    private ArrayList<GroupSplitEntity> groups;
 
+    public splitEntity() {
+        this.groups = new ArrayList<GroupSplitEntity>();
+    }// TODO Load From DB
 
-    public splitEntity(){
-        this.groups = new HashMap<GroupSplitEntity,Double>();
-    }
-    public void openNewGroup(MiniAppCommandEntity command){
-
-        HashMap<UserEntity,Double> balances = new HashMap<UserEntity,Double>();
-
-        this.groups.put(new GroupEntity( new HashMap<UserEntity,Double>group.getMembers(),))
+    public void openNewGroup(GroupEntity group, String title) {
+        GroupSplitEntity newGroup = new GroupSplitEntity(group, title);
+        this.groups.add(newGroup);
     }
 
+    public void payDebt(UserEntity user, double transID, double amount) {
+        for (GroupSplitEntity group : groups) {
+            for (SplitTransaction transaction : group.getExpenses()) {
+                UserEntity payed_user = transaction.getUserPaid();
+                if (payed_user.equals(user)) {
+                    transaction.setBalance(transaction.getBalance() - amount);
+                    computeBalancesPerGroup(group);
+                }
+            }
+        }
+    }
+    public void computeBalancesPerGroup(GroupSplitEntity group) { // total_compute_per_group
+        for (UserEntity user : group.getGroup().getMembers()) {
+            SplitTransaction users_trans = group.getUserTransaction(user);
+            double balance = users_trans.getBalance();
+            double new_balance = balance - group.getTotal_expenses() / group.getNumOfMembers();
+            users_trans.setBalance(new_balance);
+        }
+    }
 
-//    private void computeBalances(){
-//        for (GroupSplitEntity splitGroup:groups.keySet()) { // total
-//            double total_expenses = splitGroup.getTotal_expenses();
-//            for (UserEntity user: splitGroup.getBalances()) {
-//               double balance = splitGroup.getBalances().get(user);
-//               double new_balance = balance - total_expenses / splitGroup.getGroup().getMembers().size();
-//                splitGroup.getBalances().put(user,new_balance);
-//            }
-//        }
-//    }
-//
-
-//
-//
-//    private void computeBalances(){
-//        for (GroupSplitEntity splitGroup:groups.keySet()) { // total
-//            double total_expenses = splitGroup.getTotal_expenses();
-//            for (UserEntity user: splitGroup.getBalances()) {
-//                double balance = splitGroup.getBalances().get(user);
-//                double new_balance = balance - total_expenses / splitGroup.getGroup().getMembers().size();
-//                splitGroup.getBalances().put(user,new_balance);
-//            }
-//        }
-//    }
-//    export function computeBalances(allExpensesObject, allMembers, allDonePaymentsObject) {
-//        let allExpenses = Object.entries(allExpensesObject);
-//        let allDonePayments = Object.entries(allDonePaymentsObject);
-//        if (!allExpenses || allMembers.length === 0)
-//            return [];
-//
-//        let total = allExpenses.map((x) => x[1].amount).reduce((a, b) => a + b, 0);
-//        let numMembers = allMembers.length;
-//        let eachUserBalance = {};
-//        let payments = {}; // payments["charles"] = [["cryptoboid", 10]]
-//
-//        for (const member of allMembers) { // if (member[1] === NaN) return {};
-//            eachUserBalance[member[0]] = 0;
-//            payments[member[0]] = [];
-//        }
-//        // console.debug("after members! ===============", eachUserBalance);
-//
-//        for (const expense of allExpenses) {
-//        const payer = expense[1].paidBy;
-//            if (eachUserBalance[payer] === undefined)
-//                return [];
-//
-//            eachUserBalance[payer] += expense[1].amount;
-//        }
-//        for (let [usr, balance] of Object.entries(eachUserBalance)) {
-//        eachUserBalance[usr] = balance - total / numMembers;
-//    }
-//
-//    // console.debug(eachUserBalance);
-//    return Object.entries(eachUserBalance).sort((a, b) => b[1] - a[1]);
+    public void computeBalances() { // total_compute
+        for (GroupSplitEntity group : this.groups) {
+            computeBalancesPerGroup(group);
+        }
+    }
 }
