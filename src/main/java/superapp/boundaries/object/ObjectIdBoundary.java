@@ -10,7 +10,7 @@ public class ObjectIdBoundary {
 
     public ObjectIdBoundary() {}
 
-    public ObjectIdBoundary(String superapp,
+    public ObjectIdBoundary(@Value("${spring.application.name}") String superapp,
                             String internalObjectId) {
         this.superapp = superapp;
         this.internalObjectId = internalObjectId;
@@ -20,6 +20,7 @@ public class ObjectIdBoundary {
         return superapp;
     }
 
+    @Value("${spring.application.name}")
     public void setSuperapp(String superapp) {
         this.superapp = superapp;
     }

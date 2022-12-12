@@ -20,7 +20,7 @@ public class UserBoundary {
         this.avatar = avatar;
     }
 
-    public UserBoundary(String superapp, String email, String role, String username, String avatar) {
+    public UserBoundary(String superapp , String email, String role, String username, String avatar) {
         this(email, role, username, avatar);
         this.userId = new UserIdBoundary(superapp ,email);
     }
@@ -43,6 +43,7 @@ public class UserBoundary {
         this.userId = userId;
     }
 
+    @Value("${spring.application.name}")
     public void setSuperApp(String superApp) {
         if (this.userId == null)
             this.userId = new UserIdBoundary();

@@ -13,7 +13,7 @@ public class MiniAppCommandIdBoundary {
 
     public MiniAppCommandIdBoundary(String miniApp,
                                     String internalCommandId,
-                                    String superapp) {
+                                    @Value("${spring.application.name}") String superapp) {
         if (miniApp.isBlank() || internalCommandId.isBlank())
             throw new RuntimeException("command id or miniApp name cannot be blank");
         this.miniapp = miniApp;
@@ -29,6 +29,7 @@ public class MiniAppCommandIdBoundary {
         return superapp;
     }
 
+    @Value("${spring.application.name}")
     public void setSuperapp(String superapp) {
         this.superapp = superapp;
     }

@@ -1,11 +1,12 @@
 package superapp.boundaries.user;
 
 import superapp.util.EmailChecker;
+import org.springframework.beans.factory.annotation.Value;
 
 public class UserIdBoundary {
 
-    private String superapp;
-    private String email;
+    private String superapp ;
+    private String email ;
 
     public UserIdBoundary() {}
 
@@ -31,6 +32,7 @@ public class UserIdBoundary {
         return superapp;
     }
 
+    @Value("${spring.application.name}")
     public void setSuperapp(String superapp) {
         this.superapp = superapp;
     }
