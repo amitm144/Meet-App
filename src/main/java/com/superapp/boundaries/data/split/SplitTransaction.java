@@ -1,7 +1,7 @@
 package com.superapp.boundaries.data.split;
 
 import com.superapp.boundaries.data.UserEntity;
-import com.superapp.boundaries.data.split.Group.GroupEntity;
+import com.superapp.boundaries.data.Group.GroupEntity;
 
 import java.util.Date;
 
@@ -12,13 +12,8 @@ public class SplitTransaction {
     private Date timestamp;
     private String description;
     private double balance;
-
-    double percentageToBeReturned;
-    double percentageEachPay;
-;
-
-
-
+    private double percentageToBeReturned;
+    private double percentageEachPay;
 
     public SplitTransaction(GroupEntity group, UserEntity user, Date timestamp, String description, double balance) { //balance must be greater than 0
         this.group = group;
@@ -28,10 +23,7 @@ public class SplitTransaction {
         this.balance = balance;
         this.percentageToBeReturned = group.getMembers().size()-1/group.getMembers().size();
         this.percentageEachPay = -1/group.getMembers().size();
-
-
-
-
+        //TODO ID - auto incersment
     }
 
     public UserEntity getUserPaid() {
