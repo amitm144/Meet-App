@@ -1,9 +1,11 @@
 package com.superapp.boundaries.data.split;
 import com.superapp.boundaries.data.UserEntity;
 import com.superapp.boundaries.data.Group.GroupEntity;
+import com.superapp.boundaries.user.UserBoundary;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Set;
 
 public class splitEntity {
 
@@ -41,11 +43,11 @@ public class splitEntity {
     }
 
     public void computeBalancesPerGroup(GroupSplitEntity group) { // total_compute_per_group
-        for (UserEntity user : group.getGroup().getMembers()) {
-
-            double balance = users_trans.getBalance();
+        Set<UserEntity> allUsers = group.getDebts().keySet();
+        for (UserEntity user : allUsers) {
+            double balance = group.getDebts().get(user);
             double new_balance = balance - group.getTotal_expenses() / group.getNumOfMembers();
-            users_trans.setBalance(new_balance);
+            group.getDebts().put(user,new_balance);
         }
     }
 
