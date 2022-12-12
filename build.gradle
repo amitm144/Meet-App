@@ -4,7 +4,7 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 }
 
-group = 'com.superapp'
+group = 'superapp'
 version = '0.0.4'
 sourceCompatibility = '17'
 
