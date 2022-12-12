@@ -5,8 +5,8 @@ import com.superapp.boundaries.command.MiniAppCommandBoundary;
 import java.util.List;
 
 public interface MiniAppCommandsService {
-    Object invokeCommand(MiniAppCommandBoundary command);
-    List<MiniAppCommandBoundary> getALlCommands();
-    List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniAppName);
-    void deleteALlCommands();
+    public Object invokeCommand(MiniAppCommandBoundary command);
+    public List<MiniAppCommandBoundary> getALlCommands();
+    public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniAppName);
+    public void deleteALlCommands();
 }
