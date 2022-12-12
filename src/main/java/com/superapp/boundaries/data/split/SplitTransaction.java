@@ -4,26 +4,32 @@ import com.superapp.boundaries.data.UserEntity;
 import com.superapp.boundaries.data.Group.GroupEntity;
 
 import java.util.Date;
+import java.util.HashMap;
 
 public class SplitTransaction {
 
-    private GroupEntity group;
+    private HashMap<UserEntity,Double> groupDebts;
     private UserEntity userPaid;
     private Date timestamp;
     private String description;
-    private double balance;
-    private double percentageToBeReturned;
-    private double percentageEachPay;
+    private double originalPayment;
+    private double bank;
+    private boolean isOpen;
 
-    public SplitTransaction(GroupEntity group, UserEntity user, Date timestamp, String description, double balance) { //balance must be greater than 0
-        this.group = group;
+    public SplitTransaction(GroupEntity group, UserEntity user, Date timestamp, String description, double originalPayment) { //balance must be greater than 0
         this.userPaid = user;
         this.timestamp = timestamp;
         this.description = description;
-        this.balance = balance;
-        this.percentageToBeReturned = group.getMembers().size()-1/group.getMembers().size();
-        this.percentageEachPay = -1/group.getMembers().size();
+        this.originalPayment = originalPayment;
+        this.isOpen= true;
+        initGroupDebts(group);
         //TODO ID - auto incersment
+    }
+
+    private void initGroupDebts(GroupEntity group) {
+        this.groupDebts = new HashMap<UserEntity,Double>();
+        for (UserEntity user:group.getMembers())
+            groupDebts.put(user,0.0);
     }
 
     public UserEntity getUserPaid() {
@@ -50,40 +56,40 @@ public class SplitTransaction {
         this.description = description;
     }
 
-    public double getBalance() {
-        return balance;
+    public double getOriginalPayment() {
+        return originalPayment;
     }
 
-    public void setBalance(double balance) {
-        this.balance = balance;
+    public void setOriginalPayment(double originalPayment) {
+        this.originalPayment = originalPayment;
     }
 
-    public GroupEntity getGroup() {
-        return group;
+    public HashMap<UserEntity, Double> getGroupDebts() {
+        return groupDebts;
     }
 
-    public void setGroup(GroupEntity group) {
-        this.group = group;
+    public void setGroupDebts(HashMap<UserEntity, Double> groupDebts) {
+        this.groupDebts = groupDebts;
     }
 
-    public double getPercentageToBeReturned() {
-        return percentageToBeReturned;
+    public boolean isOpen() {
+        return isOpen;
     }
 
-    public void setPercentageToBeReturned(double percentageToBeReturned) {
-        this.percentageToBeReturned = percentageToBeReturned;
+    public void setOpen(boolean open) {
+        isOpen = open;
     }
 
-    public double getPercentageEachPay() {
-        return percentageEachPay;
+    public double getBank() {
+        return bank;
     }
 
-    public void setPercentageEachPay(double percentageEachPay) {
-        this.percentageEachPay = percentageEachPay;
+    public void setBank(double bank) {
+        this.bank = bank;
     }
 
     @Override
     public String toString() {
-        return "$"+balance+"/"+group.getMembers()+" per member || "+ getDescription() + "|| paid by "+ getUserPaid() + "|| At " + getTimestamp();
+        return "$"+ originalPayment +"/"+this.groupDebts.keySet().size()+" per member || "+ getDescription() + "|| paid by "+ getUserPaid() + "|| At " + getTimestamp();
     }
 }

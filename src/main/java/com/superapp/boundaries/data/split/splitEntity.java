@@ -5,9 +5,10 @@ import com.superapp.boundaries.user.UserBoundary;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Set;
 
-public class splitEntity {
+public class splitEntity implements SplitCommand{
 
     private ArrayList<GroupSplitEntity> groups;
 
@@ -15,43 +16,58 @@ public class splitEntity {
         this.groups = new ArrayList<GroupSplitEntity>();
     }// TODO Load From DB
 
-    public void openNewGroup(GroupEntity group, String title) {
+    public void openNewSplitGroup(GroupEntity group, String title) {
         GroupSplitEntity newGroup = new GroupSplitEntity(group, title);
         this.groups.add(newGroup);
     }
-    public void openNewSplit(GroupEntity group,UserEntity payedUser,String description,double splitbalance){
+    public void openNewTrasnaction(GroupEntity group,UserEntity payedUser,String description,double splitbalance){
         GroupSplitEntity split_group = getGroupSplit(group);
         if(split_group == null )throw new RuntimeException("Incorrect Group!!!!!");
         SplitTransaction trans = new SplitTransaction(group,payedUser,new Date(),description,splitbalance);
         split_group.addNewTransaction(trans);
     }
+
+    @Override
+    public double showDebt(GroupEntity group, UserEntity user) {
+        GroupSplitEntity split_group = getGroupSplit(group);
+        for (SplitTransaction trans:split_group.getExpenses()) {
+            HashMap<UserEntity, Double> debt = trans.getGroupDebts();
+            if(debt.get(user)!=null)
+                    return debt.get(user);
+        }
+        throw new RuntimeException("User Not Found");
+    }
+
     private GroupSplitEntity getGroupSplit(GroupEntity group){
         for (GroupSplitEntity g:this.groups) {
             if(group.equals(g.getGroup())) return g;
         }
         return null;
     }
-    public void payDebt(GroupEntity group,UserEntity user, double amount) {
+    public void payDebt(GroupEntity group,UserEntity user) {
         GroupSplitEntity split_group = getGroupSplit(group);
-        if(split_group == null )throw new RuntimeException("Incorrect Group!!!!!");
-        for (UserEntity findUser:split_group.getDebts().keySet()) {
-            if( user.equals(findUser)) {
-                double oldDebt = split_group.getDebts().get(user);
-                split_group.getDebts().put(findUser,oldDebt-amount);
+        for (SplitTransaction trans:split_group.getExpenses()) {
+            HashMap<UserEntity, Double> debt = trans.getGroupDebts();
+            if(debt.get(user)!=null) {
+                debt.put(user,0.0); // Payed
+                return;
             }
         }
+        throw new RuntimeException("User Not Found");
     }
 
     public void computeBalancesPerGroup(GroupSplitEntity group) { // total_compute_per_group
-        Set<UserEntity> allUsers = group.getDebts().keySet();
-        for (UserEntity user : allUsers) {
-            double balance = group.getDebts().get(user);
-            double new_balance = balance - group.getTotal_expenses() / group.getNumOfMembers();
-            group.getDebts().put(user,new_balance);
+
+        for (UserEntity user:group.getGroup().getMembers()){
+            for (SplitTransaction trans:group.getExpenses()) {
+                HashMap<UserEntity, Double> debt = trans.getGroupDebts();
+                double balance = debt.get(user);
+                double new_balance = balance -trans.getOriginalPayment() / group.getGroup().getMembers().size();
+                debt.put(user,new_balance);
+            }
         }
     }
-
-    public void computeTotalBalances() { // total_compute
+        public void computeTotalBalances() { // total_compute
         for (GroupSplitEntity group : this.groups) {
             computeBalancesPerGroup(group);
         }
