@@ -4,7 +4,6 @@ import com.superapp.boundaries.data.UserEntity;
 import com.superapp.boundaries.data.Group.GroupEntity;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 
 public class GroupSplitEntity {
@@ -31,18 +30,17 @@ public class GroupSplitEntity {
         this.numOfMembers = group.getMembers().size();
         total_expenses = expenses.stream().mapToDouble(SplitTransaction::getBalance).sum();
         this.SplitTitle = SplitTitle;
-        initSplitTransactions();
+        this.expenses = new ArrayList<SplitTransaction>();
+        initDebt();
     }
     public GroupEntity getGroup() {
         return group;
     }
 
-    public void initSplitTransactions(){
-        this.expenses = new ArrayList<SplitTransaction>();
-        for (UserEntity user:this.group.getMembers()) {
-            SplitTransaction trans = new SplitTransaction(this.group,user,new Date(),this.SplitTitle,0);
-            this.expenses.add(trans);
-        }
+    public void initDebt(){
+        this.debts = new HashMap<UserEntity,Double>();
+        for (UserEntity user:this.group.getMembers())
+            debts.put(user,0.0);
     }
     public void setGroup(GroupEntity group) {
         this.group = group;
@@ -99,11 +97,5 @@ public class GroupSplitEntity {
             } else
                 aDouble += newTran.getBalance() * newTran.getPercentageEachPay();
         });
-    }
-
-    public SplitTransaction getUserTransaction(UserEntity checkUser) {
-        for (SplitTransaction trans:this.expenses)
-            if(trans.getUserPaid().equals(checkUser)) return trans;
-        return null;
     }
 }
