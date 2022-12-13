@@ -4,7 +4,9 @@ import com.superapp.boundaries.data.MiniAppCommandEntity;
 import com.superapp.boundaries.data.UserEntity;
 import com.superapp.boundaries.data.split.Group.GroupEntity;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class splitEntity {
 
@@ -14,11 +16,19 @@ public class splitEntity {
     public splitEntity(){
         this.groups = new HashMap<GroupSplitEntity,Double>();
     }
-    public void openNewGroup(MiniAppCommandEntity command){
 
-        HashMap<UserEntity,Double> balances = new HashMap<UserEntity,Double>();
+//    GroupEntity group ;
+//    ArrayList<SplitTransaction> expenses;
+//    HashMap<UserEntity,Double> debts ;
+//    double total_expenses;
+//    String SplitTitle;
+//    int numOfMembers;
 
-        this.groups.put(new GroupEntity( new HashMap<UserEntity,Double>group.getMembers(),))
+    public void openNewGroup(List<UserEntity> users ,String SplitTitle ){
+
+        GroupSplitEntity newGroup = new GroupSplitEntity()
+
+        this.groups.put(new GroupEntity( new HashMap<UserEntity,Double>group.getMembers(),));
     }
 
 
