@@ -25,7 +25,6 @@ public class DemoControllerTests {
 	public void init() {
 		this.restTemplate = new RestTemplate();
 		this.url = "http://localhost:" + this.port + "/application";
-		System.out.println(this.url);
 	}
 
 	@Test
