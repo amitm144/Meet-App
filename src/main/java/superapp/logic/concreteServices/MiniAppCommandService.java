@@ -13,8 +13,10 @@ import java.util.*;
 
 @Service
 public class MiniAppCommandService extends AbstractService implements MiniAppCommandsService {
+
     private MiniappCommandConverter miniAppConverter;
     private Map<String, ArrayList<MiniAppCommandEntity>> miniAppsCommands; // { miniapp: miniAppCommand }
+
     @Autowired
     public MiniAppCommandService(MiniappCommandConverter miniAppConverter) {
         this.miniAppConverter = miniAppConverter;
