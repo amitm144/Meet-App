@@ -5,10 +5,10 @@ import superapp.boundaries.object.ObjectBoundary;
 import superapp.boundaries.object.ObjectIdBoundary;
 import superapp.logic.ObjectsService;
 
-import superapp.util.SuperappChecker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import superapp.util.SuperappChecker;
 
 import java.util.List;
 

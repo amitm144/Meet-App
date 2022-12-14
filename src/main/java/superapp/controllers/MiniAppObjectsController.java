@@ -5,10 +5,10 @@ import superapp.boundaries.command.MiniAppCommandIdBoundary;
 import superapp.boundaries.object.ObjectIdBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.logic.concreteServices.MiniAppCommandService;
-import superapp.util.SuperappChecker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import superapp.util.SuperappChecker;
 
 import java.util.Date;
 

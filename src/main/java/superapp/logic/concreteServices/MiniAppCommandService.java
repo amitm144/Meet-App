@@ -3,6 +3,7 @@ package superapp.logic.concreteServices;
 import superapp.boundaries.command.MiniAppCommandBoundary;
 import superapp.converters.MiniappCommandConverter;
 import superapp.data.MiniAppCommandEntity;
+import superapp.logic.AbstractService;
 import superapp.logic.MiniAppCommandsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,7 +12,7 @@ import javax.annotation.PostConstruct;
 import java.util.*;
 
 @Service
-public class MiniAppCommandService implements MiniAppCommandsService {
+public class MiniAppCommandService extends AbstractService implements MiniAppCommandsService {
     private MiniappCommandConverter miniAppConverter;
     private Map<String, ArrayList<MiniAppCommandEntity>> miniAppsCommands; // { miniapp: miniAppCommand }
     @Autowired

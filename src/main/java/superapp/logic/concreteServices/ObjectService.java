@@ -4,10 +4,10 @@ import superapp.boundaries.object.ObjectBoundary;
 import superapp.boundaries.object.ObjectIdBoundary;
 import superapp.converters.ObjectConverter;
 import superapp.data.ObjectEntity;
+import superapp.logic.AbstractService;
 import superapp.logic.ObjectsService;
 import superapp.util.wrappers.UserIdWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -15,7 +15,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class ObjectService implements ObjectsService {
+public class ObjectService extends AbstractService implements ObjectsService {
     private Map<String, ObjectEntity> objects; // { object id : object }
     private ObjectConverter converter;
 
@@ -77,7 +77,7 @@ public class ObjectService implements ObjectsService {
     }
 
     @Override
-    public ObjectBoundary getSpecificObject(@Value("${spring.application.name}") String objectSuperapp,
+    public ObjectBoundary getSpecificObject(String objectSuperapp,
                                             String internalObjectId) {
         if (!objects.containsKey(internalObjectId))
             throw new RuntimeException("Object does not exist");
