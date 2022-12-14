@@ -118,7 +118,5 @@ public class ObjectService extends AbstractService implements ObjectsService {
     }
 
     @Override
-    public void deleteAllObjects() {
-        objects.clear();
-    }
+    public void deleteAllObjects() { objects.clear(); }
 }

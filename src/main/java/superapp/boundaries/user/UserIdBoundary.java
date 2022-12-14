@@ -1,7 +1,5 @@
 package superapp.boundaries.user;
 
-import superapp.util.EmailChecker;
-
 public class UserIdBoundary {
 
     private String superapp;

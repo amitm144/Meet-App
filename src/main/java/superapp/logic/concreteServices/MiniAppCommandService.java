@@ -69,6 +69,7 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
         ArrayList<MiniAppCommandEntity> commands = this.miniAppsCommands.get(miniAppName);
         if (commands == null)
             return new ArrayList<MiniAppCommandBoundary>();
+
         return commands
                 .stream()
                 .map(this.miniAppConverter::toBoundary)
