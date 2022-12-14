@@ -10,5 +10,7 @@ public abstract  class AbstractService {
     @Value("${spring.application.name}")
     public final void setSuperappName(String name) { this.superappName = name; }
 
+    public final String getSuperappName() { return this.superappName; }
+
     public final boolean isValidSuperapp(String superapp) { return this.superappName.equals(superapp); }
 }

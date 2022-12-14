@@ -41,6 +41,7 @@ public class UserService extends AbstractService implements UsersService {
         if (userId == null || userId.getEmail() == null || !EmailChecker.isValidEmail(userId.getEmail()))
             throw new RuntimeException("Invalid User details");
 
+        userId.setSuperapp(this.superappName);
         users.put(user.getUserId().getEmail(), this.converter.toEntity(user));
         //TODO: add newly created user to DB
         return user;
@@ -83,7 +84,7 @@ public class UserService extends AbstractService implements UsersService {
             } catch (Exception ignored) { /* for now - ignore role mismatch */ }
         }
 
-        if (update.getUserId() != null) {
+        if (update.getUserId() != null) { // TODO: FIX SO USER CANNOT UPDATE EMAIL
             String newEmail = update.getUserId().getEmail();
             if (newEmail != null) {
                 user.setEmail(newEmail);

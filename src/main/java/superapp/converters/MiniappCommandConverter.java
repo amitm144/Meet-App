@@ -49,6 +49,7 @@ public class MiniappCommandConverter {
     public MiniAppCommandBoundary toBoundary(MiniAppCommandEntity miniappEntity) {
         MiniAppCommandBoundary rv = new MiniAppCommandBoundary();
         rv.setCommandId(new MiniAppCommandIdBoundary(miniappEntity.getMiniApp(),miniappEntity.getInternalCommandId()));
+        rv.getCommandId().setSuperapp(miniappEntity.getSuperApp());
         rv.setCommand(miniappEntity.getCommand());
         rv.setCommandAttributes(toBoundaryAsMap(miniappEntity.getCommandAttributes()));
         rv.setInvokedBy(new UserIdWrapper(new UserIdBoundary(miniappEntity.getSuperApp(), miniappEntity.getEmail())));

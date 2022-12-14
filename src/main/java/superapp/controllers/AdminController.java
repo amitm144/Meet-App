@@ -9,8 +9,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import superapp.logic.concreteServices.ObjectService;
 
-import java.util.List;
-
 @RestController
 public class AdminController {
 
@@ -36,8 +34,7 @@ public class AdminController {
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public UserBoundary[] getAllUsers() {
-        List<UserBoundary> list = this.usersService.getAllUsers();
-        return list.toArray(new UserBoundary[0]);
+        return this.usersService.getAllUsers().toArray(new UserBoundary[0]);
     }
 
     @RequestMapping(
@@ -45,8 +42,8 @@ public class AdminController {
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public MiniAppCommandBoundary[] exportMiniAppsCommands() {
-        List<MiniAppCommandBoundary> list = this.miniappService.getALlCommands();
-        return list.toArray(new MiniAppCommandBoundary[0]);
+        return this.miniappService.getALlCommands()
+                .toArray(new MiniAppCommandBoundary[0]);
     }
 
     @RequestMapping(
@@ -54,22 +51,22 @@ public class AdminController {
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public MiniAppCommandBoundary[] exportSpecificMiniAppsCommands(@PathVariable("miniAppName") String miniAppName) {
-        List<MiniAppCommandBoundary> list = this.miniappService.getAllMiniAppCommands(miniAppName);
-        return list.toArray(new MiniAppCommandBoundary[0]);
+        return this.miniappService.getAllMiniAppCommands(miniAppName)
+                .toArray(new MiniAppCommandBoundary[0]);
     }
 
     @RequestMapping(
                 path= {"/superapp/admin/users"},
                 method = {RequestMethod.DELETE})
-    public void deleteUsers () { this.usersService.deleteAllUsers(); }
+    public void deleteUsers() { this.usersService.deleteAllUsers(); }
 
     @RequestMapping(
             path= {"/superapp/admin/objects"},
             method = {RequestMethod.DELETE})
-    public void deleteObjects () { this.objectService.deleteAllObjects(); }
+    public void deleteObjects() { this.objectService.deleteAllObjects(); }
 
     @RequestMapping(
             path= {"/superapp/admin/miniapp"},
             method = {RequestMethod.DELETE})
-    public void deleteMiniApp () {this.miniappService.deleteALlCommands();}
+    public void deleteMiniApp() { this.miniappService.deleteALlCommands(); }
 }
