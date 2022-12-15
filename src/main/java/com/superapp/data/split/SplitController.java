@@ -4,6 +4,7 @@ import com.superapp.boundaries.data.Group.GroupEntity;
 import com.superapp.boundaries.data.UserEntity;
 
 public class SplitController implements SplitCommand{
+    private splitEntity split;
     @Override
     public void openNewSplitGroup(GroupEntity group, String title) {
 
