@@ -1,4 +1,4 @@
-package com.superapp.boundaries.data;
+package com.superapp.data;
 
 
 public class UserEntity {

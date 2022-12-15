@@ -1,4 +1,4 @@
-package com.superapp.boundaries.data;
+package com.superapp.data;
 import java.util.Date;
 
 public class MiniAppCommandEntity {

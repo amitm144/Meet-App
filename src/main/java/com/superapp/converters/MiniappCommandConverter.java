@@ -5,7 +5,7 @@ import com.superapp.boundaries.command.MiniAppCommandBoundary;
 import com.superapp.boundaries.command.MiniAppCommandIdBoundary;
 import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.boundaries.user.UserIdBoundary;
-import com.superapp.boundaries.data.MiniAppCommandEntity;
+import com.superapp.data.MiniAppCommandEntity;
 import com.superapp.util.wrappers.ObjectIdWrapper;
 import com.superapp.util.wrappers.UserIdWrapper;
 import org.springframework.stereotype.Component;

@@ -1,12 +1,10 @@
-package com.superapp.boundaries.data.split;
-import com.superapp.boundaries.data.UserEntity;
-import com.superapp.boundaries.data.Group.GroupEntity;
-import com.superapp.boundaries.user.UserBoundary;
+package com.superapp.data.split;
+import com.superapp.data.UserEntity;
+import com.superapp.data.Group.GroupEntity;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Set;
 
 public class splitEntity implements SplitCommand{
 
@@ -20,7 +18,7 @@ public class splitEntity implements SplitCommand{
         GroupSplitEntity newGroup = new GroupSplitEntity(group, title);
         this.groups.add(newGroup);
     }
-    public void openNewTrasnaction(GroupEntity group,UserEntity payedUser,String description,double splitbalance){
+    public void openNewTrasnaction(GroupEntity group, UserEntity payedUser, String description, double splitbalance){
         GroupSplitEntity split_group = getGroupSplit(group);
         if(split_group == null )throw new RuntimeException("Incorrect Group!!!!!");
         SplitTransaction trans = new SplitTransaction(group,payedUser,new Date(),description,splitbalance);

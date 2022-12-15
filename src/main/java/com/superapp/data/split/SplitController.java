@@ -1,7 +1,7 @@
-package com.superapp.boundaries.data.split;
+package com.superapp.data.split;
 
-import com.superapp.boundaries.data.Group.GroupEntity;
-import com.superapp.boundaries.data.UserEntity;
+import com.superapp.data.Group.GroupEntity;
+import com.superapp.data.UserEntity;
 
 public class SplitController implements SplitCommand{
     private splitEntity split;
