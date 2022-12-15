@@ -1,6 +1,6 @@
-package com.superapp.boundaries.data.Group;
+package com.superapp.data.Group;
 
-import com.superapp.boundaries.data.UserEntity;
+import com.superapp.data.UserEntity;
 
 import java.util.List;
 

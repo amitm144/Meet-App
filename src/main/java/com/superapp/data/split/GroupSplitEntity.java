@@ -1,10 +1,8 @@
-package com.superapp.boundaries.data.split;
+package com.superapp.data.split;
 
-import com.superapp.boundaries.data.UserEntity;
-import com.superapp.boundaries.data.Group.GroupEntity;
+import com.superapp.data.Group.GroupEntity;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class GroupSplitEntity {
 

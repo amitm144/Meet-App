@@ -1,4 +1,4 @@
-package com.superapp.boundaries.data.Group;
+package com.superapp.data.Group;
 
 import com.superapp.boundaries.user.UserBoundary;
 

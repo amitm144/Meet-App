@@ -3,7 +3,7 @@ package com.superapp.logic.concreteServices;
 import com.superapp.boundaries.object.ObjectBoundary;
 import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.converters.ObjectConverter;
-import com.superapp.boundaries.data.ObjectEntity;
+import com.superapp.data.ObjectEntity;
 import com.superapp.logic.ObjectsService;
 import com.superapp.util.wrappers.UserIdWrapper;
 import org.springframework.beans.factory.annotation.Autowired;

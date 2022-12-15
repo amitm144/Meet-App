@@ -2,7 +2,7 @@ package com.superapp.logic.concreteServices;
 
 import com.superapp.boundaries.command.MiniAppCommandBoundary;
 import com.superapp.converters.MiniappCommandConverter;
-import com.superapp.boundaries.data.MiniAppCommandEntity;
+import com.superapp.data.MiniAppCommandEntity;
 import com.superapp.logic.MiniAppCommandsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
