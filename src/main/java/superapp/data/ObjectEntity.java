@@ -3,20 +3,23 @@ package superapp.data;
 
 import superapp.util.wrappers.UserIdWrapper;
 
+import javax.persistence.*;
 import java.util.Date;
 import java.util.Map;
-
+@Entity
+@Table(name="Object")
 public class ObjectEntity {
-
+    @Id
     private String objectId;
     private String superapp;
     private String type;
     private String alias;
     private boolean active;
     private Date creationTimestamp;
+    @Transient
     private UserIdWrapper createdBy;
+    @Transient
     private Map<String, Object> objectDetails;
-
 
     public ObjectEntity() {}
 

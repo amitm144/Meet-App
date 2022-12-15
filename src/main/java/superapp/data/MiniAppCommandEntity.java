@@ -1,10 +1,16 @@
 package superapp.data;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.Date;
 
+@Entity
+@Table(name="MiniAppCommand")
 public class MiniAppCommandEntity {
-
     private String superapp ;
     private String miniapp ;
+    @Id
     private String internalCommandId;
     private String command;
     private String internalObjectId; // ObjectID
