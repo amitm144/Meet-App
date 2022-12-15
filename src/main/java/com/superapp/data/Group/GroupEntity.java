@@ -1,5 +1,6 @@
 package com.superapp.data.Group;
 
+import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.data.UserEntity;
 
 import java.util.List;
@@ -7,11 +8,19 @@ import java.util.List;
 public class GroupEntity {
 
     private String groupId;
-    private List<UserEntity> members ;
+    private String superapp;
+    private UserEntity groupLeader;
+    private List<UserEntity> allUsers ;
+    private String avatar;
 
-    public GroupEntity(String groupId, List<UserEntity> members) {
-        this.groupId = groupId;
-        this.members = members;
+    public GroupEntity() {
+    }
+
+    public GroupEntity(String groupId, UserEntity groupLeader, List<UserEntity> allUsers, String avatar) {
+        this.groupId = groupId; //todo
+        this.groupLeader = groupLeader;
+        this.allUsers = allUsers;
+        this.avatar = avatar;
     }
 
     public String getGroupId() {
@@ -22,11 +31,35 @@ public class GroupEntity {
         this.groupId = groupId;
     }
 
-    public List<UserEntity> getMembers() {
-        return members;
+    public UserEntity getGroupLeader() {
+        return groupLeader;
     }
 
-    public void setMembers(List<UserEntity> members) {
-        this.members = members;
+    public void setGroupLeader(UserEntity groupLeader) {
+        this.groupLeader = groupLeader;
+    }
+
+    public List<UserEntity> getAllUsers() {
+        return allUsers;
+    }
+
+    public void setAllUsers(List<UserEntity> allUsers) {
+        this.allUsers = allUsers;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public String getSuperapp() {
+        return superapp;
+    }
+
+    public void setSuperapp(String superapp) {
+        this.superapp = superapp;
     }
 }

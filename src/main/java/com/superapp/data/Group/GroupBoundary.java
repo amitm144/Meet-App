@@ -1,23 +1,28 @@
 package com.superapp.data.Group;
 
+import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.boundaries.user.UserBoundary;
 
 import java.util.List;
 
 public class GroupBoundary {
+    private ObjectIdBoundary groupId;
     private UserBoundary groupLeader;
-    private List<UserBoundary> group;
+    private List<UserBoundary> allUsers;
     private String avatar;
 
-    public GroupBoundary(){};
 
-    public GroupBoundary(UserBoundary groupLeader, List<UserBoundary> group, String avatar) {
-        this.groupLeader = groupLeader;
-        this.group = group;
-        this.avatar = avatar;
+    public GroupBoundary() {
     }
 
 
+    public GroupBoundary(ObjectIdBoundary groupId, UserBoundary groupLeader, List<UserBoundary> allUsers, String avatar) {
+        this.groupId = groupId; //todo
+        this.groupLeader = groupLeader;
+        this.allUsers = allUsers;
+        this.avatar = avatar;
+    }
+    
     public UserBoundary getGroupLeader() {
         return groupLeader;
     }
@@ -26,12 +31,12 @@ public class GroupBoundary {
         this.groupLeader = groupLeader;
     }
 
-    public List<UserBoundary> getGroup() {
-        return group;
+    public List<UserBoundary> getAllUsers() {
+        return allUsers;
     }
 
-    public void setGroup(List<UserBoundary> group) {
-        this.group = group;
+    public void setAllUsers(List<UserBoundary> allUsers) {
+        this.allUsers = allUsers;
     }
 
     public String getAvatar() {
@@ -42,4 +47,11 @@ public class GroupBoundary {
         this.avatar = avatar;
     }
 
+    public ObjectIdBoundary getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(ObjectIdBoundary groupId) {
+        this.groupId = groupId;
+    }
 }
