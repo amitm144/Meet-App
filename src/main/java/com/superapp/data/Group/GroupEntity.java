@@ -1,4 +1,4 @@
-package com.superapp.boundaries.data.split.Group;
+package com.superapp.boundaries.data.Group;
 
 import com.superapp.boundaries.data.UserEntity;
 
