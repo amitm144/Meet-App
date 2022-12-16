@@ -4,16 +4,16 @@ import com.superapp.data.Group.GroupEntity;
 
 import java.util.ArrayList;
 
-public class GroupSplitEntity {
+public class SplitGroupEntity {
 
     private GroupEntity group ;
     private ArrayList<SplitTransaction> expenses;
     private String SplitTitle;
 
-    public GroupSplitEntity() {
+    public SplitGroupEntity() {
     }
 
-    public GroupSplitEntity(GroupEntity group, String SplitTitle) {
+    public SplitGroupEntity(GroupEntity group, String SplitTitle) {
         this.group = group;
         this.SplitTitle = SplitTitle;
         this.expenses = new ArrayList<SplitTransaction>();
