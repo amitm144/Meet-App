@@ -1,6 +1,11 @@
 package com.superapp.data;
 
 
+import com.superapp.data.Group.GroupEntity;
+import com.superapp.data.split.SplitTransaction;
+
+import java.util.HashMap;
+
 public class UserEntity {
 
     private String superapp;
@@ -9,6 +14,8 @@ public class UserEntity {
     private UserRole role;
     private String avatar;
     private String firstName, lastName;
+
+    private HashMap<SplitTransaction,Double> debts;
 
     public UserEntity() {}
 
@@ -23,8 +30,8 @@ public class UserEntity {
         this.avatar = avatar;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.debts = new HashMap<SplitTransaction,Double>();
     }
-
     public String getSuperapp() {
         return superapp;
     }
