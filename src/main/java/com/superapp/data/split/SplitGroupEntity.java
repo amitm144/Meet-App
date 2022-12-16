@@ -1,7 +1,6 @@
 package com.superapp.data.split;
 
-import com.superapp.boundaries.user.UserBoundary;
-import com.superapp.data.Group.GroupEntity;
+import com.superapp.data.GroupEntity;
 import com.superapp.data.UserEntity;
 
 import java.util.ArrayList;
@@ -15,20 +14,20 @@ public class SplitGroupEntity {
     private List<UserEntity> allUsers;
     private String avatar;
     private ArrayList<SplitTransaction> expenses;
-    private String SplitTitle;
+    private String splitTitle;
 
     public SplitGroupEntity() {
     }
 
 
-    public SplitGroupEntity(String groupId, String superapp, UserEntity groupLeader, String avatar, String splitTitle) {
-        this.groupId = groupId;
-        this.superapp = superapp;
-        this.groupLeader = groupLeader;
-        this.avatar = avatar;
-        SplitTitle = splitTitle;
+    public SplitGroupEntity(GroupEntity group, String splitTitle) {
+        this.groupId = group.getGroupId();
+        this.superapp = group.getSuperapp();
+        this.groupLeader = group.getGroupLeader();
+        this.avatar = group.getAvatar();
+        this.splitTitle = splitTitle;
         this.expenses = new ArrayList<SplitTransaction>();
-        this.allUsers = new ArrayList<UserEntity>();
+        this.allUsers = group.getAllUsers();
     }
 
     public String getGroupId() {
@@ -48,11 +47,11 @@ public class SplitGroupEntity {
     }
 
     public String getSplitTitle() {
-        return SplitTitle;
+        return splitTitle;
     }
 
     public void setSplitTitle(String splitTitle) {
-        SplitTitle = splitTitle;
+        this.splitTitle = splitTitle;
     }
 
 

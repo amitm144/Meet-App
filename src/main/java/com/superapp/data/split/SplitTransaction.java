@@ -1,7 +1,7 @@
 package com.superapp.data.split;
 
 import com.superapp.data.UserEntity;
-import com.superapp.data.Group.GroupEntity;
+import com.superapp.data.GroupEntity;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -13,7 +13,6 @@ public class SplitTransaction {
     private Date timestamp;
     private String description;
     private double originalPayment;
-    private double bank;
     private boolean isOpen;
 
     public SplitTransaction(GroupEntity group, UserEntity user, Date timestamp, String description, double originalPayment) { //balance must be greater than 0
@@ -23,19 +22,19 @@ public class SplitTransaction {
         this.originalPayment = originalPayment;
         this.isOpen= true;
         initGroupDebts(group);
+        this.groupDebts.put(userPaid,originalPayment);
         //TODO ID - auto incersment
     }
 
     private void initGroupDebts(GroupEntity group) {
         this.groupDebts = new HashMap<UserEntity,Double>();
-        for (UserEntity user:group.getMembers())
+        for (UserEntity user:group.getAllUsers())
             groupDebts.put(user,0.0);
     }
 
     public UserEntity getUserPaid() {
         return userPaid;
     }
-
     public void setUserPaid(UserEntity user) {
         this.userPaid = userPaid;
     }
@@ -80,16 +79,18 @@ public class SplitTransaction {
         isOpen = open;
     }
 
-    public double getBank() {
-        return bank;
-    }
 
-    public void setBank(double bank) {
-        this.bank = bank;
-    }
-
+        public void ComputeBank(UserEntity user) {
+            double userdebt = this.groupDebts.get(user);
+            double payedUserDebts = this.groupDebts.get(userPaid);
+            this.groupDebts.put(this.userPaid,payedUserDebts+userdebt);
+            this.groupDebts.put(user,0.0);
+            this.setOpen(this.groupDebts.get(userPaid) ==0?false:true); // if userPayed debt equals to 0--> trasnacion close
+        }
     @Override
     public String toString() {
         return "$"+ originalPayment +"/"+this.groupDebts.keySet().size()+" per member || "+ getDescription() + "|| paid by "+ getUserPaid() + "|| At " + getTimestamp();
     }
+
 }
+

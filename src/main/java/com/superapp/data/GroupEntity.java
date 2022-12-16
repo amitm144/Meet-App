@@ -1,4 +1,4 @@
-package com.superapp.data.Group;
+package com.superapp.data;
 
 import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.data.UserEntity;

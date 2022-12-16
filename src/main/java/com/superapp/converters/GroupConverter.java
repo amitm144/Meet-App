@@ -1,18 +1,17 @@
-package com.superapp.data.split;
+package com.superapp.converters;
 
 import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.boundaries.user.UserBoundary;
-import com.superapp.converters.UserConverter;
-import com.superapp.data.Group.GroupBoundary;
-import com.superapp.data.Group.GroupEntity;
+import com.superapp.boundaries.split.GroupBoundary;
+import com.superapp.data.GroupEntity;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class GroupConvertor {
+public class GroupConverter {
 	private UserConverter userConvertor;
 
-	public GroupConvertor() {
+	public GroupConverter() {
 		UserConverter userConvertor = new UserConverter();
 	}
 

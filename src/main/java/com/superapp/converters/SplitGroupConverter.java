@@ -1,10 +1,11 @@
-package com.superapp.data.split;
+package com.superapp.converters;
 
 
 import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.boundaries.user.UserBoundary;
-import com.superapp.converters.UserConverter;
-import com.superapp.data.Group.GroupBoundary;
+import com.superapp.boundaries.split.GroupBoundary;
+import com.superapp.boundaries.split.SplitGroupBoundary;
+import com.superapp.data.split.SplitGroupEntity;
 
 import java.util.List;
 import java.util.stream.Collectors;
