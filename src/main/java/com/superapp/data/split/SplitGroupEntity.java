@@ -21,11 +21,14 @@ public class SplitGroupEntity {
     }
 
 
-
-    public SplitGroupEntity(String groupId, ArrayList<SplitTransaction> expenses, String splitTitle) {
-        this.groupId = groupId; // todo
-        this.expenses = expenses;
+    public SplitGroupEntity(String groupId, String superapp, UserEntity groupLeader, String avatar, String splitTitle) {
+        this.groupId = groupId;
+        this.superapp = superapp;
+        this.groupLeader = groupLeader;
+        this.avatar = avatar;
         SplitTitle = splitTitle;
+        this.expenses = new ArrayList<SplitTransaction>();
+        this.allUsers = new ArrayList<UserEntity>();
     }
 
     public String getGroupId() {

@@ -66,7 +66,7 @@ public class splitEntity implements SplitCommand{
         }
     }
         public void computeTotalBalances() { // total_compute
-        for (SplitGroupEntity group : this.groups) {
+        for (GroupSplitEntity group : this.groups) {
             computeBalancesPerGroup(group);
         }
     }

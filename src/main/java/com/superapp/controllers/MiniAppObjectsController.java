@@ -5,6 +5,7 @@ import com.superapp.boundaries.command.MiniAppCommandIdBoundary;
 import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.boundaries.user.UserIdBoundary;
 import com.superapp.logic.concreteServices.MiniAppCommandService;
+import com.superapp.logic.concreteServices.SplitService;
 import com.superapp.util.SuperappChecker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;

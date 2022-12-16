@@ -13,10 +13,15 @@ import java.util.*;
 @Service
 public class MiniAppCommandService implements MiniAppCommandsService {
     private MiniappCommandConverter miniAppConverter;
+    private SplitService splitService;
     private Map<String, ArrayList<MiniAppCommandEntity>> miniAppsCommands; // { miniapp: miniAppCommand }
     @Autowired
     public MiniAppCommandService(MiniappCommandConverter miniAppConverter) {
         this.miniAppConverter = miniAppConverter;
+    }
+    @Autowired
+    public void setMiniAppCommandService(SplitService splitService) {
+        this.splitService = splitService;
     }
     @PostConstruct
     public void setup() {
@@ -25,13 +30,21 @@ public class MiniAppCommandService implements MiniAppCommandsService {
 
     @Override
     public Object invokeCommand(MiniAppCommandBoundary command) {
-        if (miniAppsCommands.get(command.getCommandId().getMiniapp()) == null) {
+        if (miniAppsCommands.get(command.getCommandId().getMiniapp()) == null) {// TODO Check if miniapp is one of the miniapps
             ArrayList<MiniAppCommandEntity> commandList = new ArrayList<MiniAppCommandEntity>();
             commandList.add(this.miniAppConverter.toEntity(command));
             miniAppsCommands.put(command.getCommandId().getMiniapp(),commandList);
         } else
             miniAppsCommands.get(command.getCommandId().getMiniapp()).add(this.miniAppConverter.toEntity(command));
+        invokeMiniapp(command,command.getCommandId().getMiniapp());
+
         return command;
+    }
+    private void invokeMiniapp(MiniAppCommandBoundary command,String miniapp){
+        if (miniapp.equals("Split"))
+            splitService.invokeCommand(command);
+        else
+        throw new RuntimeException("Unknown miniApp");
     }
 
     @Override
@@ -55,6 +68,8 @@ public class MiniAppCommandService implements MiniAppCommandsService {
         }
         return rv;
     }
+
+
 
     @Override
     public void deleteALlCommands() {
