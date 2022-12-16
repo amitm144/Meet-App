@@ -3,10 +3,13 @@ package com.superapp.converters;
 //import com.fasterxml.jackson.databind.ObjectMapper;
 import com.superapp.boundaries.object.ObjectIdBoundary;
 import com.superapp.boundaries.object.ObjectBoundary;
+import com.superapp.data.GroupEntity;
 import com.superapp.data.ObjectEntity;
+import com.superapp.data.UserEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class ObjectConverter {
@@ -39,5 +42,14 @@ public class ObjectConverter {
         objBoundary.setCreatedBy(obj.getCreatedBy());
         objBoundary.setCreationTimestamp(new Date());
         return objBoundary;
+    }
+
+    public GroupEntity ToGroupEntity(ObjectEntity oe) {
+        GroupEntity rv = new GroupEntity();
+        rv.setGroupId((String) oe.getObjectDetails().get("groupId"));
+        rv.setGroupLeader((UserEntity)oe.getObjectDetails().get("groupLeader"));
+        rv.setAllUsers((List<UserEntity>) oe.getObjectDetails().get("allUsers"));
+        rv.setAvatar((String) oe.getObjectDetails().get("avatar"));
+        return rv;
     }
 }

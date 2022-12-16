@@ -2,7 +2,10 @@ package com.superapp.logic.concreteServices;
 
 import com.superapp.boundaries.object.ObjectBoundary;
 import com.superapp.boundaries.object.ObjectIdBoundary;
+import com.superapp.boundaries.split.GroupBoundary;
+import com.superapp.converters.GroupConverter;
 import com.superapp.converters.ObjectConverter;
+import com.superapp.data.GroupEntity;
 import com.superapp.data.ObjectEntity;
 import com.superapp.logic.ObjectsService;
 import com.superapp.util.wrappers.UserIdWrapper;
@@ -17,11 +20,12 @@ import java.util.stream.Collectors;
 @Service
 public class ObjectService implements ObjectsService {
     private Map<String, ObjectEntity> objects; // { object id : object }
-    private ObjectConverter converter;
-
+    private ObjectConverter obecjtConverter;
+    private GroupConverter groupConverter;
     @Autowired
-    public ObjectService(ObjectConverter converter) {
-        this.converter = converter;
+    public ObjectService(ObjectConverter obecjtConverter, GroupConverter groupConverter) {
+        this.obecjtConverter = obecjtConverter;
+        this.groupConverter = groupConverter;
     }
 
     @PostConstruct
@@ -41,10 +45,18 @@ public class ObjectService implements ObjectsService {
             throw new RuntimeException("Superapp name cannot be empty");
 
         object.setCreationTimestamp(new Date());
-        objects.put(object.getObjectId().getInternalObjectId(), converter.toEntity(object));
+        ObjectEntity oe = obecjtConverter.toEntity(object);
+        objects.put(object.getObjectId().getInternalObjectId(),oe);
+        switch (oe.getType()){
+            case "GroupEntity":{
+                GroupEntity groupEntity = obecjtConverter.ToGroupEntity(oe);
+                //TODO add to DB
+                break;
+            }
+
+        }
         return object;
     }
-
     @Override
     public ObjectBoundary updateObject(String objectSuperapp,
                                        String internalObjectId,
@@ -82,14 +94,14 @@ public class ObjectService implements ObjectsService {
         if (!objects.containsKey(internalObjectId))
             throw new RuntimeException("Object does not exist");
 
-        return this.converter.toBoundary(objects.get(internalObjectId));
+        return this.obecjtConverter.toBoundary(objects.get(internalObjectId));
     }
 
     @Override
     public List<ObjectBoundary> getAllObjects() {
         return this.objects.values()
                 .stream()
-                .map(this.converter::toBoundary)
+                .map(this.obecjtConverter::toBoundary)
                 .collect(Collectors.toList());
     }
 

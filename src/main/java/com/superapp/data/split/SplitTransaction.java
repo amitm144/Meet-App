@@ -14,6 +14,7 @@ public class SplitTransaction {
     private String description;
     private double originalPayment;
     private boolean isOpen;
+    private String id;//TODO DB gives an ID
 
     public SplitTransaction(GroupEntity group, UserEntity user, Date timestamp, String description, double originalPayment) { //balance must be greater than 0
         this.userPaid = user;
@@ -23,7 +24,6 @@ public class SplitTransaction {
         this.isOpen= true;
         initGroupDebts(group);
         this.groupDebts.put(userPaid,originalPayment);
-        //TODO ID - auto incersment
     }
 
     private void initGroupDebts(GroupEntity group) {
