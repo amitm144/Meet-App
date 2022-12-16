@@ -1,19 +1,20 @@
 package com.superapp.logic.concreteServices;
 
 import com.superapp.boundaries.command.MiniAppCommandBoundary;
-import com.superapp.data.split.splitEntity;
+import com.superapp.data.split.SplitGroupConverter;
+import com.superapp.data.split.SplitGroupEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SplitService {
 
-        private SplitConverter splitConverter;
-        private splitEntity split;
+        private SplitGroupConverter splitConverter;
+        private SplitGroupEntity split;
         @Autowired
-        public SplitService(SplitConverter splitConverter) {
+        public SplitService(SplitGroupConverter splitConverter) {
             this.splitConverter = splitConverter;
-            this.split = new splitEntity();
+            this.split = new SplitGroupEntity();
         }
 
     public void invokeCommand(MiniAppCommandBoundary command) {

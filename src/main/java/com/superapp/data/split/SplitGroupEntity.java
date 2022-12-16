@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
-public class splitEntity implements SplitCommand{
+public class SplitGroupEntity implements SplitCommand{
 
     private ArrayList<SplitGroupEntity> groups;
 
-    public splitEntity() {
+    public SplitGroupEntity() {
         this.groups = new ArrayList<SplitGroupEntity>();
     }// TODO Load From DB
 
