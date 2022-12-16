@@ -1,6 +1,6 @@
-package com.superapp.data.split;
+package com.superapp.boundaries.split;
 
-import com.superapp.data.Group.GroupBoundary;
+import com.superapp.data.split.SplitTransaction;
 
 import java.util.ArrayList;
 
@@ -14,9 +14,9 @@ public class SplitGroupBoundary {
 	public SplitGroupBoundary() {
 	}
 
-	public SplitGroupBoundary(GroupBoundary group, ArrayList<SplitTransaction> expenses, String splitTitle) {
+	public SplitGroupBoundary(GroupBoundary group, String splitTitle) {
 		this.group = group;
-		this.expenses = expenses;
+		this.expenses = new ArrayList<SplitTransaction> ();
 		SplitTitle = splitTitle;
 	}
 
