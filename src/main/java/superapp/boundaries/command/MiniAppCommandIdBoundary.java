@@ -1,23 +1,15 @@
 package superapp.boundaries.command;
 
-
-import org.springframework.beans.factory.annotation.Value;
-
 public class MiniAppCommandIdBoundary {
 
-    private String superapp ;
-    private String miniapp ;
+    private String superapp;
+    private String miniapp;
     private String internalCommandId;
 
     public MiniAppCommandIdBoundary() {}
 
-    public MiniAppCommandIdBoundary(String miniApp,
-                                    String internalCommandId,
-                                    @Value("${spring.application.name}") String superapp) {
-        if (miniApp.isBlank() || internalCommandId.isBlank())
-            throw new RuntimeException("command id or miniApp name cannot be blank");
+    public MiniAppCommandIdBoundary(String miniApp, String internalCommandId) {
         this.miniapp = miniApp;
-        this.superapp = superapp;
         this.internalCommandId = internalCommandId;
     }
 
@@ -29,7 +21,6 @@ public class MiniAppCommandIdBoundary {
         return superapp;
     }
 
-    @Value("${spring.application.name}")
     public void setSuperapp(String superapp) {
         this.superapp = superapp;
     }

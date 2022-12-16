@@ -21,16 +21,16 @@ public class MiniappCommandConverter {
     }
 
     public MiniAppCommandEntity toEntity(MiniAppCommandBoundary miniApp) {
-        MiniAppCommandEntity rv = new MiniAppCommandEntity();
-        rv.setSuperApp(miniApp.getCommandId().getSuperapp());
-        rv.setMiniApp(miniApp.getCommandId().getMiniapp());
-        rv.setInternalCommandId(miniApp.getCommandId().getInternalCommandId());
-        rv.setCommand(miniApp.getCommand());
-        rv.setInvocationTimestamp(miniApp.getInvocationTimestamp());
-        rv.setInternalObjectId(((ObjectIdWrapper)miniApp.getTargetObject()).getObjectId().getInternalObjectId());
-        rv.setEmail((miniApp.getInvokedBy()).getUserId().getEmail());
-        rv.setCommandAttributes(toEntityAsString(miniApp.getCommandAttributes()));
-        return rv;
+        MiniAppCommandEntity result = new MiniAppCommandEntity();
+        result.setSuperApp(miniApp.getCommandId().getSuperapp());
+        result.setMiniApp(miniApp.getCommandId().getMiniapp());
+        result.setInternalCommandId(miniApp.getCommandId().getInternalCommandId());
+        result.setCommand(miniApp.getCommand());
+        result.setInvocationTimestamp(miniApp.getInvocationTimestamp());
+        result.setInternalObjectId(((ObjectIdWrapper)miniApp.getTargetObject()).getObjectId().getInternalObjectId());
+        result.setEmail((miniApp.getInvokedBy()).getUserId().getEmail());
+        result.setCommandAttributes(toEntityAsString(miniApp.getCommandAttributes()));
+        return result;
     }
     public String toEntityAsString(Map<String, Object> attributes) {
         try {
@@ -47,13 +47,14 @@ public class MiniappCommandConverter {
         }
     }
     public MiniAppCommandBoundary toBoundary(MiniAppCommandEntity miniappEntity) {
-        MiniAppCommandBoundary rv = new MiniAppCommandBoundary();
-        rv.setCommandId(new MiniAppCommandIdBoundary(miniappEntity.getMiniApp(),miniappEntity.getInternalCommandId(),miniappEntity.getSuperApp()));
-        rv.setCommand(miniappEntity.getCommand());
-        rv.setCommandAttributes(toBoundaryAsMap(miniappEntity.getCommandAttributes()));
-        rv.setInvokedBy(new UserIdWrapper(new UserIdBoundary(miniappEntity.getSuperApp(), miniappEntity.getEmail())));
-        rv.setTargetObject(new ObjectIdWrapper(new ObjectIdBoundary(miniappEntity.getSuperApp(), miniappEntity.getInternalObjectId())));
-        rv.setInvocationTimestamp(miniappEntity.getInvocationTimestamp());
-        return rv;
+        MiniAppCommandBoundary result = new MiniAppCommandBoundary();
+        result.setCommandId(new MiniAppCommandIdBoundary(miniappEntity.getMiniApp(),miniappEntity.getInternalCommandId()));
+        result.getCommandId().setSuperapp(miniappEntity.getSuperApp());
+        result.setCommand(miniappEntity.getCommand());
+        result.setCommandAttributes(toBoundaryAsMap(miniappEntity.getCommandAttributes()));
+        result.setInvokedBy(new UserIdWrapper(new UserIdBoundary(miniappEntity.getSuperApp(), miniappEntity.getEmail())));
+        result.setTargetObject(new ObjectIdWrapper(new ObjectIdBoundary(miniappEntity.getSuperApp(), miniappEntity.getInternalObjectId())));
+        result.setInvocationTimestamp(miniappEntity.getInvocationTimestamp());
+        return result;
     }
 }

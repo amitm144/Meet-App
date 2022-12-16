@@ -7,14 +7,14 @@ import superapp.logic.concreteServices.MiniAppCommandService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import superapp.logic.concreteServices.ObjectService;
 
 @RestController
 public class AdminController {
 
     private UsersService usersService;
     private MiniAppCommandService miniappService;
+    private ObjectService objectService;
 
     @Autowired
     public void setMessageService(UsersService usersService) {
@@ -26,13 +26,15 @@ public class AdminController {
         this.miniappService = MiniAppCommandService;
     }
 
+    @Autowired
+    public void setObjectService(ObjectService objectService) { this.objectService = objectService; }
+
     @RequestMapping(
             path = {"/superapp/admin/users"},
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public UserBoundary[] getAllUsers() {
-        List<UserBoundary> list = this.usersService.getAllUsers();
-        return list.toArray(new UserBoundary[list.size()]);
+        return this.usersService.getAllUsers().toArray(new UserBoundary[0]);
     }
 
     @RequestMapping(
@@ -40,8 +42,8 @@ public class AdminController {
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public MiniAppCommandBoundary[] exportMiniAppsCommands() {
-        List<MiniAppCommandBoundary> list = this.miniappService.getALlCommands();
-        return list.toArray(new MiniAppCommandBoundary[list.size()]);
+        return this.miniappService.getALlCommands()
+                .toArray(new MiniAppCommandBoundary[0]);
     }
 
     @RequestMapping(
@@ -49,22 +51,22 @@ public class AdminController {
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public MiniAppCommandBoundary[] exportSpecificMiniAppsCommands(@PathVariable("miniAppName") String miniAppName) {
-        List<MiniAppCommandBoundary> list = this.miniappService.getAllMiniAppCommands(miniAppName);
-        return list.toArray(new MiniAppCommandBoundary[list.size()]);
+        return this.miniappService.getAllMiniAppCommands(miniAppName)
+                .toArray(new MiniAppCommandBoundary[0]);
     }
 
     @RequestMapping(
                 path= {"/superapp/admin/users"},
                 method = {RequestMethod.DELETE})
-    public void deleteUsers () { this.usersService.deleteAllUsers(); }
+    public void deleteUsers() { this.usersService.deleteAllUsers(); }
 
     @RequestMapping(
             path= {"/superapp/admin/objects"},
             method = {RequestMethod.DELETE})
-    public void deleteObjects () {}
+    public void deleteObjects() { this.objectService.deleteAllObjects(); }
 
     @RequestMapping(
             path= {"/superapp/admin/miniapp"},
             method = {RequestMethod.DELETE})
-    public void deleteMiniApp () {this.miniappService.deleteALlCommands();}
+    public void deleteMiniApp() { this.miniappService.deleteALlCommands(); }
 }

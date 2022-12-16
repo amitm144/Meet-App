@@ -6,8 +6,6 @@ import superapp.boundaries.object.ObjectBoundary;
 import superapp.data.ObjectEntity;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-
 @Component
 public class ObjectConverter {
 
@@ -37,7 +35,8 @@ public class ObjectConverter {
         objBoundary.setObjectDetails(obj.getObjectDetails());
         objBoundary.setType(obj.getType());
         objBoundary.setCreatedBy(obj.getCreatedBy());
-        objBoundary.setCreationTimestamp(new Date());
+        objBoundary.setCreationTimestamp(obj.getCreationTimestamp());
+
         return objBoundary;
     }
 }

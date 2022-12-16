@@ -16,22 +16,22 @@ public class UserConverter {
     }
 
     public UserEntity toEntity(UserBoundary user) {
-        UserEntity rv = new UserEntity();
-        rv.setSuperapp(user.getUserId().getSuperapp());
-        rv.setEmail(user.getUserId().getEmail());
-        rv.setUsername(user.getUsername());
-        rv.setRole(UserRole.valueOf(user.getRole()));
-        rv.setAvatar(user.getAvatar());
-        return rv;
+        UserEntity result = new UserEntity();
+        result.setSuperapp(user.getUserId().getSuperapp());
+        result.setEmail(user.getUserId().getEmail());
+        result.setUsername(user.getUsername());
+        result.setRole(UserRole.valueOf(user.getRole()));
+        result.setAvatar(user.getAvatar());
+        return result;
     }
 
     public UserBoundary toBoundary(UserEntity user) {
-        UserBoundary rv = new UserBoundary();
-        rv.setSuperApp(user.getSuperapp());
-        rv.setEmail(user.getEmail());
-        rv.setRole(user.getRole().name());
-        rv.setUsername(user.getUsername());
-        rv.setAvatar(user.getAvatar());
-        return rv;
+        UserBoundary result = new UserBoundary();
+        result.setSuperApp(user.getSuperapp());
+        result.setEmail(user.getEmail());
+        result.setRole(user.getRole().name());
+        result.setUsername(user.getUsername());
+        result.setAvatar(user.getAvatar());
+        return result;
     }
 }
