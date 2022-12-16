@@ -32,15 +32,16 @@ public class MiniAppCommandService implements MiniAppCommandsService {
     public Object invokeCommand(MiniAppCommandBoundary command) {
         if (miniAppsCommands.get(command.getCommandId().getMiniapp()) == null) {// TODO Check if miniapp is one of the miniapps
             ArrayList<MiniAppCommandEntity> commandList = new ArrayList<MiniAppCommandEntity>();
+            invokeCommandAtMiniapp(command, command.getCommandId().getMiniapp());
             commandList.add(this.miniAppConverter.toEntity(command));
             miniAppsCommands.put(command.getCommandId().getMiniapp(),commandList);
-        } else
+        } else {
+            invokeCommandAtMiniapp(command, command.getCommandId().getMiniapp());
             miniAppsCommands.get(command.getCommandId().getMiniapp()).add(this.miniAppConverter.toEntity(command));
-        invokeMiniapp(command,command.getCommandId().getMiniapp());
-
+        }
         return command;
     }
-    private void invokeMiniapp(MiniAppCommandBoundary command,String miniapp){
+    private void invokeCommandAtMiniapp(MiniAppCommandBoundary command, String miniapp){
         if (miniapp.equals("Split"))
             splitService.invokeCommand(command);
         else
