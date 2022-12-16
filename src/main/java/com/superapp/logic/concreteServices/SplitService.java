@@ -101,12 +101,12 @@ public class SplitService implements SplitsService {
     @Override
     public double showDebt(GroupEntity group, UserEntity user) {
         SplitGroupEntity split_group = getGroupSplit(group);
+        double allDebt = 0;
         for (SplitTransaction trans:split_group.getExpenses()) {
-            HashMap<UserEntity, Double> debt = trans.getGroupDebts();
-            if(debt.get(user)!=null)
-                return debt.get(user);
+            if(trans.getGroupDebts().containsKey(user))
+                allDebt+=trans.getGroupDebts().get(user);
         }
-        throw new RuntimeException("User Not Found");
+        return allDebt;
     }
 
     private SplitGroupEntity getGroupSplit(GroupEntity group){
