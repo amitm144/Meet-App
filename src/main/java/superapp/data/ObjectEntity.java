@@ -10,15 +10,16 @@ import java.util.Map;
 @Table(name="Object")
 public class ObjectEntity {
     @Id
+//    @GeneratedValue(strategy = GenerationType.AUTO)
     private String objectId;
     private String superapp;
     private String type;
     private String alias;
     private boolean active;
     private Date creationTimestamp;
-    @Transient
+    @Transient // solution: create FK to relevant userId.
     private UserIdWrapper createdBy;
-    @Transient
+    @Transient // solution: create objectDetailsEntity fill with id, property,value, type, and FK to relevant Object.
     private Map<String, Object> objectDetails;
 
     public ObjectEntity() {}

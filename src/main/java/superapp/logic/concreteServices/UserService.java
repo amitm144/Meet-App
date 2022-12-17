@@ -2,24 +2,26 @@ package superapp.logic.concreteServices;
 
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.UserConverter;
+import superapp.dal.UserEntityRepository;
 import superapp.data.UserEntity;
 import superapp.data.UserRole;
 import superapp.util.EmailChecker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import javax.annotation.PostConstruct;
 
 import superapp.boundaries.user.UserBoundary;
 import superapp.logic.UsersService;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class UserService implements UsersService {
 
-    private Map<String, UserEntity> users; // { email: User }
+    @Autowired
+    private UserEntityRepository userEntityRepository;
     private UserConverter converter;
 
     @Autowired
@@ -27,28 +29,23 @@ public class UserService implements UsersService {
         this.converter = converter;
     }
 
-    @PostConstruct
-    public void setup() {
-        this.users = Collections.synchronizedMap(new HashMap<>());
-    }
+
 
     @Override
     public UserBoundary createUser(UserBoundary user) {
-        if (users.containsKey(user.getUserId().getEmail()))
-            throw new RuntimeException("User already exists");
-
         UserIdBoundary userId = user.getUserId();
-        if (userId == null || userId.getEmail() == null || !EmailChecker.isValidEmail(userId.getEmail()))
+        if(userId == null || userId.getEmail() == null || !EmailChecker.isValidEmail(userId.getEmail()))
             throw new RuntimeException("Invalid User details");
-
-        users.put(user.getUserId().getEmail(), this.converter.toEntity(user));
-        //TODO: add newly created user to DB
+        UserEntity userE = this.userEntityRepository.findByEmail(userId.getEmail());
+        if (userE != null)
+            throw new RuntimeException("User already exists");
+        this.userEntityRepository.save(this.converter.toEntity(user));
         return user;
     }
 
     @Override
     public UserBoundary login(@Value("${spring.application.name}") String userSuperApp, String userEmail) {
-        UserEntity user = this.users.get(userEmail);
+        UserEntity user = this.userEntityRepository.findByEmail(userEmail);
         if (user == null || !user.getSuperapp().equals(userSuperApp) || !user.getEmail().equals(userEmail))
             throw new RuntimeException("Unknown user");
 
@@ -57,7 +54,7 @@ public class UserService implements UsersService {
 
     @Override
     public UserBoundary updateUser(@Value("${spring.application.name}") String userSuperApp, String userEmail, UserBoundary update) {
-        UserEntity user = this.users.get(userEmail);
+        UserEntity user = this.userEntityRepository.findByEmail(userEmail);
         if (user == null || !user.getSuperapp().equals(userSuperApp) || !user.getEmail().equals(userEmail)) {
             throw new RuntimeException("Unknown user");
         }
@@ -77,28 +74,19 @@ public class UserService implements UsersService {
                 user.setRole(UserRole.valueOf(newRole));
             } catch (Exception ignored) { /* for now - ignore role mismatch */ }
         }
-
-        if (update.getUserId() != null) {
-            String newEmail = update.getUserId().getEmail();
-            if (newEmail != null) {
-                user.setEmail(newEmail);
-                this.users.remove(userEmail);
-                this.users.put(newEmail, user);
-            }
-        }
-
-        return this.converter.toBoundary(user); // TODO: update user in DB
+        userEntityRepository.save(user);
+        return this.converter.toBoundary(user);
     }
 
     @Override
     public List<UserBoundary> getAllUsers() {
-       return this.users
-               .values()
-               .stream()
-               .map(this.converter::toBoundary)
-               .collect(Collectors.toList());
+        Iterable<UserEntity> users = this.userEntityRepository.findAll();
+        return StreamSupport
+                .stream(users.spliterator() , false)
+                .map(this.converter::toBoundary)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public void deleteAllUsers() { this.users.clear(); } // TODO: clear all users from DB
+    public void deleteAllUsers() { this.userEntityRepository.deleteAll(); }
 }

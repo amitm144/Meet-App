@@ -3,6 +3,9 @@ package superapp.logic.concreteServices;
 import superapp.boundaries.object.ObjectBoundary;
 import superapp.boundaries.object.ObjectIdBoundary;
 import superapp.converters.ObjectConverter;
+import superapp.dal.ObjectDetailsEntityRepository;
+import superapp.dal.ObjectEntityRepository;
+import superapp.data.ObjectDetailsEntity;
 import superapp.data.ObjectEntity;
 import superapp.logic.ObjectsService;
 import superapp.util.wrappers.UserIdWrapper;
@@ -10,13 +13,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import static java.lang.Integer.parseInt;
 
 @Service
 public class ObjectService implements ObjectsService {
-    private Map<String, ObjectEntity> objects; // { object id : object }
+
+    @Autowired
+    private ObjectEntityRepository objectRepository;
+    @Autowired
+    private ObjectDetailsEntityRepository objectDetailsRepository;
     private ObjectConverter converter;
 
     @Autowired
@@ -24,39 +34,52 @@ public class ObjectService implements ObjectsService {
         this.converter = converter;
     }
 
-    @PostConstruct
-    public void setup() {this.objects = Collections.synchronizedMap(new HashMap<>()); }
-
     @Override
+//    @Transactional(readOnly = false)
     public ObjectBoundary createObject(ObjectBoundary object) {
-        if (objects.containsKey(object.getObjectId().getInternalObjectId()))
+        String objectId = object.getObjectId().getInternalObjectId();
+        Optional<ObjectEntity> objectE = this.objectRepository.findById(objectId);
+        if (objectE.isPresent())
             throw new RuntimeException("Object already exists");
 
-        String ObjectId = object.getObjectId().getInternalObjectId();
-        if (ObjectId == null || ObjectId.equals("null"))
-            object.getObjectId().setInternalObjectId(String.valueOf(this.objects.size() + 1));
-
+        if (objectId.equals("") || objectId.equals("null")) {
+            object.getObjectId().setInternalObjectId(String.valueOf(
+                    parseInt(this.objectRepository.findLastId()) + 1));
+        }
         String superapp = object.getObjectId().getSuperapp();
         if (superapp == null || superapp.equals("null"))
             throw new RuntimeException("Superapp name cannot be empty");
 
+        AtomicInteger number = new AtomicInteger();
+        object.getObjectDetails().forEach((key, value) -> {
+            String objDetailsId = this.objectDetailsRepository.findLastId();
+            if(objDetailsId != null) {
+                number.set(parseInt(objDetailsId) + 1);
+            }
+            ObjectDetailsEntity objDetails = new ObjectDetailsEntity(
+                    Integer.toString(number.get()),
+                    key,
+                    value.toString(),
+                    value.toString());
+            this.objectDetailsRepository.save(objDetails);
+        });
         object.setCreationTimestamp(new Date());
-        objects.put(object.getObjectId().getInternalObjectId(), converter.toEntity(object));
+        this.objectRepository.save(converter.toEntity(object));
+
+
         return object;
     }
 
     @Override
+//    @Transactional(readOnly = false)
     public ObjectBoundary updateObject(String objectSuperapp,
                                        String internalObjectId,
                                        ObjectBoundary update) {
-        ObjectEntity object = this.objects.get(internalObjectId);
-        if (object == null || !object.getSuperapp().equals(objectSuperapp))
+        Optional<ObjectEntity> objectE = this.objectRepository.findById(internalObjectId);
+        if (objectE.isEmpty() || !objectE.get().getSuperapp().equals(objectSuperapp))
             throw new RuntimeException("Unknown object");
-        ObjectIdBoundary objectId = update.getObjectId();
-        if (objectId != null && !objectId.getInternalObjectId().equals(internalObjectId))
-            throw new RuntimeException("Cannot change object's id");
         UserIdWrapper newCreatedBy = update.getCreatedBy();
-        if(newCreatedBy != null && !object.getCreatedBy().getUserId().equals(newCreatedBy.getUserId()))
+        if(newCreatedBy != null && !objectE.get().getCreatedBy().getUserId().equals(newCreatedBy.getUserId()))
             throw new RuntimeException("Cannot change object's creator");
 
         Map<String, Object> newDetails = update.getObjectDetails();
@@ -65,36 +88,41 @@ public class ObjectService implements ObjectsService {
         String newAlias = update.getAlias();
 
         if (newDetails != null)
-            object.setObjectDetails(newDetails);
+            objectE.get().setObjectDetails(newDetails);
         if (newActive != null)
-            object.setActive(newActive);
+            objectE.get().setActive(newActive);
         if (newType != null)
-            object.setType(newType);
+            objectE.get().setType(newType);
         if (newAlias != null)
-            object.setAlias(newAlias);
-
+            objectE.get().setAlias(newAlias);
+        ObjectEntity newObj = objectE.get();
+        this.objectRepository.save(newObj);
         return update;
     }
 
     @Override
+//    @Transactional(readOnly = true)
     public ObjectBoundary getSpecificObject(@Value("${spring.application.name}") String objectSuperapp,
                                             String internalObjectId) {
-        if (!objects.containsKey(internalObjectId))
+        Optional<ObjectEntity> objectE = this.objectRepository.findById(internalObjectId);
+        if (objectE.isEmpty())
             throw new RuntimeException("Object does not exist");
 
-        return this.converter.toBoundary(objects.get(internalObjectId));
+        return this.converter.toBoundary(objectE.get());
     }
 
     @Override
+//    @Transactional(readOnly = true)
     public List<ObjectBoundary> getAllObjects() {
-        return this.objects.values()
-                .stream()
+        Iterable<ObjectEntity> objects = this.objectRepository.findAll();
+        return StreamSupport
+                .stream(objects.spliterator() , false)
                 .map(this.converter::toBoundary)
                 .collect(Collectors.toList());
     }
 
     @Override
     public void deleteAllObjects() {
-        objects.clear();
+        this.objectRepository.deleteAll();
     }
 }
