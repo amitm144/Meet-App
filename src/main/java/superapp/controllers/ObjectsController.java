@@ -1,6 +1,7 @@
 package superapp.controllers;
 
 import superapp.boundaries.object.ObjectBoundary;
+import superapp.boundaries.object.ObjectIdBoundary;
 import superapp.logic.ObjectsService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,4 +55,24 @@ public class ObjectsController {
     public ObjectBoundary[] getAllObjects() {
         return this.objService.getAllObjects().toArray(new ObjectBoundary[0]);
     }
+
+    @RequestMapping(
+            path="/superapp/objects/{superapp}/{internalObjectId}/children",
+            method = {RequestMethod.PUT},
+            consumes = {MediaType.APPLICATION_JSON_VALUE})
+    public void bindExistingObjects(@RequestBody ObjectIdBoundary toBind,
+                                    @PathVariable String superapp,
+                                    @PathVariable String internalObjectId) {}
+
+    @RequestMapping(
+            path="/superapp/objects/{superapp}/{internalObjectId}/children",
+            method = {RequestMethod.GET},
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public void getAllChildren(@PathVariable String superapp, @PathVariable String internalObjectId) {}
+
+    @RequestMapping(
+            path="/superapp/objects/{superapp}/{internalObjectId}/parents",
+            method = {RequestMethod.GET},
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public void getAllParents(@PathVariable String superapp, @PathVariable String internalObjectId) {}
 }
