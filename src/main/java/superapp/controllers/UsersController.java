@@ -1,5 +1,6 @@
 package superapp.controllers;
 
+import superapp.boundaries.user.NewUserBoundary;
 import superapp.boundaries.user.UserBoundary;
 import superapp.logic.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,14 +31,15 @@ public class UsersController {
             method = {RequestMethod.POST},
             produces = {MediaType.APPLICATION_JSON_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE})
-    public UserBoundary createUser (@RequestBody UserBoundary user, @Value("${spring.application.name}") String superApp) {
-        user.setSuperApp(superApp);
-        return this.usersService.createUser(user);
+    public UserBoundary createUser (@RequestBody NewUserBoundary newUser, @Value("${spring.application.name}") String superapp) {
+        return this.usersService.createNewUser(superapp ,newUser);
     }
 
     @RequestMapping(
             path= {"/superapp/users/{superapp}/{userEmail}"},
-            method = {RequestMethod.PUT})
+            method = {RequestMethod.PUT},
+            consumes = {MediaType.APPLICATION_JSON_VALUE})
+
     public void update (
             @PathVariable("superapp") String superapp,
             @PathVariable("userEmail") String email,
