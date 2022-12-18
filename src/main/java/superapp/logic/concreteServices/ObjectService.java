@@ -1,16 +1,15 @@
 package superapp.logic.concreteServices;
 
 import superapp.boundaries.object.ObjectBoundary;
-import superapp.boundaries.object.ObjectIdBoundary;
 import superapp.converters.ObjectConverter;
 import superapp.dal.ObjectDetailsEntityRepository;
 import superapp.dal.ObjectEntityRepository;
 import superapp.data.ObjectDetailsEntity;
 import superapp.data.ObjectEntity;
+import superapp.logic.AbstractService;
 import superapp.logic.ObjectsService;
 import superapp.util.wrappers.UserIdWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -21,22 +20,31 @@ import java.util.stream.StreamSupport;
 import static java.lang.Integer.parseInt;
 
 @Service
-public class ObjectService implements ObjectsService {
+public class ObjectService extends AbstractService implements ObjectsService {
 
-    @Autowired
     private ObjectEntityRepository objectRepository;
-    @Autowired
     private ObjectDetailsEntityRepository objectDetailsRepository;
     private ObjectConverter converter;
 
     @Autowired
-    public ObjectService(ObjectConverter converter) {
+    public ObjectService(ObjectConverter converter,
+                         ObjectEntityRepository objectRepository,
+                         ObjectDetailsEntityRepository objectDetailsRepository) {
         this.converter = converter;
+        this.objectRepository = objectRepository;
+        this.objectDetailsRepository = objectDetailsRepository;
     }
 
     @Override
 //    @Transactional(readOnly = false)
     public ObjectBoundary createObject(ObjectBoundary object) {
+        /*
+         TODO:
+          check for valid active, type and alias
+          TBD - set default values or throw runtime exception
+          if empty objectDetails, set to be empty map
+          IMO, value setting should be in the entity it self.
+         */
         String objectId = object.getObjectId().getInternalObjectId();
         Optional<ObjectEntity> objectE = this.objectRepository.findById(objectId);
         if (objectE.isPresent())
@@ -66,7 +74,6 @@ public class ObjectService implements ObjectsService {
         object.setCreationTimestamp(new Date());
         this.objectRepository.save(converter.toEntity(object));
 
-
         return object;
     }
 
@@ -78,6 +85,7 @@ public class ObjectService implements ObjectsService {
         Optional<ObjectEntity> objectE = this.objectRepository.findById(internalObjectId);
         if (objectE.isEmpty() || !objectE.get().getSuperapp().equals(objectSuperapp))
             throw new RuntimeException("Unknown object");
+
         UserIdWrapper newCreatedBy = update.getCreatedBy();
         if(newCreatedBy != null && !objectE.get().getCreatedBy().getUserId().equals(newCreatedBy.getUserId()))
             throw new RuntimeException("Cannot change object's creator");
@@ -101,9 +109,8 @@ public class ObjectService implements ObjectsService {
     }
 
     @Override
-//    @Transactional(readOnly = true)
-    public ObjectBoundary getSpecificObject(@Value("${spring.application.name}") String objectSuperapp,
-                                            String internalObjectId) {
+    //    @Transactional(readOnly = true)
+    public ObjectBoundary getSpecificObject(String objectSuperapp, String internalObjectId) {
         Optional<ObjectEntity> objectE = this.objectRepository.findById(internalObjectId);
         if (objectE.isEmpty())
             throw new RuntimeException("Object does not exist");
@@ -122,7 +129,5 @@ public class ObjectService implements ObjectsService {
     }
 
     @Override
-    public void deleteAllObjects() {
-        this.objectRepository.deleteAll();
-    }
+    public void deleteAllObjects() {  this.objectRepository.deleteAll(); }
 }
