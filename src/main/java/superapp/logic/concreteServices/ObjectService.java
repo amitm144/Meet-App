@@ -2,12 +2,13 @@ package superapp.logic.concreteServices;
 
 import superapp.boundaries.object.ObjectBoundary;
 import superapp.boundaries.object.ObjectIdBoundary;
+import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.ObjectConverter;
 import superapp.data.ObjectEntity;
+import superapp.logic.AbstractService;
 import superapp.logic.ObjectsService;
 import superapp.util.wrappers.UserIdWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -15,7 +16,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class ObjectService implements ObjectsService {
+public class ObjectService extends AbstractService implements ObjectsService {
     private Map<String, ObjectEntity> objects; // { object id : object }
     private ObjectConverter converter;
 
@@ -29,19 +30,33 @@ public class ObjectService implements ObjectsService {
 
     @Override
     public ObjectBoundary createObject(ObjectBoundary object) {
-        if (objects.containsKey(object.getObjectId().getInternalObjectId()))
+        ObjectIdBoundary id = object.getObjectId();
+        if (id != null &&
+                id.getSuperapp() != null &&
+                !isValidSuperapp(id.getSuperapp())) {
+            throw new RuntimeException("Unknown superapp or superapp name is empty");
+        }
+        if (id != null && objects.containsKey(id.getInternalObjectId()))
             throw new RuntimeException("Object already exists");
 
-        String ObjectId = object.getObjectId().getInternalObjectId();
-        if (ObjectId == null || ObjectId.equals("null"))
-            object.getObjectId().setInternalObjectId(String.valueOf(this.objects.size() + 1));
+        UserIdBoundary createdBy = object.getCreatedBy() != null ? object.getCreatedBy().getUserId() : null;
+        if (createdBy == null || !isValidSuperapp(createdBy.getSuperapp()))
+            throw new RuntimeException("Unknown user");
 
-        String superapp = object.getObjectId().getSuperapp();
-        if (superapp == null || superapp.equals("null"))
-            throw new RuntimeException("Superapp name cannot be empty");
-
+        String internalId = String.valueOf(this.objects.size() + 1);
+        object.setObjectId(new ObjectIdBoundary(
+                this.superappName,
+                internalId
+        ));
         object.setCreationTimestamp(new Date());
-        objects.put(object.getObjectId().getInternalObjectId(), converter.toEntity(object));
+        /*
+         TODO:
+          check for valid active, type and alias
+          TBD - set default values or throw runtime exception
+          if empty objectDetails, set to be empty map
+          IMO, value setting should be in the entity it self.
+         */
+        objects.put(internalId, converter.toEntity(object));
         return object;
     }
 
@@ -49,12 +64,18 @@ public class ObjectService implements ObjectsService {
     public ObjectBoundary updateObject(String objectSuperapp,
                                        String internalObjectId,
                                        ObjectBoundary update) {
+        ObjectIdBoundary id = update.getObjectId();
+        if (id != null) {
+            if (!isValidSuperapp(id.getSuperapp()))
+                throw new RuntimeException("Incorrect superapp");
+            if (!id.getInternalObjectId().equals(internalObjectId))
+                throw new RuntimeException("Cannot change object's id");
+        }
+
         ObjectEntity object = this.objects.get(internalObjectId);
         if (object == null || !object.getSuperapp().equals(objectSuperapp))
             throw new RuntimeException("Unknown object");
-        ObjectIdBoundary objectId = update.getObjectId();
-        if (objectId != null && !objectId.getInternalObjectId().equals(internalObjectId))
-            throw new RuntimeException("Cannot change object's id");
+
         UserIdWrapper newCreatedBy = update.getCreatedBy();
         if(newCreatedBy != null && !object.getCreatedBy().getUserId().equals(newCreatedBy.getUserId()))
             throw new RuntimeException("Cannot change object's creator");
@@ -77,8 +98,11 @@ public class ObjectService implements ObjectsService {
     }
 
     @Override
-    public ObjectBoundary getSpecificObject(@Value("${spring.application.name}") String objectSuperapp,
+    public ObjectBoundary getSpecificObject(String objectSuperapp,
                                             String internalObjectId) {
+        if (!isValidSuperapp(objectSuperapp))
+            throw new RuntimeException("Incorrect superapp");
+
         if (!objects.containsKey(internalObjectId))
             throw new RuntimeException("Object does not exist");
 
@@ -94,7 +118,5 @@ public class ObjectService implements ObjectsService {
     }
 
     @Override
-    public void deleteAllObjects() {
-        objects.clear();
-    }
+    public void deleteAllObjects() { objects.clear(); }
 }
