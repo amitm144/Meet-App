@@ -31,8 +31,6 @@ public class UserService extends AbstractService implements UsersService {
         this.userEntityRepository = userEntityRepository;
     }
 
-
-
     @Override
     public UserBoundary createUser(UserBoundary user) {
         UserIdBoundary userId = user.getUserId();
@@ -86,7 +84,7 @@ public class UserService extends AbstractService implements UsersService {
         if (newRole != null) {
             try {
                 user.setRole(UserRole.valueOf(newRole));
-            } catch (Exception ignored) { /* for now - ignore role mismatch */ }
+            } catch (IllegalArgumentException e) { /* for now - ignore role mismatch */ }
         }
         userEntityRepository.save(user);
         return this.converter.toBoundary(user);

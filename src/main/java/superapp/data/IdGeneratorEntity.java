@@ -3,8 +3,10 @@ package superapp.data;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
+@Table(name="ID_Generator")
 public class IdGeneratorEntity {
     private Long id;
 

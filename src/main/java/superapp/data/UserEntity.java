@@ -1,9 +1,6 @@
 package superapp.data;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -106,7 +103,9 @@ public class UserEntity {
 
     public static class UserPK implements Serializable {
         /* This class creates composite primary key for User */
+        @Column(name = "superapp")
         private String superapp;
+        @Column(name = "email")
         private String email;
 
         public UserPK() {}

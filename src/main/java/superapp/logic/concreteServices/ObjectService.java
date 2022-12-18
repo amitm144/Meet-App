@@ -1,117 +1,94 @@
 package superapp.logic.concreteServices;
 
-import superapp.boundaries.object.ObjectBoundary;
-import superapp.converters.ObjectConverter;
-import superapp.dal.ObjectDetailsEntityRepository;
-import superapp.dal.ObjectEntityRepository;
-import superapp.data.ObjectDetailsEntity;
-import superapp.data.ObjectEntity;
-import superapp.logic.AbstractService;
-import superapp.logic.ObjectsService;
-import superapp.util.wrappers.UserIdWrapper;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import superapp.boundaries.object.ObjectBoundary;
+import superapp.boundaries.object.ObjectIdBoundary;
+import superapp.converters.ObjectConverter;
+import superapp.dal.IdGeneratorRepository;
+import superapp.dal.ObjectEntityRepository;
+import superapp.data.IdGeneratorEntity;
+import superapp.data.ObjectEntity;
+import superapp.logic.AbstractService;
+import superapp.logic.ObjectsService;
+
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static java.lang.Integer.parseInt;
-
 @Service
 public class ObjectService extends AbstractService implements ObjectsService {
-
     private ObjectEntityRepository objectRepository;
-    private ObjectDetailsEntityRepository objectDetailsRepository;
+    private IdGeneratorRepository idGenerator;
     private ObjectConverter converter;
 
     @Autowired
     public ObjectService(ObjectConverter converter,
                          ObjectEntityRepository objectRepository,
-                         ObjectDetailsEntityRepository objectDetailsRepository) {
+                         IdGeneratorRepository idGenerator) {
         this.converter = converter;
         this.objectRepository = objectRepository;
-        this.objectDetailsRepository = objectDetailsRepository;
+        this.idGenerator = idGenerator;
     }
 
     @Override
-//    @Transactional(readOnly = false)
+    @Transactional
     public ObjectBoundary createObject(ObjectBoundary object) {
-        /*
-         TODO:
-          check for valid active, type and alias
-          TBD - set default values or throw runtime exception
-          if empty objectDetails, set to be empty map
-          IMO, value setting should be in the entity it self.
-         */
-        String objectId = object.getObjectId().getInternalObjectId();
-        Optional<ObjectEntity> objectE = this.objectRepository.findById(objectId);
-        if (objectE.isPresent())
-            throw new RuntimeException("Object already exists");
+        String alias = object.getAlias();
+        String type = object.getType(); // TODO: check type corresponds to future object types
+        if (alias == null || type == null || alias.isBlank() || type.isBlank())
+            throw new RuntimeException("Object alias and/or type must be specified");
 
-        if (objectId.equals("") || objectId.equals("null")) {
-            object.getObjectId().setInternalObjectId(String.valueOf(
-                    parseInt(this.objectRepository.findLastId()) + 1));
-        }
-        String superapp = object.getObjectId().getSuperapp();
-        if (superapp == null || superapp.equals("null"))
-            throw new RuntimeException("Superapp name cannot be empty");
+        Boolean active = object.getActive();
+        if (active == null)
+            active = false;
 
-        AtomicInteger number = new AtomicInteger();
-        object.getObjectDetails().forEach((key, value) -> {
-            String objDetailsId = this.objectDetailsRepository.findLastId();
-            if(objDetailsId != null) {
-                number.set(parseInt(objDetailsId) + 1);
-            }
-            ObjectDetailsEntity objDetails = new ObjectDetailsEntity(
-                    Integer.toString(number.get()),
-                    key,
-                    value.toString(),
-                    value.toString());
-            this.objectDetailsRepository.save(objDetails);
-        });
+        IdGeneratorEntity helper = this.idGenerator.save(new IdGeneratorEntity());
+        String objectId = helper.getId().toString();
+        this.idGenerator.delete(helper);
+
+        object.setObjectId(new ObjectIdBoundary(this.superappName, objectId));
+        object.setActive(active);
         object.setCreationTimestamp(new Date());
-        this.objectRepository.save(converter.toEntity(object));
 
+        this.objectRepository.save(converter.toEntity(object));
         return object;
     }
 
     @Override
-//    @Transactional(readOnly = false)
+    @Transactional
     public ObjectBoundary updateObject(String objectSuperapp,
                                        String internalObjectId,
                                        ObjectBoundary update) {
-        Optional<ObjectEntity> objectE = this.objectRepository.findById(internalObjectId);
-        if (objectE.isEmpty() || !objectE.get().getSuperapp().equals(objectSuperapp))
+        Optional<ObjectEntity> objectO = this.objectRepository.findByCompositeId(objectSuperapp, internalObjectId);
+        if (objectO.isEmpty())
             throw new RuntimeException("Unknown object");
 
-        UserIdWrapper newCreatedBy = update.getCreatedBy();
-        if(newCreatedBy != null && !objectE.get().getCreatedBy().getUserId().equals(newCreatedBy.getUserId()))
-            throw new RuntimeException("Cannot change object's creator");
-
+        ObjectEntity objectE = objectO.get();
         Map<String, Object> newDetails = update.getObjectDetails();
         Boolean newActive = update.getActive();
-        String newType = update.getType();
+        String newType = update.getType(); // TODO: check type corresponds to future object types
         String newAlias = update.getAlias();
 
         if (newDetails != null)
-            objectE.get().setObjectDetails(newDetails);
+            objectE.setObjectDetails(this.converter.detailsToString(newDetails));
         if (newActive != null)
-            objectE.get().setActive(newActive);
+            objectE.setActive(newActive);
         if (newType != null)
-            objectE.get().setType(newType);
+            objectE.setType(newType);
         if (newAlias != null)
-            objectE.get().setAlias(newAlias);
-        ObjectEntity newObj = objectE.get();
-        this.objectRepository.save(newObj);
-        return update;
+            objectE.setAlias(newAlias);
+
+        objectE = this.objectRepository.save(objectE);
+        return this.converter.toBoundary(objectE);
     }
 
     @Override
-    //    @Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public ObjectBoundary getSpecificObject(String objectSuperapp, String internalObjectId) {
-        Optional<ObjectEntity> objectE = this.objectRepository.findById(internalObjectId);
+        Optional<ObjectEntity> objectE = this.objectRepository.findByCompositeId(objectSuperapp, internalObjectId);
         if (objectE.isEmpty())
             throw new RuntimeException("Object does not exist");
 
@@ -119,7 +96,7 @@ public class ObjectService extends AbstractService implements ObjectsService {
     }
 
     @Override
-//    @Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public List<ObjectBoundary> getAllObjects() {
         Iterable<ObjectEntity> objects = this.objectRepository.findAll();
         return StreamSupport
@@ -129,5 +106,5 @@ public class ObjectService extends AbstractService implements ObjectsService {
     }
 
     @Override
-    public void deleteAllObjects() {  this.objectRepository.deleteAll(); }
+    public void deleteAllObjects() { this.objectRepository.deleteAll(); }
 }
