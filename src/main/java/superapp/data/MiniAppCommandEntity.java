@@ -1,8 +1,6 @@
 package superapp.data;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Date;
 
 @Entity
@@ -11,6 +9,7 @@ public class MiniAppCommandEntity {
     private String superapp ;
     private String miniapp ;
     @Id
+//    @GeneratedValue(strategy = GenerationType.AUTO)
     private String internalCommandId;
     private String command;
     private String internalObjectId; // ObjectID
