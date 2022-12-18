@@ -2,11 +2,16 @@ package superapp.data;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.Table;
+import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Table(name="Users")
+@IdClass(UserEntity.UserPK.class)
 public class UserEntity {
+    @Id
     private String superapp;
     @Id
     private String email;
@@ -97,5 +102,31 @@ public class UserEntity {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 '}';
+    }
+
+    public class UserPK implements Serializable {
+        /* This class creates composite primary key for User */
+        private String superapp;
+        private String email;
+
+        public UserPK(){}
+
+        public UserPK(String superapp, String email) {
+            this.superapp = superapp;
+            this.email = email;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            UserPK userPK = (UserPK) o;
+            return superapp.equals(userPK.superapp) && email.equals(userPK.email);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(superapp, email);
+        }
     }
 }
