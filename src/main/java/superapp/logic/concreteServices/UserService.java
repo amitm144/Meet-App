@@ -4,6 +4,7 @@ import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.UserConverter;
 import superapp.dal.UserEntityRepository;
 import superapp.data.UserEntity;
+import superapp.data.UserEntity.UserPK;
 import superapp.data.UserRole;
 import superapp.logic.AbstractService;
 import superapp.util.EmailChecker;
@@ -37,9 +38,12 @@ public class UserService extends AbstractService implements UsersService {
         UserIdBoundary userId = user.getUserId();
         if (userId == null || userId.getEmail() == null || !EmailChecker.isValidEmail(userId.getEmail()))
             throw new RuntimeException("Invalid User details");
-        UserEntity userE = this.userEntityRepository.findByEmail(userId.getEmail());
-        if (userE != null)
+
+        user.setSuperApp(this.superappName);
+        Optional<UserEntity> userE = this.userEntityRepository.findById(new UserPK(userId.getSuperapp(), userId.getEmail()));
+        if (userE.isPresent())
             throw new RuntimeException("User already exists");
+
         this.userEntityRepository.save(this.converter.toEntity(user));
         return user;
     }
@@ -49,11 +53,11 @@ public class UserService extends AbstractService implements UsersService {
         if (!isValidSuperapp(superapp))
             throw new RuntimeException("Invalid superapp");
 
-        UserEntity user = this.userEntityRepository.findByEmail(superapp);
-        if (user == null || !user.getSuperapp().equals(superapp) || !user.getEmail().equals(userEmail))
+        Optional<UserEntity> user = this.userEntityRepository.findById(new UserPK(superapp, userEmail));
+        if (user.isEmpty())
             throw new RuntimeException("Unknown user");
 
-        return this.converter.toBoundary(user);
+        return this.converter.toBoundary(user.get());
     }
 
     @Override
@@ -61,9 +65,13 @@ public class UserService extends AbstractService implements UsersService {
         if (!isValidSuperapp(superapp))
             throw new RuntimeException("Invalid superapp");
 
-        UserEntity user = this.userEntityRepository.findByEmail(userEmail);
-        if (user == null || !user.getSuperapp().equals(superapp) || !user.getEmail().equals(userEmail))
+        Optional<UserEntity> userOpt = this.userEntityRepository.findById(new UserPK(superapp, userEmail));
+        if (userOpt.isEmpty())
             throw new RuntimeException("Unknown user");
+
+        UserEntity user = userOpt.get();
+        if (!user.getSuperapp().equals(this.superappName))
+            throw new RuntimeException("Cannot update this user - Wrong superapp");
 
         String newUserName = update.getUsername();
         String newAvatar = update.getAvatar();

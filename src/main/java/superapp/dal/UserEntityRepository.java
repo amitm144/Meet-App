@@ -5,8 +5,10 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 import superapp.data.UserEntity;
 
+import java.util.List;
+
 @Repository
-public interface UserEntityRepository extends CrudRepository<UserEntity, String> {
+public interface UserEntityRepository extends CrudRepository<UserEntity, UserEntity.UserPK> {
     @Query(value = "SELECT * FROM USERS WHERE EMAIL=email;", nativeQuery = true)
-    UserEntity findByEmail(String email);
+    List<UserEntity> findByEmail(String email);
 }

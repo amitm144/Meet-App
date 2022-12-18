@@ -104,12 +104,12 @@ public class UserEntity {
                 '}';
     }
 
-    public class UserPK implements Serializable {
+    public static class UserPK implements Serializable {
         /* This class creates composite primary key for User */
         private String superapp;
         private String email;
 
-        public UserPK(){}
+        public UserPK() {}
 
         public UserPK(String superapp, String email) {
             this.superapp = superapp;
