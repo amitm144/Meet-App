@@ -1,83 +1,99 @@
 package superapp.logic.concreteServices;
 
 import superapp.boundaries.command.MiniAppCommandBoundary;
-import superapp.boundaries.object.ObjectIdBoundary;
-import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.MiniappCommandConverter;
+import superapp.dal.IdGeneratorRepository;
+import superapp.dal.MiniAppCommandRepository;
+import superapp.data.IdGeneratorEntity;
 import superapp.data.MiniAppCommandEntity;
 import superapp.logic.AbstractService;
 import superapp.logic.MiniAppCommandsService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import superapp.util.wrappers.ObjectIdWrapper;
+import superapp.util.wrappers.UserIdWrapper;
 
-import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class MiniAppCommandService extends AbstractService implements MiniAppCommandsService {
-
     private MiniappCommandConverter miniAppConverter;
-    private Map<String, ArrayList<MiniAppCommandEntity>> miniAppsCommands; // { miniapp: List of miniAppCommands }
+    private MiniAppCommandRepository miniappRepository;
+    private IdGeneratorRepository idGenerator;
 
     @Autowired
-    public MiniAppCommandService(MiniappCommandConverter miniAppConverter) {
+    public MiniAppCommandService(MiniappCommandConverter miniAppConverter,
+                                 MiniAppCommandRepository miniappRepository,
+                                 IdGeneratorRepository idGenerator) {
         this.miniAppConverter = miniAppConverter;
-    }
-
-    @PostConstruct
-    public void setup() {
-        this.miniAppsCommands = Collections.synchronizedMap(new HashMap<>());
+        this.miniappRepository = miniappRepository;
+        this.idGenerator = idGenerator;
     }
 
     @Override
+    @Transactional
     public Object invokeCommand(MiniAppCommandBoundary command) {
-        // TODO: add check for known miniapp
+        UserIdWrapper invokedBy = command.getInvokedBy();
+        if (invokedBy == null ||
+                invokedBy.getUserId() == null ||
+                invokedBy.getUserId().getSuperapp() == null ||
+                invokedBy.getUserId().getEmail() == null ||
+                invokedBy.getUserId().getSuperapp().isBlank() ||
+                invokedBy.getUserId().getEmail().isBlank())
+            throw new RuntimeException("Invoked by fields cannot be missing or empty");
+
+        ObjectIdWrapper targetObject = command.getTargetObject();
+        if (targetObject == null ||
+                targetObject.getObjectId() == null ||
+                targetObject.getObjectId().getSuperapp() == null ||
+                targetObject.getObjectId().getInternalObjectId() == null ||
+                targetObject.getObjectId().getSuperapp().isBlank() ||
+                targetObject.getObjectId().getInternalObjectId().isBlank())
+            throw new RuntimeException("Target object fields cannot be missing or empty");
+
+        if (command.getCommand() == null || command.getCommand().isEmpty())
+            throw new RuntimeException("Command attribute cannot be missing or empty");
+
+        /*
+            TODO:
+             add check for known miniapp
+             if known - point to miniapp service
+             otherwise save command and throw error
+        */
+
         // issue internalCommandId, tie with superapp and set invocation timestamp
+        IdGeneratorEntity helper = this.idGenerator.save(new IdGeneratorEntity());
+        String commandId = helper.getId().toString();
+        this.idGenerator.delete(helper);
+        command.getCommandId().setInternalCommandId(commandId);
         command.setInvocationTimestamp(new Date());
-        command.getCommandId().setInternalCommandId(Integer.toString(this.miniAppsCommands.size() + 1));
-        command.getCommandId().setSuperapp(getSuperappName());
+        command.getCommandId().setSuperapp(this.superappName);
 
-        UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
-        ObjectIdBoundary targetObject = command.getTargetObject().getObjectId();
-        String miniapp = command.getCommandId().getMiniapp();
-        if (invokedBy != null && !isValidSuperapp(invokedBy.getSuperapp()) ||
-                targetObject != null && !isValidSuperapp(targetObject.getSuperapp())) {
-            throw new RuntimeException("Incorrect superapp");
-        }
-
-        if (miniAppsCommands.get(miniapp) == null) { // create new entry if there is no log for relevant miniapp
-            ArrayList<MiniAppCommandEntity> commandList = new ArrayList<>();
-            miniAppsCommands.put(miniapp,commandList);
-        }
-        miniAppsCommands.get(miniapp).add(this.miniAppConverter.toEntity(command));
+        this.miniappRepository.save(this.miniAppConverter.toEntity(command));
         return command;
     }
 
     @Override
     public List<MiniAppCommandBoundary> getALlCommands() {
-        return this.miniAppsCommands
-                .values()
-                .stream()
-                .flatMap(Collection::stream) // breaks every ArrayList to its individual values and returns all of them as stream
+        return StreamSupport
+                .stream(this.miniappRepository.findAll().spliterator(), false)
                 .map(this.miniAppConverter::toBoundary)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniAppName) {
-        ArrayList<MiniAppCommandEntity> commands = this.miniAppsCommands.get(miniAppName);
-        if (commands == null)
-            return Collections.synchronizedList(new ArrayList<>());
-
-        return commands
-                .stream()
+    public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniappName) {
+        Iterable<MiniAppCommandEntity> miniappCommands = this.miniappRepository.findAllByMiniapp(miniappName);
+        return StreamSupport
+                .stream(miniappCommands.spliterator(), false)
                 .map(this.miniAppConverter::toBoundary)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public void deleteALlCommands() {
-        this.miniAppsCommands.clear();
-    }
+    public void deleteALlCommands() { this.miniappRepository.deleteAll(); }
 }

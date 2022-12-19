@@ -11,6 +11,7 @@ import superapp.util.wrappers.UserIdWrapper;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+
 @Component
 public class MiniappCommandConverter {
 
@@ -35,7 +36,7 @@ public class MiniappCommandConverter {
     public String toEntityAsString(Map<String, Object> attributes) {
         try {
             return this.jackson.writeValueAsString(attributes);
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

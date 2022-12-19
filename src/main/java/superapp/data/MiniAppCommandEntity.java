@@ -9,7 +9,6 @@ public class MiniAppCommandEntity {
     private String superapp ;
     private String miniapp ;
     @Id
-//    @GeneratedValue(strategy = GenerationType.AUTO)
     private String internalCommandId;
     private String command;
     private String internalObjectId; // ObjectID
@@ -83,6 +82,7 @@ public class MiniAppCommandEntity {
         return internalObjectId;
     }
 
+    @Temporal(TemporalType.TIMESTAMP)
     public Date getInvocationTimestamp() {
         return invocationTimestamp;
     }
@@ -91,6 +91,7 @@ public class MiniAppCommandEntity {
         return email;
     }
 
+    @Lob
     public String getCommandAttributes() {
         return commandAttributes;
     }
