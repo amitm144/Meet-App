@@ -2,6 +2,7 @@ package superapp.data;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.Objects;
 
 @Entity
 @Table(name="MiniAppCommand")
@@ -94,6 +95,19 @@ public class MiniAppCommandEntity {
     @Lob
     public String getCommandAttributes() {
         return commandAttributes;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MiniAppCommandEntity that = (MiniAppCommandEntity) o;
+        return superapp.equals(that.superapp) && miniapp.equals(that.miniapp) && internalCommandId.equals(that.internalCommandId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(superapp, miniapp, internalCommandId);
     }
 
     @Override

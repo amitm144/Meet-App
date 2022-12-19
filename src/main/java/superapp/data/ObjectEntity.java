@@ -5,6 +5,7 @@ import superapp.util.wrappers.UserIdWrapper;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.Objects;
 
 @Entity
 @Table(name="Objects")
@@ -104,6 +105,19 @@ public class ObjectEntity {
 
     public void setObjectDetails(String objectDetails) {
         this.objectDetails = objectDetails;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ObjectEntity object = (ObjectEntity) o;
+        return objectId.equals(object.objectId) && superapp.equals(object.superapp);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(objectId, superapp);
     }
 
     @Override
