@@ -3,11 +3,7 @@ package superapp.dal;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-import superapp.boundaries.command.MiniAppCommandBoundary;
 import superapp.data.MiniAppCommandEntity;
-import superapp.data.ObjectEntity;
-
-import java.util.Optional;
 
 @Repository
 public interface MiniAppCommandRepository extends CrudRepository<MiniAppCommandEntity, String> {
