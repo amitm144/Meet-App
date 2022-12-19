@@ -31,8 +31,8 @@ public class UsersController {
             method = {RequestMethod.POST},
             produces = {MediaType.APPLICATION_JSON_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE})
-    public UserBoundary createUser (@RequestBody NewUserBoundary newUser, @Value("${spring.application.name}") String superapp) {
-        return this.usersService.createNewUser(superapp ,newUser);
+    public UserBoundary createUser (@RequestBody NewUserBoundary newUser) {
+        return this.usersService.createUser(newUser);
     }
 
     @RequestMapping(
