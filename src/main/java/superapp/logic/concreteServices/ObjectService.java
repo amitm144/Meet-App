@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import superapp.boundaries.object.ObjectBoundary;
 import superapp.boundaries.object.ObjectIdBoundary;
+import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.ObjectConverter;
 import superapp.dal.IdGeneratorRepository;
 import superapp.dal.ObjectEntityRepository;
@@ -13,6 +14,7 @@ import superapp.data.IdGeneratorEntity;
 import superapp.data.ObjectEntity;
 import superapp.logic.AbstractService;
 import superapp.logic.ObjectsService;
+import superapp.util.EmailChecker;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -40,6 +42,14 @@ public class ObjectService extends AbstractService implements ObjectsService {
         String type = object.getType(); // TODO: check type corresponds to future object types
         if (alias == null || type == null || alias.isBlank() || type.isBlank())
             throw new RuntimeException("Object alias and/or type must be specified");
+
+        UserIdBoundary createdBy = object.getCreatedBy().getUserId();
+        if (createdBy == null ||
+                createdBy.getEmail() == null ||
+                createdBy.getSuperapp() == null ||
+                createdBy.getSuperapp().isEmpty() ||
+                !EmailChecker.isValidEmail(createdBy.getEmail()))
+            throw new RuntimeException("Invalid creating user details");
 
         Boolean active = object.getActive();
         if (active == null)
@@ -106,5 +116,6 @@ public class ObjectService extends AbstractService implements ObjectsService {
     }
 
     @Override
+    @Transactional
     public void deleteAllObjects() { this.objectRepository.deleteAll(); }
 }
