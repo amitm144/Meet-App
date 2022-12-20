@@ -1,5 +1,6 @@
 package superapp.logic.concreteServices;
 
+import superapp.boundaries.user.NewUserBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.UserConverter;
 import superapp.data.UserEntity;
@@ -33,15 +34,13 @@ public class UserService extends AbstractService implements UsersService {
     }
 
     @Override
-    public UserBoundary createUser(UserBoundary user) {
+    public UserBoundary createUser( UserBoundary user) {
         if (users.containsKey(user.getUserId().getEmail()))
             throw new RuntimeException("User already exists");
-
         UserIdBoundary userId = user.getUserId();
         if (userId == null || userId.getEmail() == null || !EmailChecker.isValidEmail(userId.getEmail()))
             throw new RuntimeException("Invalid User details");
-
-        userId.setSuperapp(this.superappName);
+        user.getUserId().setSuperapp(this.superappName);
         users.put(user.getUserId().getEmail(), this.converter.toEntity(user));
         //TODO: add newly created user to DB
         return user;

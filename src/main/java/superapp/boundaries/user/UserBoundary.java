@@ -18,6 +18,15 @@ public class UserBoundary {
         this.avatar = avatar;
     }
 
+    public UserBoundary(UserIdBoundary userId, String role, String username, String avatar) {
+        if (username.isBlank() || role.isBlank())
+            throw new RuntimeException("Username or role cannot be blank");
+        this.userId = userId;
+        this.role = role;
+        this.username = username;
+        this.avatar = avatar;
+    }
+
     public UserBoundary(String superapp , String email, String role, String username, String avatar) {
         this(email, role, username, avatar);
         this.userId = new UserIdBoundary(superapp ,email);

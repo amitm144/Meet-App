@@ -1,5 +1,6 @@
 package superapp.logic;
 
+import superapp.boundaries.user.NewUserBoundary;
 import superapp.boundaries.user.UserBoundary;
 
 import java.util.List;
