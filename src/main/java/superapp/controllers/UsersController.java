@@ -32,7 +32,10 @@ public class UsersController {
             produces = {MediaType.APPLICATION_JSON_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE})
     public UserBoundary createUser (@RequestBody NewUserBoundary newUser) {
-        return this.usersService.createUser(newUser);
+
+        UserBoundary user = new UserBoundary(newUser.getEmail(),newUser.getRole(),newUser.getUsername(),newUser.getAvatar());
+
+        return this.usersService.createUser(user);
     }
 
     @RequestMapping(
