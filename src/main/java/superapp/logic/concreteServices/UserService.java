@@ -34,20 +34,16 @@ public class UserService extends AbstractService implements UsersService {
     }
 
     @Override
-    public UserBoundary createUser( UserBoundary newUser) {
-
-        if (users.containsKey(newUser.getUserId().getEmail()))
+    public UserBoundary createUser( UserBoundary user) {
+        if (users.containsKey(user.getUserId().getEmail()))
             throw new RuntimeException("User already exists");
-
-        UserIdBoundary userId = newUser.getUserId();
+        UserIdBoundary userId = user.getUserId();
         if (userId == null || userId.getEmail() == null || !EmailChecker.isValidEmail(userId.getEmail()))
             throw new RuntimeException("Invalid User details");
-
-        newUser.getUserId().setSuperapp(this.superappName);
-
-        users.put(newUser.getUserId().getEmail(), this.converter.toEntity(newUser));
+        user.getUserId().setSuperapp(this.superappName);
+        users.put(user.getUserId().getEmail(), this.converter.toEntity(user));
         //TODO: add newly created user to DB
-        return newUser;
+        return user;
     }
 
     @Override
