@@ -8,6 +8,7 @@ import superapp.data.IdGeneratorEntity;
 import superapp.data.MiniAppCommandEntity;
 import superapp.logic.AbstractService;
 import superapp.logic.MiniAppCommandsService;
+import superapp.util.EmailChecker;
 import superapp.util.wrappers.ObjectIdWrapper;
 import superapp.util.wrappers.UserIdWrapper;
 
@@ -46,6 +47,9 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
                 invokedBy.getUserId().getEmail().isBlank())
             throw new RuntimeException("Invoked by fields cannot be missing or empty");
 
+        if (!EmailChecker.isValidEmail(invokedBy.getUserId().getEmail()))
+            throw new RuntimeException("Invalid invoking user email");
+
         ObjectIdWrapper targetObject = command.getTargetObject();
         if (targetObject == null ||
                 targetObject.getObjectId() == null ||
@@ -58,13 +62,6 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
         if (command.getCommand() == null || command.getCommand().isEmpty())
             throw new RuntimeException("Command attribute cannot be missing or empty");
 
-        /*
-            TODO:
-             add check for known miniapp
-             if known - point to miniapp service
-             otherwise save command and throw error
-        */
-
         // issue internalCommandId, tie with superapp and set invocation timestamp
         IdGeneratorEntity helper = this.idGenerator.save(new IdGeneratorEntity());
         String commandId = helper.getId().toString();
@@ -74,6 +71,12 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
         command.getCommandId().setSuperapp(this.superappName);
 
         this.miniappRepository.save(this.miniAppConverter.toEntity(command));
+        /*
+            TODO:
+             add check for known miniapp
+             if known - point to miniapp service
+             otherwise throw error (command is already been saved)
+        */
         return command;
     }
 

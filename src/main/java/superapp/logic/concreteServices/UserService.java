@@ -37,8 +37,11 @@ public class UserService extends AbstractService implements UsersService {
     @Transactional
     public UserBoundary createUser(UserBoundary user) {
         UserIdBoundary userId = user.getUserId();
-        if (userId == null ||userId.getEmail() == null || !EmailChecker.isValidEmail(userId.getEmail()) ||
-                user.getAvatar() == null || user.getUsername() == null || !UserRole.isValidRole(user.getRole()))
+        if (userId == null || userId.getEmail() == null ||
+                !EmailChecker.isValidEmail(userId.getEmail()) ||
+                user.getAvatar() == null || user.getUsername() == null ||
+                user.getUsername().isBlank() || user.getAvatar().isBlank() ||
+                !UserRole.isValidRole(user.getRole()))
             throw new RuntimeException("Invalid User details");
 
         user.setSuperApp(this.superappName);

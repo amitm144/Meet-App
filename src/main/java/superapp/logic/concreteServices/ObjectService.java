@@ -86,10 +86,20 @@ public class ObjectService extends AbstractService implements ObjectsService {
             objectE.setObjectDetails(this.converter.detailsToString(newDetails));
         if (newActive != null)
             objectE.setActive(newActive);
-        if (newType != null)
-            objectE.setType(newType);
-        if (newAlias != null)
-            objectE.setAlias(newAlias);
+
+        if (newType != null) {
+            if (newType.isBlank())
+                throw new RuntimeException("Object alias and/or type must be specified");
+            else
+                objectE.setType(newType);
+        }
+
+        if (newAlias != null) {
+            if (newAlias.isBlank())
+                throw new RuntimeException("Object alias and/or type must be specified");
+            else
+                objectE.setAlias(newAlias);
+        }
 
         objectE = this.objectRepository.save(objectE);
         return this.converter.toBoundary(objectE);
