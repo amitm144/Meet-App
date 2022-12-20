@@ -24,13 +24,13 @@ public class SuperAppObjectEntity {
     private String userEmail;
     private String userSuperapp;
     private String objectDetails;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private SuperAppObjectEntity parent;
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "parent")
+    @ManyToMany
+    @JoinTable(name="ObjectsRelations")
+    private Set<SuperAppObjectEntity> parents;
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "parents")
     private Set<SuperAppObjectEntity> childObjects;
 
-    public SuperAppObjectEntity() {
-    }
+    public SuperAppObjectEntity() {}
 
     public String getObjectId() {
         return objectId;
@@ -116,12 +116,12 @@ public class SuperAppObjectEntity {
         this.objectDetails = objectDetails;
     }
 
-    public SuperAppObjectEntity getParent() {
-        return parent;
+    public Set<SuperAppObjectEntity> getParent() {
+        return parents;
     }
 
-    public void setParent(SuperAppObjectEntity parent) {
-        this.parent = parent;
+    public void setParent(Set<SuperAppObjectEntity> parent) {
+        this.parents = parent;
     }
 
     public Set<SuperAppObjectEntity> getChildObjects() {
