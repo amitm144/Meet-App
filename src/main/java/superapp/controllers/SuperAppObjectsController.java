@@ -1,19 +1,19 @@
 package superapp.controllers;
 
-import superapp.boundaries.object.ObjectBoundary;
-import superapp.logic.ObjectsService;
+import superapp.boundaries.object.SuperAppObjectBoundary;
+import superapp.logic.SuperAppObjectsService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-public class ObjectsController {
+public class SuperAppObjectsController {
 
-    private ObjectsService objService;
+    private SuperAppObjectsService objService;
 
     @Autowired
-    public void setObjectService(ObjectsService objService) {
+    public void setObjectService(SuperAppObjectsService objService) {
         this.objService = objService;
     }
 
@@ -23,7 +23,7 @@ public class ObjectsController {
             produces = {MediaType.APPLICATION_JSON_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
-    public ObjectBoundary createObject(@RequestBody ObjectBoundary objectBoundary) {
+    public SuperAppObjectBoundary createObject(@RequestBody SuperAppObjectBoundary objectBoundary) {
         return this.objService.createObject(objectBoundary);
     }
 
@@ -31,7 +31,7 @@ public class ObjectsController {
             path = {"/superapp/objects/{superapp}/{InternalObjectId}"},
             method = {RequestMethod.PUT},
             consumes = {MediaType.APPLICATION_JSON_VALUE})
-    public void updateObject(@RequestBody ObjectBoundary objectBoundary,
+    public void updateObject(@RequestBody SuperAppObjectBoundary objectBoundary,
                              @PathVariable String superapp,
                              @PathVariable String InternalObjectId) {
         this.objService.updateObject(superapp, InternalObjectId, objectBoundary);
@@ -41,8 +41,8 @@ public class ObjectsController {
             path = {"/superapp/objects/{superapp}/{InternalObjectId}"},
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ObjectBoundary retrieveObject(@PathVariable String superapp,
-                                         @PathVariable String InternalObjectId) {
+    public SuperAppObjectBoundary retrieveObject(@PathVariable String superapp,
+                                                 @PathVariable String InternalObjectId) {
         return this.objService.getSpecificObject(superapp,InternalObjectId);
     }
 
@@ -51,7 +51,7 @@ public class ObjectsController {
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
-    public ObjectBoundary[] getAllObjects() {
-        return this.objService.getAllObjects().toArray(new ObjectBoundary[0]);
+    public SuperAppObjectBoundary[] getAllObjects() {
+        return this.objService.getAllObjects().toArray(new SuperAppObjectBoundary[0]);
     }
 }

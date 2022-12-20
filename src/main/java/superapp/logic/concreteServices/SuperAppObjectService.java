@@ -4,30 +4,31 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import superapp.boundaries.object.ObjectBoundary;
-import superapp.boundaries.object.ObjectIdBoundary;
-import superapp.converters.ObjectConverter;
+import superapp.boundaries.object.SuperAppObjectBoundary;
+import superapp.boundaries.object.SuperAppObjectIdBoundary;
+import superapp.converters.SuperAppObjectConverter;
 import superapp.dal.IdGeneratorRepository;
-import superapp.dal.ObjectEntityRepository;
+import superapp.dal.SuperAppObjectEntityRepository;
 import superapp.data.IdGeneratorEntity;
-import superapp.data.ObjectEntity;
+import superapp.data.SuperAppObjectEntity;
+import superapp.data.SuperAppObjectEntity.SuperAppObjectId;
 import superapp.logic.AbstractService;
-import superapp.logic.ObjectsService;
+import superapp.logic.SuperAppObjectsService;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Service
-public class ObjectService extends AbstractService implements ObjectsService {
-    private ObjectEntityRepository objectRepository;
+public class SuperAppObjectService extends AbstractService implements SuperAppObjectsService {
+    private SuperAppObjectEntityRepository objectRepository;
     private IdGeneratorRepository idGenerator;
-    private ObjectConverter converter;
+    private SuperAppObjectConverter converter;
 
     @Autowired
-    public ObjectService(ObjectConverter converter,
-                         ObjectEntityRepository objectRepository,
-                         IdGeneratorRepository idGenerator) {
+    public SuperAppObjectService(SuperAppObjectConverter converter,
+                                 SuperAppObjectEntityRepository objectRepository,
+                                 IdGeneratorRepository idGenerator) {
         this.converter = converter;
         this.objectRepository = objectRepository;
         this.idGenerator = idGenerator;
@@ -35,7 +36,7 @@ public class ObjectService extends AbstractService implements ObjectsService {
 
     @Override
     @Transactional
-    public ObjectBoundary createObject(ObjectBoundary object) {
+    public SuperAppObjectBoundary createObject(SuperAppObjectBoundary object) {
         String alias = object.getAlias();
         String type = object.getType(); // TODO: check type corresponds to future object types
         if (alias == null || type == null || alias.isBlank() || type.isBlank())
@@ -49,7 +50,7 @@ public class ObjectService extends AbstractService implements ObjectsService {
         String objectId = helper.getId().toString();
         this.idGenerator.delete(helper);
 
-        object.setObjectId(new ObjectIdBoundary(this.superappName, objectId));
+        object.setObjectId(new SuperAppObjectIdBoundary(this.superappName, objectId));
         object.setActive(active);
         object.setCreationTimestamp(new Date());
 
@@ -59,14 +60,15 @@ public class ObjectService extends AbstractService implements ObjectsService {
 
     @Override
     @Transactional
-    public ObjectBoundary updateObject(String objectSuperapp,
-                                       String internalObjectId,
-                                       ObjectBoundary update) {
-        Optional<ObjectEntity> objectO = this.objectRepository.findByCompositeId(objectSuperapp, internalObjectId);
+    public SuperAppObjectBoundary updateObject(String objectSuperapp,
+                                               String internalObjectId,
+                                               SuperAppObjectBoundary update) {
+        Optional<SuperAppObjectEntity> objectO =
+                this.objectRepository.findById(new SuperAppObjectId(objectSuperapp, internalObjectId));
         if (objectO.isEmpty())
             throw new RuntimeException("Unknown object");
 
-        ObjectEntity objectE = objectO.get();
+        SuperAppObjectEntity objectE = objectO.get();
         Map<String, Object> newDetails = update.getObjectDetails();
         Boolean newActive = update.getActive();
         String newType = update.getType(); // TODO: check type corresponds to future object types
@@ -87,8 +89,9 @@ public class ObjectService extends AbstractService implements ObjectsService {
 
     @Override
     @Transactional(readOnly = true)
-    public ObjectBoundary getSpecificObject(String objectSuperapp, String internalObjectId) {
-        Optional<ObjectEntity> objectE = this.objectRepository.findByCompositeId(objectSuperapp, internalObjectId);
+    public SuperAppObjectBoundary getSpecificObject(String objectSuperapp, String internalObjectId) {
+        Optional<SuperAppObjectEntity> objectE =
+                this.objectRepository.findById(new SuperAppObjectId(objectSuperapp, internalObjectId));
         if (objectE.isEmpty())
             throw new RuntimeException("Object does not exist");
 
@@ -97,8 +100,8 @@ public class ObjectService extends AbstractService implements ObjectsService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ObjectBoundary> getAllObjects() {
-        Iterable<ObjectEntity> objects = this.objectRepository.findAll();
+    public List<SuperAppObjectBoundary> getAllObjects() {
+        Iterable<SuperAppObjectEntity> objects = this.objectRepository.findAll();
         return StreamSupport
                 .stream(objects.spliterator() , false)
                 .map(this.converter::toBoundary)

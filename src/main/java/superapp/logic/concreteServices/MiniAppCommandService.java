@@ -11,7 +11,7 @@ import superapp.logic.MiniAppCommandsService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import superapp.util.wrappers.ObjectIdWrapper;
+import superapp.util.wrappers.SuperAppObjectIdWrapper;
 import superapp.util.wrappers.UserIdWrapper;
 
 import javax.transaction.Transactional;
@@ -46,7 +46,7 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
                 invokedBy.getUserId().getEmail().isBlank())
             throw new RuntimeException("Invoked by fields cannot be missing or empty");
 
-        ObjectIdWrapper targetObject = command.getTargetObject();
+        SuperAppObjectIdWrapper targetObject = command.getTargetObject();
         if (targetObject == null ||
                 targetObject.getObjectId() == null ||
                 targetObject.getObjectId().getSuperapp() == null ||

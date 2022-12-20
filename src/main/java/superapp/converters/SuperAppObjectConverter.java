@@ -1,22 +1,22 @@
 package superapp.converters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import superapp.boundaries.object.ObjectIdBoundary;
-import superapp.boundaries.object.ObjectBoundary;
-import superapp.data.ObjectEntity;
+import superapp.boundaries.object.SuperAppObjectIdBoundary;
+import superapp.boundaries.object.SuperAppObjectBoundary;
+import superapp.data.SuperAppObjectEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
 @Component
-public class ObjectConverter {
+public class SuperAppObjectConverter {
 
     private ObjectMapper mapper;
 
-    public ObjectConverter() { this.mapper = new ObjectMapper(); }
+    public SuperAppObjectConverter() { this.mapper = new ObjectMapper(); }
 
-    public ObjectEntity toEntity(ObjectBoundary obj) {
-        ObjectEntity objEntity = new ObjectEntity();
+    public SuperAppObjectEntity toEntity(SuperAppObjectBoundary obj) {
+        SuperAppObjectEntity objEntity = new SuperAppObjectEntity();
         objEntity.setObjectId(obj.getObjectId().getInternalObjectId());
         objEntity.setSuperapp(obj.getObjectId().getSuperapp());
         objEntity.setActive(obj.getActive());
@@ -29,9 +29,9 @@ public class ObjectConverter {
         return objEntity;
     }
 
-    public ObjectBoundary toBoundary(ObjectEntity obj) {
-        ObjectBoundary objBoundary = new ObjectBoundary();
-        objBoundary.setObjectId(new ObjectIdBoundary(obj.getSuperapp(), obj.getObjectId()));
+    public SuperAppObjectBoundary toBoundary(SuperAppObjectEntity obj) {
+        SuperAppObjectBoundary objBoundary = new SuperAppObjectBoundary();
+        objBoundary.setObjectId(new SuperAppObjectIdBoundary(obj.getSuperapp(), obj.getObjectId()));
         objBoundary.setActive(obj.getActive());
         objBoundary.setAlias(obj.getAlias());
         objBoundary.setObjectDetails(this.detailsToMap(obj.getObjectDetails()));

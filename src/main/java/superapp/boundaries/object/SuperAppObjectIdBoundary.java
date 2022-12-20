@@ -1,13 +1,13 @@
 package superapp.boundaries.object;
 
-public class ObjectIdBoundary {
+public class SuperAppObjectIdBoundary {
 
     private String superapp;
     private String internalObjectId;
 
-    public ObjectIdBoundary() {}
+    public SuperAppObjectIdBoundary() {}
 
-    public ObjectIdBoundary(String superapp, String internalObjectId) {
+    public SuperAppObjectIdBoundary(String superapp, String internalObjectId) {
         this.superapp = superapp;
         this.internalObjectId = internalObjectId;
     }
@@ -40,7 +40,7 @@ public class ObjectIdBoundary {
     public boolean equals(Object obj) {
         if (obj == null || this.getClass() != obj.getClass())
             return false;
-        ObjectIdBoundary objId = (ObjectIdBoundary) obj;
+        SuperAppObjectIdBoundary objId = (SuperAppObjectIdBoundary) obj;
         return this.superapp.equals(objId.superapp) && this.internalObjectId.equals(objId.internalObjectId);
     }
 
