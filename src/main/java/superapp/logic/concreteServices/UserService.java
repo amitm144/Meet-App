@@ -1,6 +1,6 @@
 package superapp.logic.concreteServices;
 
-import org.yaml.snakeyaml.util.EnumUtils;
+import superapp.boundaries.user.NewUserBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.UserConverter;
 import superapp.dal.UserEntityRepository;
@@ -40,7 +40,7 @@ public class UserService extends AbstractService implements UsersService {
         if (userId == null || userId.getEmail() == null ||
                 !EmailChecker.isValidEmail(userId.getEmail()) ||
                 user.getAvatar() == null || user.getUsername() == null ||
-                user.getUsername().isBlank() || user.getAvatar().isBlank() ||
+                user.getAvatar().isBlank() ||  user.getUsername().isBlank() ||
                 !UserRole.isValidRole(user.getRole()))
             throw new RuntimeException("Invalid User details");
 
@@ -51,6 +51,12 @@ public class UserService extends AbstractService implements UsersService {
 
         this.userEntityRepository.save(this.converter.toEntity(user));
         return user;
+    }
+
+    @Override
+    public UserBoundary createUser(NewUserBoundary newUser) {
+        return createUser(new UserBoundary(newUser.getEmail(), newUser.getRole(),
+                newUser.getUsername(), newUser.getAvatar()));
     }
 
     @Override
