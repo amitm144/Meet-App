@@ -7,8 +7,7 @@ public class NewUserBoundary {
 	private String username;
 	private String avatar;
 
-	public NewUserBoundary() {
-	}
+	public NewUserBoundary() {}
 
 	public NewUserBoundary(String email, String role, String username, String avatar) {
 		this.email = email;

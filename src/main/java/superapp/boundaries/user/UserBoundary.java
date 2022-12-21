@@ -10,7 +10,7 @@ public class UserBoundary {
     public UserBoundary() {}
 
     public UserBoundary(String email, String role, String username, String avatar) {
-        if (username.isBlank() || role.isBlank())
+        if (username == null || role == null || username.isBlank() || role.isBlank())
             throw new RuntimeException("Username or role cannot be blank");
         this.userId = new UserIdBoundary(email);
         this.role = role;
@@ -19,7 +19,7 @@ public class UserBoundary {
     }
 
     public UserBoundary(UserIdBoundary userId, String role, String username, String avatar) {
-        if (username.isBlank() || role.isBlank())
+        if (username == null || role == null || username.isBlank() || role.isBlank())
             throw new RuntimeException("Username or role cannot be blank");
         this.userId = userId;
         this.role = role;
