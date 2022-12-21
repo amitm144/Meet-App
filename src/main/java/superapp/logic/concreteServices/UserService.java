@@ -1,110 +1,129 @@
 package superapp.logic.concreteServices;
 
+import superapp.boundaries.user.NewUserBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.UserConverter;
+import superapp.dal.UserEntityRepository;
 import superapp.data.UserEntity;
+import superapp.data.UserEntity.UserPK;
 import superapp.data.UserRole;
 import superapp.logic.AbstractService;
 import superapp.util.EmailChecker;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import javax.annotation.PostConstruct;
-
 import superapp.boundaries.user.UserBoundary;
 import superapp.logic.UsersService;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 public class UserService extends AbstractService implements UsersService {
 
-    private Map<String, UserEntity> users; // { email: User }
+    private UserEntityRepository userEntityRepository;
     private UserConverter converter;
 
     @Autowired
-    public UserService(UserConverter converter) {
+    public UserService(UserConverter converter,
+                       UserEntityRepository userEntityRepository) {
         this.converter = converter;
-    }
-
-    @PostConstruct
-    public void setup() {
-        this.users = Collections.synchronizedMap(new HashMap<>());
+        this.userEntityRepository = userEntityRepository;
     }
 
     @Override
+    @Transactional
     public UserBoundary createUser(UserBoundary user) {
-        if (users.containsKey(user.getUserId().getEmail()))
-            throw new RuntimeException("User already exists");
-
         UserIdBoundary userId = user.getUserId();
-        if (userId == null || userId.getEmail() == null || !EmailChecker.isValidEmail(userId.getEmail()))
+        if (userId == null || userId.getEmail() == null ||
+                !EmailChecker.isValidEmail(userId.getEmail()) ||
+                user.getAvatar() == null || user.getUsername() == null ||
+                user.getAvatar().isBlank() ||  user.getUsername().isBlank() ||
+                !UserRole.isValidRole(user.getRole()))
             throw new RuntimeException("Invalid User details");
 
-        userId.setSuperapp(this.superappName);
-        users.put(user.getUserId().getEmail(), this.converter.toEntity(user));
-        //TODO: add newly created user to DB
+        user.setSuperApp(this.superappName);
+        Optional<UserEntity> userE = this.userEntityRepository.findById(new UserPK(userId.getSuperapp(), userId.getEmail()));
+        if (userE.isPresent())
+            throw new RuntimeException("User already exists");
+
+        this.userEntityRepository.save(this.converter.toEntity(user));
         return user;
     }
 
     @Override
+    public UserBoundary createUser(NewUserBoundary newUser) {
+        return createUser(new UserBoundary(newUser.getEmail(), newUser.getRole(),
+                newUser.getUsername(), newUser.getAvatar()));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public UserBoundary login(String superapp, String userEmail) {
         if (!isValidSuperapp(superapp))
             throw new RuntimeException("Invalid superapp");
 
-        UserEntity user = this.users.get(userEmail);
-        if (user == null || !user.getSuperapp().equals(this.superappName) || !user.getEmail().equals(userEmail))
+        Optional<UserEntity> user = this.userEntityRepository.findById(new UserPK(superapp, userEmail));
+        if (user.isEmpty())
             throw new RuntimeException("Unknown user");
 
-        return this.converter.toBoundary(user);
+        return this.converter.toBoundary(user.get());
     }
 
     @Override
+    @Transactional
     public UserBoundary updateUser(String superapp, String userEmail, UserBoundary update) {
         if (!isValidSuperapp(superapp))
             throw new RuntimeException("Invalid superapp");
 
-        UserEntity user = this.users.get(userEmail);
-        if (user == null || !user.getSuperapp().equals(this.superappName) || !user.getEmail().equals(userEmail))
+        Optional<UserEntity> userOpt = this.userEntityRepository.findById(new UserPK(superapp, userEmail));
+        if (userOpt.isEmpty())
             throw new RuntimeException("Unknown user");
+
+        UserEntity user = userOpt.get();
+        if (!user.getSuperapp().equals(this.superappName))
+            throw new RuntimeException("Cannot update this user - Wrong superapp");
 
         String newUserName = update.getUsername();
         String newAvatar = update.getAvatar();
         String newRole = update.getRole();
 
         if (newUserName != null)
-            user.setUsername(newUserName);
+            if (newUserName.isBlank())
+                throw new RuntimeException("Invalid username");
+            else
+                user.setUsername(newUserName);
+
 
         if (newAvatar != null)
-            user.setAvatar(newAvatar);
+            if (newAvatar.isBlank())
+                throw new RuntimeException("Invalid user avatar");
+            else
+                user.setAvatar(newAvatar);
+
 
         if (newRole != null) {
             try {
                 user.setRole(UserRole.valueOf(newRole));
-            } catch (Exception ignored) { /* for now - ignore role mismatch */ }
+            } catch (IllegalArgumentException e) { throw new RuntimeException("Illegal user role"); }
         }
-
-        if (update.getUserId() != null) { // TODO: FIX SO USER CANNOT UPDATE EMAIL
-            String newEmail = update.getUserId().getEmail();
-            if (newEmail != null) {
-                user.setEmail(newEmail);
-                this.users.remove(userEmail);
-                this.users.put(newEmail, user);
-            }
-        }
-
-        return this.converter.toBoundary(user); // TODO: update user in DB
+        userEntityRepository.save(user);
+        return this.converter.toBoundary(user);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserBoundary> getAllUsers() {
-       return this.users
-               .values()
-               .stream()
-               .map(this.converter::toBoundary)
-               .collect(Collectors.toList());
+        Iterable<UserEntity> users = this.userEntityRepository.findAll();
+        return StreamSupport
+                .stream(users.spliterator() , false)
+                .map(this.converter::toBoundary)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public void deleteAllUsers() { this.users.clear(); } // TODO: clear all users from DB
+    @Transactional
+    public void deleteAllUsers() { this.userEntityRepository.deleteAll(); }
 }

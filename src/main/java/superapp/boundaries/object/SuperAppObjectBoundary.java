@@ -5,8 +5,8 @@ import superapp.util.wrappers.UserIdWrapper;
 import java.util.Date;
 import java.util.Map;
 
-public class ObjectBoundary {
-    private ObjectIdBoundary objectId;
+public class SuperAppObjectBoundary {
+    private SuperAppObjectIdBoundary objectId;
     private String type;
     private String alias;
     private Boolean active;
@@ -14,10 +14,10 @@ public class ObjectBoundary {
     private UserIdWrapper createdBy;
     private Map<String, Object> objectDetails;
 
-    public ObjectBoundary() {}
+    public SuperAppObjectBoundary() {}
 
-    public ObjectBoundary(ObjectIdBoundary objectId, String type, String alias,
-                          Map<String, Object> objectDetails, UserIdWrapper createdBy){
+    public SuperAppObjectBoundary(SuperAppObjectIdBoundary objectId, String type, String alias,
+                                  Map<String, Object> objectDetails, UserIdWrapper createdBy){
         this.objectId = objectId;
         this.type = type;
         this.alias = alias;
@@ -27,11 +27,11 @@ public class ObjectBoundary {
         this.objectDetails = objectDetails;
     }
 
-    public ObjectIdBoundary getObjectId() {
+    public SuperAppObjectIdBoundary getObjectId() {
         return objectId;
     }
 
-    public void setObjectId(ObjectIdBoundary objectId) {
+    public void setObjectId(SuperAppObjectIdBoundary objectId) {
         this.objectId = objectId;
     }
 

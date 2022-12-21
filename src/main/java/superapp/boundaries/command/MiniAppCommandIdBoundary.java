@@ -13,7 +13,7 @@ public class MiniAppCommandIdBoundary {
         this.internalCommandId = internalCommandId;
     }
 
-    public MiniAppCommandIdBoundary(String miniApp) {
+    public MiniAppCommandIdBoundary(String miniapp) {
         this.miniapp = miniapp;
     }
 

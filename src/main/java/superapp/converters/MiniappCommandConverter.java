@@ -3,14 +3,15 @@ package superapp.converters;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import superapp.boundaries.command.MiniAppCommandBoundary;
 import superapp.boundaries.command.MiniAppCommandIdBoundary;
-import superapp.boundaries.object.ObjectIdBoundary;
+import superapp.boundaries.object.SuperAppObjectIdBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.data.MiniAppCommandEntity;
-import superapp.util.wrappers.ObjectIdWrapper;
+import superapp.util.wrappers.SuperAppObjectIdWrapper;
 import superapp.util.wrappers.UserIdWrapper;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+
 @Component
 public class MiniappCommandConverter {
 
@@ -27,7 +28,7 @@ public class MiniappCommandConverter {
         result.setInternalCommandId(miniApp.getCommandId().getInternalCommandId());
         result.setCommand(miniApp.getCommand());
         result.setInvocationTimestamp(miniApp.getInvocationTimestamp());
-        result.setInternalObjectId(((ObjectIdWrapper)miniApp.getTargetObject()).getObjectId().getInternalObjectId());
+        result.setInternalObjectId(miniApp.getTargetObject().getObjectId().getInternalObjectId());
         result.setEmail((miniApp.getInvokedBy()).getUserId().getEmail());
         result.setCommandAttributes(toEntityAsString(miniApp.getCommandAttributes()));
         return result;
@@ -35,7 +36,7 @@ public class MiniappCommandConverter {
     public String toEntityAsString(Map<String, Object> attributes) {
         try {
             return this.jackson.writeValueAsString(attributes);
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -53,7 +54,7 @@ public class MiniappCommandConverter {
         result.setCommand(miniappEntity.getCommand());
         result.setCommandAttributes(toBoundaryAsMap(miniappEntity.getCommandAttributes()));
         result.setInvokedBy(new UserIdWrapper(new UserIdBoundary(miniappEntity.getSuperApp(), miniappEntity.getEmail())));
-        result.setTargetObject(new ObjectIdWrapper(new ObjectIdBoundary(miniappEntity.getSuperApp(), miniappEntity.getInternalObjectId())));
+        result.setTargetObject(new SuperAppObjectIdWrapper(new SuperAppObjectIdBoundary(miniappEntity.getSuperApp(), miniappEntity.getInternalObjectId())));
         result.setInvocationTimestamp(miniappEntity.getInvocationTimestamp());
         return result;
     }
