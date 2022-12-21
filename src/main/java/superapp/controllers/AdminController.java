@@ -7,14 +7,14 @@ import superapp.logic.concreteServices.MiniAppCommandService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import superapp.logic.concreteServices.ObjectService;
+import superapp.logic.concreteServices.SuperAppObjectService;
 
 @RestController
 public class AdminController {
 
     private UsersService usersService;
     private MiniAppCommandService miniappService;
-    private ObjectService objectService;
+    private SuperAppObjectService objectService;
 
     @Autowired
     public void setMessageService(UsersService usersService) {
@@ -27,7 +27,7 @@ public class AdminController {
     }
 
     @Autowired
-    public void setObjectService(ObjectService objectService) { this.objectService = objectService; }
+    public void setObjectService(SuperAppObjectService objectService) { this.objectService = objectService; }
 
     @RequestMapping(
             path = {"/superapp/admin/users"},

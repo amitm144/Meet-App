@@ -3,10 +3,10 @@ package superapp.converters;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import superapp.boundaries.command.MiniAppCommandBoundary;
 import superapp.boundaries.command.MiniAppCommandIdBoundary;
-import superapp.boundaries.object.ObjectIdBoundary;
+import superapp.boundaries.object.SuperAppObjectIdBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.data.MiniAppCommandEntity;
-import superapp.util.wrappers.ObjectIdWrapper;
+import superapp.util.wrappers.SuperAppObjectIdWrapper;
 import superapp.util.wrappers.UserIdWrapper;
 import org.springframework.stereotype.Component;
 
@@ -54,7 +54,7 @@ public class MiniappCommandConverter {
         result.setCommand(miniappEntity.getCommand());
         result.setCommandAttributes(toBoundaryAsMap(miniappEntity.getCommandAttributes()));
         result.setInvokedBy(new UserIdWrapper(new UserIdBoundary(miniappEntity.getSuperApp(), miniappEntity.getEmail())));
-        result.setTargetObject(new ObjectIdWrapper(new ObjectIdBoundary(miniappEntity.getSuperApp(), miniappEntity.getInternalObjectId())));
+        result.setTargetObject(new SuperAppObjectIdWrapper(new SuperAppObjectIdBoundary(miniappEntity.getSuperApp(), miniappEntity.getInternalObjectId())));
         result.setInvocationTimestamp(miniappEntity.getInvocationTimestamp());
         return result;
     }

@@ -13,7 +13,7 @@ import superapp.data.MiniAppCommandEntity;
 import superapp.logic.AbstractService;
 import superapp.logic.MiniAppCommandsService;
 import superapp.util.EmailChecker;
-import superapp.util.wrappers.ObjectIdWrapper;
+import superapp.util.wrappers.SuperAppObjectIdWrapper;
 import superapp.util.wrappers.UserIdWrapper;
 
 import java.util.*;
@@ -50,7 +50,7 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
         if (!EmailChecker.isValidEmail(invokedBy.getUserId().getEmail()))
             throw new RuntimeException("Invalid invoking user email");
 
-        ObjectIdWrapper targetObject = command.getTargetObject();
+        SuperAppObjectIdWrapper targetObject = command.getTargetObject();
         if (targetObject == null ||
                 targetObject.getObjectId() == null ||
                 targetObject.getObjectId().getSuperapp() == null ||
