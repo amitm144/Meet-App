@@ -1,5 +1,9 @@
 package superapp.logic.concreteServices;
 
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import superapp.boundaries.command.MiniAppCommandBoundary;
 import superapp.converters.MiniappCommandConverter;
 import superapp.dal.IdGeneratorRepository;
@@ -12,10 +16,6 @@ import superapp.util.EmailChecker;
 import superapp.util.wrappers.ObjectIdWrapper;
 import superapp.util.wrappers.UserIdWrapper;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -81,6 +81,7 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<MiniAppCommandBoundary> getALlCommands() {
         return StreamSupport
                 .stream(this.miniappRepository.findAll().spliterator(), false)
@@ -89,6 +90,7 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniappName) {
         Iterable<MiniAppCommandEntity> miniappCommands = this.miniappRepository.findAllByMiniapp(miniappName);
         return StreamSupport
@@ -98,5 +100,6 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
     }
 
     @Override
+    @Transactional
     public void deleteALlCommands() { this.miniappRepository.deleteAll(); }
 }
