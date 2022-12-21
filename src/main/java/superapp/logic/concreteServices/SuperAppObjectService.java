@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.boundaries.object.SuperAppObjectIdBoundary;
+import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.SuperAppObjectConverter;
 import superapp.dal.IdGeneratorRepository;
 import superapp.dal.SuperAppObjectEntityRepository;
@@ -14,6 +15,7 @@ import superapp.data.SuperAppObjectEntity;
 import superapp.data.SuperAppObjectEntity.SuperAppObjectId;
 import superapp.logic.AbstractService;
 import superapp.logic.SuperAppObjectsService;
+import superapp.util.EmailChecker;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,6 +43,14 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
         String type = object.getType(); // TODO: check type corresponds to future object types
         if (alias == null || type == null || alias.isBlank() || type.isBlank())
             throw new RuntimeException("Object alias and/or type must be specified");
+
+        UserIdBoundary createdBy = object.getCreatedBy().getUserId();
+        if (createdBy == null ||
+                createdBy.getEmail() == null ||
+                createdBy.getSuperapp() == null ||
+                createdBy.getSuperapp().isEmpty() ||
+                !EmailChecker.isValidEmail(createdBy.getEmail()))
+            throw new RuntimeException("Invalid creating user details");
 
         Boolean active = object.getActive();
         if (active == null)
@@ -78,10 +88,20 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
             objectE.setObjectDetails(this.converter.detailsToString(newDetails));
         if (newActive != null)
             objectE.setActive(newActive);
-        if (newType != null)
-            objectE.setType(newType);
-        if (newAlias != null)
-            objectE.setAlias(newAlias);
+
+        if (newType != null) {
+            if (newType.isBlank())
+                throw new RuntimeException("Object alias and/or type must be specified");
+            else
+                objectE.setType(newType);
+        }
+
+        if (newAlias != null) {
+            if (newAlias.isBlank())
+                throw new RuntimeException("Object alias and/or type must be specified");
+            else
+                objectE.setAlias(newAlias);
+        }
 
         objectE = this.objectRepository.save(objectE);
         return this.converter.toBoundary(objectE);
@@ -109,5 +129,6 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
     }
 
     @Override
+    @Transactional
     public void deleteAllObjects() { this.objectRepository.deleteAll(); }
 }

@@ -1,5 +1,6 @@
 package superapp.logic.concreteServices;
 
+import superapp.boundaries.user.NewUserBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.UserConverter;
 import superapp.dal.UserEntityRepository;
@@ -8,11 +9,12 @@ import superapp.data.UserEntity.UserPK;
 import superapp.data.UserRole;
 import superapp.logic.AbstractService;
 import superapp.util.EmailChecker;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import superapp.boundaries.user.UserBoundary;
 import superapp.logic.UsersService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -32,9 +34,14 @@ public class UserService extends AbstractService implements UsersService {
     }
 
     @Override
+    @Transactional
     public UserBoundary createUser(UserBoundary user) {
         UserIdBoundary userId = user.getUserId();
-        if (userId == null || userId.getEmail() == null || !EmailChecker.isValidEmail(userId.getEmail()))
+        if (userId == null || userId.getEmail() == null ||
+                !EmailChecker.isValidEmail(userId.getEmail()) ||
+                user.getAvatar() == null || user.getUsername() == null ||
+                user.getAvatar().isBlank() ||  user.getUsername().isBlank() ||
+                !UserRole.isValidRole(user.getRole()))
             throw new RuntimeException("Invalid User details");
 
         user.setSuperApp(this.superappName);
@@ -47,6 +54,13 @@ public class UserService extends AbstractService implements UsersService {
     }
 
     @Override
+    public UserBoundary createUser(NewUserBoundary newUser) {
+        return createUser(new UserBoundary(newUser.getEmail(), newUser.getRole(),
+                newUser.getUsername(), newUser.getAvatar()));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public UserBoundary login(String superapp, String userEmail) {
         if (!isValidSuperapp(superapp))
             throw new RuntimeException("Invalid superapp");
@@ -59,6 +73,7 @@ public class UserService extends AbstractService implements UsersService {
     }
 
     @Override
+    @Transactional
     public UserBoundary updateUser(String superapp, String userEmail, UserBoundary update) {
         if (!isValidSuperapp(superapp))
             throw new RuntimeException("Invalid superapp");
@@ -76,21 +91,30 @@ public class UserService extends AbstractService implements UsersService {
         String newRole = update.getRole();
 
         if (newUserName != null)
-            user.setUsername(newUserName);
+            if (newUserName.isBlank())
+                throw new RuntimeException("Invalid username");
+            else
+                user.setUsername(newUserName);
+
 
         if (newAvatar != null)
-            user.setAvatar(newAvatar);
+            if (newAvatar.isBlank())
+                throw new RuntimeException("Invalid user avatar");
+            else
+                user.setAvatar(newAvatar);
+
 
         if (newRole != null) {
             try {
                 user.setRole(UserRole.valueOf(newRole));
-            } catch (IllegalArgumentException e) { /* for now - ignore role mismatch */ }
+            } catch (IllegalArgumentException e) { throw new RuntimeException("Illegal user role"); }
         }
         userEntityRepository.save(user);
         return this.converter.toBoundary(user);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserBoundary> getAllUsers() {
         Iterable<UserEntity> users = this.userEntityRepository.findAll();
         return StreamSupport
@@ -100,5 +124,6 @@ public class UserService extends AbstractService implements UsersService {
     }
 
     @Override
+    @Transactional
     public void deleteAllUsers() { this.userEntityRepository.deleteAll(); }
 }
