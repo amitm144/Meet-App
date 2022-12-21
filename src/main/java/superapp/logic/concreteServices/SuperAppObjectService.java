@@ -108,6 +108,23 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
     }
 
     @Override
+    @Transactional
+    public void bindNewChild(String parentSuperapp, String parentObjectId, SuperAppObjectIdBoundary newChild) {
+        SuperAppObjectEntity parent = this.objectRepository
+                .findById(new SuperAppObjectId(parentSuperapp, parentObjectId))
+                .orElseThrow(() -> new RuntimeException("Cannot find parent object"));
+        SuperAppObjectEntity child = this.objectRepository
+                .findById(this.converter.idToEntity(newChild))
+                .orElseThrow(() -> new RuntimeException("Cannot find children object"));
+
+       if (parent.addChild(child) && child.addParent(parent)) {
+           this.objectRepository.save(parent);
+           this.objectRepository.save(child);
+       } else
+           throw new RuntimeException("Failed to update parent or child object");
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public SuperAppObjectBoundary getSpecificObject(String objectSuperapp, String internalObjectId) {
         Optional<SuperAppObjectEntity> objectE =
@@ -116,6 +133,34 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
             throw new RuntimeException("Object does not exist");
 
         return this.converter.toBoundary(objectE.get());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SuperAppObjectBoundary> getChildren(String objectSuperapp, String internalObjectId) {
+        SuperAppObjectEntity parent = this.objectRepository
+                .findById(new SuperAppObjectId(objectSuperapp, internalObjectId))
+                .orElseThrow(() -> new RuntimeException("Cannot find parent object"));
+
+        return parent
+                .getChildren()
+                .stream()
+                .map(this.converter::toBoundary)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SuperAppObjectBoundary> getParents(String objectSuperapp, String internalObjectId) {
+        SuperAppObjectEntity object = this.objectRepository
+                .findById(new SuperAppObjectId(objectSuperapp, internalObjectId))
+                .orElseThrow(() -> new RuntimeException("Cannot find requested object"));
+
+        return object
+                .getParents()
+                .stream()
+                .map(this.converter::toBoundary)
+                .collect(Collectors.toList());
     }
 
     @Override

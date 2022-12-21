@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import superapp.boundaries.object.SuperAppObjectIdBoundary;
 import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.data.SuperAppObjectEntity;
+import superapp.data.SuperAppObjectEntity.SuperAppObjectId;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -40,6 +41,14 @@ public class SuperAppObjectConverter {
         objBoundary.setCreationTimestamp(obj.getCreationTimestamp());
 
         return objBoundary;
+    }
+
+    public SuperAppObjectId idToEntity(SuperAppObjectIdBoundary obj) {
+        return new SuperAppObjectId(obj.getSuperapp(), obj.getInternalObjectId());
+    }
+
+    public SuperAppObjectIdBoundary idToBoundary(SuperAppObjectId obj) {
+        return new SuperAppObjectIdBoundary(obj.getSuperapp(), obj.getObjectId());
     }
 
     public String detailsToString(Map<String, Object> objectDetails) {

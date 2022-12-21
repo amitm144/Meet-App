@@ -28,7 +28,7 @@ public class SuperAppObjectEntity {
     @JoinTable(name="ObjectsRelations")
     private Set<SuperAppObjectEntity> parents;
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "parents")
-    private Set<SuperAppObjectEntity> childObjects;
+    private Set<SuperAppObjectEntity> children;
 
     public SuperAppObjectEntity() {}
 
@@ -116,20 +116,28 @@ public class SuperAppObjectEntity {
         this.objectDetails = objectDetails;
     }
 
-    public Set<SuperAppObjectEntity> getParent() {
+    public Set<SuperAppObjectEntity> getParents() {
         return parents;
     }
 
-    public void setParent(Set<SuperAppObjectEntity> parent) {
+    public void setParents(Set<SuperAppObjectEntity> parent) {
         this.parents = parent;
     }
 
-    public Set<SuperAppObjectEntity> getChildObjects() {
-        return childObjects;
+    public boolean addParent(SuperAppObjectEntity parent) {
+        return parent != this && !this.children.contains(parent) && this.parents.add(parent);
     }
 
-    public void setChildObjects(Set<SuperAppObjectEntity> childObjects) {
-        this.childObjects = childObjects;
+    public Set<SuperAppObjectEntity> getChildren() {
+        return children;
+    }
+
+    public void setChildren(Set<SuperAppObjectEntity> childObjects) {
+        this.children = childObjects;
+    }
+
+    public boolean addChild(SuperAppObjectEntity child) {
+        return child != this && !this.parents.contains(child) && this.children.add(child);
     }
 
     public static class SuperAppObjectId implements Serializable {
@@ -158,6 +166,14 @@ public class SuperAppObjectEntity {
         public int hashCode() {
             return Objects.hash(objectId, superapp);
         }
+
+        public String getSuperapp() { return superapp; }
+
+        public void setSuperapp(String superapp) { this.superapp = superapp; }
+
+        public String getObjectId() { return objectId; }
+
+        public void setObjectId(String objectId) { this.objectId = objectId; }
     }
 
     @Override
