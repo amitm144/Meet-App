@@ -12,6 +12,7 @@ import superapp.data.IdGeneratorEntity;
 import superapp.data.MiniAppCommandEntity;
 import superapp.logic.AbstractService;
 import superapp.logic.MiniAppCommandsService;
+import superapp.logic.exceptions.InvalidInputException;
 import superapp.util.EmailChecker;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
 import superapp.util.wrappers.UserIdWrapper;
@@ -45,10 +46,10 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
                 invokedBy.getUserId().getEmail() == null ||
                 invokedBy.getUserId().getSuperapp().isBlank() ||
                 invokedBy.getUserId().getEmail().isBlank())
-            throw new RuntimeException("Invoked by fields cannot be missing or empty");
+            throw new InvalidInputException("Invoked by fields cannot be missing or empty");
 
         if (!EmailChecker.isValidEmail(invokedBy.getUserId().getEmail()))
-            throw new RuntimeException("Invalid invoking user email");
+            throw new InvalidInputException("Invalid invoking user email");
 
         SuperAppObjectIdWrapper targetObject = command.getTargetObject();
         if (targetObject == null ||
@@ -57,10 +58,10 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
                 targetObject.getObjectId().getInternalObjectId() == null ||
                 targetObject.getObjectId().getSuperapp().isBlank() ||
                 targetObject.getObjectId().getInternalObjectId().isBlank())
-            throw new RuntimeException("Target object fields cannot be missing or empty");
+            throw new InvalidInputException("Target object fields cannot be missing or empty");
 
         if (command.getCommand() == null || command.getCommand().isEmpty())
-            throw new RuntimeException("Command attribute cannot be missing or empty");
+            throw new InvalidInputException("Command attribute cannot be missing or empty");
 
         // issue internalCommandId, tie with superapp and set invocation timestamp
         IdGeneratorEntity helper = this.idGenerator.save(new IdGeneratorEntity());
