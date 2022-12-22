@@ -6,6 +6,7 @@ import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.data.SuperAppObjectEntity;
 import superapp.data.SuperAppObjectEntity.SuperAppObjectId;
 import org.springframework.stereotype.Component;
+import superapp.util.exceptions.InvalidInputException;
 
 import java.util.Map;
 
@@ -54,16 +55,12 @@ public class SuperAppObjectConverter {
     public String detailsToString(Map<String, Object> objectDetails) {
         try {
             return mapper.writeValueAsString(objectDetails);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        } catch (Exception e) { throw new InvalidInputException(e.getMessage()); }
     }
 
     public Map<String, Object> detailsToMap(String details) {
         try {
             return (Map<String, Object>)this.mapper.readValue(details, Map.class);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        } catch (Exception e) { throw new InvalidInputException(e.getMessage()); }
     }
 }
