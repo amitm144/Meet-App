@@ -15,6 +15,8 @@ import superapp.data.SuperAppObjectEntity;
 import superapp.data.SuperAppObjectEntity.SuperAppObjectId;
 import superapp.logic.AbstractService;
 import superapp.logic.SuperAppObjectsService;
+import superapp.util.exceptions.InvalidInputException;
+import superapp.util.exceptions.NotFoundException;
 import superapp.util.EmailChecker;
 
 import java.util.*;
@@ -42,7 +44,7 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
         String alias = object.getAlias();
         String type = object.getType(); // TODO: check type corresponds to future object types
         if (alias == null || type == null || alias.isBlank() || type.isBlank())
-            throw new RuntimeException("Object alias and/or type must be specified");
+            throw new InvalidInputException("Object alias and/or type must be specified");
 
         UserIdBoundary createdBy = object.getCreatedBy().getUserId();
         if (createdBy == null ||
@@ -50,7 +52,7 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
                 createdBy.getSuperapp() == null ||
                 createdBy.getSuperapp().isEmpty() ||
                 !EmailChecker.isValidEmail(createdBy.getEmail()))
-            throw new RuntimeException("Invalid creating user details");
+            throw new InvalidInputException("Invalid creating user details");
 
         Boolean active = object.getActive();
         if (active == null)
@@ -76,7 +78,7 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
         Optional<SuperAppObjectEntity> objectO =
                 this.objectRepository.findById(new SuperAppObjectId(objectSuperapp, internalObjectId));
         if (objectO.isEmpty())
-            throw new RuntimeException("Unknown object");
+            throw new NotFoundException("Unknown object");
 
         SuperAppObjectEntity objectE = objectO.get();
         Map<String, Object> newDetails = update.getObjectDetails();
@@ -91,14 +93,14 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
 
         if (newType != null) {
             if (newType.isBlank())
-                throw new RuntimeException("Object alias and/or type must be specified");
+                throw new InvalidInputException("Object alias and/or type must be specified");
             else
                 objectE.setType(newType);
         }
 
         if (newAlias != null) {
             if (newAlias.isBlank())
-                throw new RuntimeException("Object alias and/or type must be specified");
+                throw new InvalidInputException("Object alias and/or type must be specified");
             else
                 objectE.setAlias(newAlias);
         }
@@ -113,7 +115,7 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
         Optional<SuperAppObjectEntity> objectE =
                 this.objectRepository.findById(new SuperAppObjectId(objectSuperapp, internalObjectId));
         if (objectE.isEmpty())
-            throw new RuntimeException("Object does not exist");
+            throw new NotFoundException("Object does not exist");
 
         return this.converter.toBoundary(objectE.get());
     }
