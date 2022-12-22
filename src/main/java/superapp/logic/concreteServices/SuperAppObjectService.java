@@ -15,6 +15,7 @@ import superapp.data.SuperAppObjectEntity;
 import superapp.data.SuperAppObjectEntity.SuperAppObjectId;
 import superapp.logic.AbstractService;
 import superapp.logic.SuperAppObjectsService;
+import superapp.util.exceptions.CannotProcessException;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.exceptions.NotFoundException;
 import superapp.util.EmailChecker;
@@ -110,6 +111,23 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
     }
 
     @Override
+    @Transactional
+    public void bindNewChild(String parentSuperapp, String parentObjectId, SuperAppObjectIdBoundary newChild) {
+        SuperAppObjectEntity parent = this.objectRepository
+                .findById(new SuperAppObjectId(parentSuperapp, parentObjectId))
+                .orElseThrow(() -> new NotFoundException("Cannot find parent object"));
+        SuperAppObjectEntity child = this.objectRepository
+                .findById(this.converter.idToEntity(newChild))
+                .orElseThrow(() -> new NotFoundException("Cannot find children object"));
+
+       if (parent.addChild(child) && child.addParent(parent)) {
+           this.objectRepository.save(parent);
+           this.objectRepository.save(child);
+       } else
+           throw new CannotProcessException("Failed to update parent or child object");
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public SuperAppObjectBoundary getSpecificObject(String objectSuperapp, String internalObjectId) {
         Optional<SuperAppObjectEntity> objectE =
@@ -118,6 +136,34 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
             throw new NotFoundException("Object does not exist");
 
         return this.converter.toBoundary(objectE.get());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SuperAppObjectBoundary> getChildren(String objectSuperapp, String internalObjectId) {
+        SuperAppObjectEntity parent = this.objectRepository
+                .findById(new SuperAppObjectId(objectSuperapp, internalObjectId))
+                .orElseThrow(() -> new NotFoundException("Cannot find parent object"));
+
+        return parent
+                .getChildren()
+                .stream()
+                .map(this.converter::toBoundary)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SuperAppObjectBoundary> getParents(String objectSuperapp, String internalObjectId) {
+        SuperAppObjectEntity object = this.objectRepository
+                .findById(new SuperAppObjectId(objectSuperapp, internalObjectId))
+                .orElseThrow(() -> new NotFoundException("Cannot find requested object"));
+
+        return object
+                .getParents()
+                .stream()
+                .map(this.converter::toBoundary)
+                .collect(Collectors.toList());
     }
 
     @Override

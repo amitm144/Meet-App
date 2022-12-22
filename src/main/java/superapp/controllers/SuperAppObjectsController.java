@@ -1,6 +1,7 @@
 package superapp.controllers;
 
 import superapp.boundaries.object.SuperAppObjectBoundary;
+import superapp.boundaries.object.SuperAppObjectIdBoundary;
 import superapp.logic.SuperAppObjectsService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,5 +54,33 @@ public class SuperAppObjectsController {
     @ResponseBody
     public SuperAppObjectBoundary[] getAllObjects() {
         return this.objService.getAllObjects().toArray(new SuperAppObjectBoundary[0]);
+    }
+
+    @RequestMapping(
+            path="/superapp/objects/{superapp}/{internalObjectId}/children",
+            method = {RequestMethod.PUT},
+            consumes = {MediaType.APPLICATION_JSON_VALUE})
+    public void bindExistingObjects(@RequestBody SuperAppObjectIdBoundary toBind,
+                                    @PathVariable String superapp,
+                                    @PathVariable String internalObjectId) {
+        this.objService.bindNewChild(superapp, internalObjectId, toBind);
+    }
+
+    @RequestMapping(
+            path="/superapp/objects/{superapp}/{internalObjectId}/children",
+            method = {RequestMethod.GET},
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public SuperAppObjectBoundary[] getAllChildren(@PathVariable String superapp,
+                                                   @PathVariable String internalObjectId) {
+        return this.objService.getChildren(superapp, internalObjectId).toArray(new SuperAppObjectBoundary[0]);
+    }
+
+    @RequestMapping(
+            path="/superapp/objects/{superapp}/{internalObjectId}/parents",
+            method = {RequestMethod.GET},
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public SuperAppObjectBoundary[] getAllParents(@PathVariable String superapp,
+                                                  @PathVariable String internalObjectId) {
+        return this.objService.getParents(superapp, internalObjectId).toArray(new SuperAppObjectBoundary[0]);
     }
 }
