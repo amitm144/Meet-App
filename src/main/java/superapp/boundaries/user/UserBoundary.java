@@ -1,6 +1,6 @@
 package superapp.boundaries.user;
 
-import superapp.logic.exceptions.InvalidInputException;
+import superapp.util.exceptions.InvalidInputException;
 
 public class UserBoundary {
 

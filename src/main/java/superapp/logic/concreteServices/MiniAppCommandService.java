@@ -12,7 +12,7 @@ import superapp.data.IdGeneratorEntity;
 import superapp.data.MiniAppCommandEntity;
 import superapp.logic.AbstractService;
 import superapp.logic.MiniAppCommandsService;
-import superapp.logic.exceptions.InvalidInputException;
+import superapp.util.exceptions.InvalidInputException;
 import superapp.util.EmailChecker;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
 import superapp.util.wrappers.UserIdWrapper;

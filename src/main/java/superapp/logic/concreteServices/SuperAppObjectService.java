@@ -15,8 +15,8 @@ import superapp.data.SuperAppObjectEntity;
 import superapp.data.SuperAppObjectEntity.SuperAppObjectId;
 import superapp.logic.AbstractService;
 import superapp.logic.SuperAppObjectsService;
-import superapp.logic.exceptions.InvalidInputException;
-import superapp.logic.exceptions.NotFoundException;
+import superapp.util.exceptions.InvalidInputException;
+import superapp.util.exceptions.NotFoundException;
 import superapp.util.EmailChecker;
 
 import java.util.*;

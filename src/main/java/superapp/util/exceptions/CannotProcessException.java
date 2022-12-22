@@ -1,16 +1,16 @@
-package superapp.logic.exceptions;
+package superapp.util.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(code = HttpStatus.UNPROCESSABLE_ENTITY)
-public class CannotProccessException extends RuntimeException{
+public class CannotProcessException extends RuntimeException {
 
-    public CannotProccessException(){
+    public CannotProcessException(){
         super();
     }
 
-    public CannotProccessException(String message) {
+    public CannotProcessException(String message) {
         super(message);
     }
 }

@@ -8,10 +8,10 @@ import superapp.data.UserEntity;
 import superapp.data.UserEntity.UserPK;
 import superapp.data.UserRole;
 import superapp.logic.AbstractService;
-import superapp.logic.exceptions.AlreadyExistsException;
-import superapp.logic.exceptions.CannotProccessException;
-import superapp.logic.exceptions.InvalidInputException;
-import superapp.logic.exceptions.NotFoundException;
+import superapp.util.exceptions.AlreadyExistsException;
+import superapp.util.exceptions.CannotProcessException;
+import superapp.util.exceptions.InvalidInputException;
+import superapp.util.exceptions.NotFoundException;
 import superapp.util.EmailChecker;
 import superapp.boundaries.user.UserBoundary;
 import superapp.logic.UsersService;
@@ -88,7 +88,7 @@ public class UserService extends AbstractService implements UsersService {
 
         UserEntity user = userOpt.get();
         if (!user.getSuperapp().equals(this.superappName))
-            throw new CannotProccessException("Cannot update this user - Wrong superapp");
+            throw new CannotProcessException("Cannot update this user - Wrong superapp");
 
         String newUserName = update.getUsername();
         String newAvatar = update.getAvatar();
