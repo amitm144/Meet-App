@@ -1,17 +1,13 @@
 package superapp.boundaries.object;
 
-
-import org.springframework.beans.factory.annotation.Value;
-
-public class ObjectIdBoundary {
+public class SuperAppObjectIdBoundary {
 
     private String superapp;
     private String internalObjectId;
 
-    public ObjectIdBoundary() {}
+    public SuperAppObjectIdBoundary() {}
 
-    public ObjectIdBoundary(@Value("${spring.application.name}") String superapp,
-                            String internalObjectId) {
+    public SuperAppObjectIdBoundary(String superapp, String internalObjectId) {
         this.superapp = superapp;
         this.internalObjectId = internalObjectId;
     }
@@ -21,7 +17,6 @@ public class ObjectIdBoundary {
         return superapp;
     }
 
-    @Value("${spring.application.name}")
     public void setSuperapp(String superapp) {
         this.superapp = superapp;
     }
@@ -46,7 +41,7 @@ public class ObjectIdBoundary {
     public boolean equals(Object obj) {
         if (obj == null || this.getClass() != obj.getClass())
             return false;
-        ObjectIdBoundary objId = (ObjectIdBoundary) obj;
+        SuperAppObjectIdBoundary objId = (SuperAppObjectIdBoundary) obj;
         return this.superapp.equals(objId.superapp) && this.internalObjectId.equals(objId.internalObjectId);
     }
 

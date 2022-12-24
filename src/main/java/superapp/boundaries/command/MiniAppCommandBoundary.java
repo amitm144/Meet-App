@@ -1,17 +1,16 @@
 package superapp.boundaries.command;
 
-import superapp.boundaries.object.ObjectIdBoundary;
+import superapp.boundaries.object.SuperAppObjectIdBoundary;
 import superapp.boundaries.user.UserIdBoundary;
-import superapp.util.wrappers.ObjectIdWrapper;
+import superapp.util.wrappers.SuperAppObjectIdWrapper;
 import superapp.util.wrappers.UserIdWrapper;
-
 import java.util.Date;
 import java.util.Map;
 
 public class MiniAppCommandBoundary {
     private MiniAppCommandIdBoundary commandId ;
     private String command;
-    private ObjectIdWrapper targetObject;
+    private SuperAppObjectIdWrapper targetObject;
     private Date invocationTimestamp;
     private UserIdWrapper invokedBy;
     private Map<String, Object> commandAttributes;
@@ -19,7 +18,7 @@ public class MiniAppCommandBoundary {
     public MiniAppCommandBoundary() {}
 
     public MiniAppCommandBoundary(MiniAppCommandIdBoundary commandId, String command,
-                                  ObjectIdBoundary targetObject, UserIdBoundary invokedBy,
+                                  SuperAppObjectIdBoundary targetObject, UserIdBoundary invokedBy,
                                   Map<String, Object> commandAttributes)
     {
         this();
@@ -27,7 +26,7 @@ public class MiniAppCommandBoundary {
         this.command = command;
         this.commandAttributes = commandAttributes;
         this.invocationTimestamp = new Date();
-        this.targetObject = new ObjectIdWrapper(targetObject);
+        this.targetObject = new SuperAppObjectIdWrapper(targetObject);
         this.invokedBy = new UserIdWrapper(invokedBy);
     }
 
@@ -39,9 +38,9 @@ public class MiniAppCommandBoundary {
         this.commandId = commandId;
     }
 
-    public ObjectIdWrapper getTargetObject() { return targetObject; }
+    public SuperAppObjectIdWrapper getTargetObject() { return targetObject; }
 
-    public void setTargetObject(ObjectIdWrapper targetObject) { this.targetObject = targetObject; }
+    public void setTargetObject(SuperAppObjectIdWrapper targetObject) { this.targetObject = targetObject; }
 
     public String getCommand() {
         return command;

@@ -1,6 +1,6 @@
 package superapp.boundaries.user;
 
-import org.springframework.beans.factory.annotation.Value;
+import superapp.util.exceptions.InvalidInputException;
 
 public class UserBoundary {
 
@@ -12,9 +12,18 @@ public class UserBoundary {
     public UserBoundary() {}
 
     public UserBoundary(String email, String role, String username, String avatar) {
-        if (username.isBlank() || role.isBlank())
-            throw new RuntimeException("Username or role cannot be blank");
+        if (username == null || role == null || username.isBlank() || role.isBlank())
+            throw new InvalidInputException("Username or role cannot be blank");
         this.userId = new UserIdBoundary(email);
+        this.role = role;
+        this.username = username;
+        this.avatar = avatar;
+    }
+
+    public UserBoundary(UserIdBoundary userId, String role, String username, String avatar) {
+        if (username == null || role == null || username.isBlank() || role.isBlank())
+            throw new InvalidInputException("Username or role cannot be blank");
+        this.userId = userId;
         this.role = role;
         this.username = username;
         this.avatar = avatar;
@@ -25,16 +34,6 @@ public class UserBoundary {
         this.userId = new UserIdBoundary(superapp ,email);
     }
 
-    public static UserBoundary[] getNRandomUsers(int n) {
-        UserBoundary[] userBoundaries = new UserBoundary[n];
-        for (int i = 0; i < n; i++) {
-            userBoundaries[i] = new UserBoundary(
-                    String.format("random%d@example.com", i),"example",
-                    String.format("random%d", i), String.format("%d", i));
-        }
-        return userBoundaries;
-    }
-
     public UserIdBoundary getUserId() {
         return userId;
     }
@@ -43,7 +42,6 @@ public class UserBoundary {
         this.userId = userId;
     }
 
-    @Value("${spring.application.name}")
     public void setSuperApp(String superApp) {
         if (this.userId == null)
             this.userId = new UserIdBoundary();
