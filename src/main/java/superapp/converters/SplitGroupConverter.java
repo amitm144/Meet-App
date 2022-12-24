@@ -1,10 +1,10 @@
 package superapp.converters;
 
 
-import superapp.boundaries.object.ObjectIdBoundary;
+import superapp.boundaries.object.SuperAppObjectIdBoundary;
 import superapp.boundaries.user.UserBoundary;
 import superapp.boundaries.split.GroupBoundary;
-import superapp.data.Group.SplitGroupEntity;
+import superapp.data.group.SplitGroupEntity;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,16 +17,16 @@ public class SplitGroupConverter {
 
 	}
 
-	public SplitGroupEntity toEntity(SplitGroupBoundary group) {
+	public SplitGroupEntity toEntity(GroupBoundary group) {
 		SplitGroupEntity rv = new SplitGroupEntity();
-		rv.setGroupId(group.getGroup().getGroupId().getInternalObjectId());
+		rv.setGroupId(group.getGroupId().getInternalObjectId());
 		rv.setSplitTitle(group.getSplitTitle());
 		rv.setExpenses(group.getExpenses());
 		return rv;
 	}
 
-	public SplitGroupBoundary toBoundary(SplitGroupEntity group) {
-		SplitGroupBoundary rv = new SplitGroupBoundary();
+	public GroupBoundary toBoundary(SplitGroupEntity group) {
+		GroupBoundary rv = new GroupBoundary();
 		rv.setGroup(convertToGroupBoundary(group));
 		rv.setSplitTitle(group.getSplitTitle());
 		rv.setExpenses(group.getExpenses());
@@ -35,7 +35,7 @@ public class SplitGroupConverter {
 	}
 
 	public GroupBoundary convertToGroupBoundary(SplitGroupEntity group){
-		ObjectIdBoundary groupId = new ObjectIdBoundary(group.getSuperapp(),group.getGroupId());
+		SuperAppObjectIdBoundary groupId = new SuperAppObjectIdBoundary(group.getSuperapp(),group.getGroupId());
 		UserBoundary leader = userConvertor.toBoundary(group.getGroupLeader());
 		List<UserBoundary> allUsers = group.getAllUsers()
 				.stream()

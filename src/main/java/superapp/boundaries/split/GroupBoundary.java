@@ -1,12 +1,12 @@
 package superapp.boundaries.split;
 
-import superapp.boundaries.object.ObjectIdBoundary;
+import superapp.boundaries.object.SuperAppObjectIdBoundary;
 import superapp.boundaries.user.UserBoundary;
 
 import java.util.List;
 
 public class GroupBoundary {
-    private ObjectIdBoundary groupId;
+    private SuperAppObjectIdBoundary groupId;
     private UserBoundary groupLeader;
     private List<UserBoundary> allUsers;
     private String avatar;
@@ -16,7 +16,10 @@ public class GroupBoundary {
     }
 
 
-    public GroupBoundary(ObjectIdBoundary groupId, UserBoundary groupLeader, List<UserBoundary> allUsers, String avatar) {
+    public GroupBoundary(SuperAppObjectIdBoundary groupId,
+                         UserBoundary groupLeader,
+                         List<UserBoundary> allUsers,
+                         String avatar) {
         this.groupId = groupId; //todo
         this.groupLeader = groupLeader;
         this.allUsers = allUsers;
@@ -47,11 +50,11 @@ public class GroupBoundary {
         this.avatar = avatar;
     }
 
-    public ObjectIdBoundary getGroupId() {
+    public SuperAppObjectIdBoundary getGroupId() {
         return groupId;
     }
 
-    public void setGroupId(ObjectIdBoundary groupId) {
+    public void setGroupId(SuperAppObjectIdBoundary groupId) {
         this.groupId = groupId;
     }
 }

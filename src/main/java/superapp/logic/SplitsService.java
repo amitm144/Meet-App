@@ -1,6 +1,6 @@
 package superapp.logic;
 
-import superapp.data.Group.SplitGroupEntity;
+import superapp.data.group.SplitGroupEntity;
 import superapp.data.GroupEntity;
 import superapp.data.UserEntity;
 import superapp.data.split.SplitTransaction;

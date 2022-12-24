@@ -26,6 +26,7 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
     private MiniappCommandConverter miniAppConverter;
     private MiniAppCommandRepository miniappRepository;
     private IdGeneratorRepository idGenerator;
+    private SplitService splitService;
 
     @Autowired
     public MiniAppCommandService(MiniappCommandConverter miniAppConverter,
@@ -39,6 +40,18 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
     @Override
     @Transactional
     public Object invokeCommand(MiniAppCommandBoundary command) {
+        /*
+        if (miniAppsCommands.get(command.getCommandId().getMiniapp()) == null) {// TODO Check if miniapp is one of the miniapps
+            ArrayList<MiniAppCommandEntity> commandList = new ArrayList<MiniAppCommandEntity>();
+            invokeCommandAtMiniapp(command, command.getCommandId().getMiniapp());
+            commandList.add(this.miniAppConverter.toEntity(command));
+            miniAppsCommands.put(command.getCommandId().getMiniapp(),commandList);
+        } else {
+            invokeCommandAtMiniapp(command, command.getCommandId().getMiniapp());
+            miniAppsCommands.get(command.getCommandId().getMiniapp()).add(this.miniAppConverter.toEntity(command));
+        }
+        return command;
+         */
         UserIdWrapper invokedBy = command.getInvokedBy();
         if (invokedBy == null ||
                 invokedBy.getUserId() == null ||
@@ -98,6 +111,13 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
                 .stream(miniappCommands.spliterator(), false)
                 .map(this.miniAppConverter::toBoundary)
                 .collect(Collectors.toList());
+    }
+
+    private void invokeCommandAtMiniapp(MiniAppCommandBoundary command, String miniapp){
+        if (miniapp.equals("Split"))
+            splitService.invokeCommand(command);
+        else
+            throw new RuntimeException("Unknown miniApp");
     }
 
     @Override

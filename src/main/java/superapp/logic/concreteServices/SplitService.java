@@ -6,7 +6,7 @@ import superapp.boundaries.user.UserBoundary;
 import superapp.converters.GroupConverter;
 import superapp.converters.SplitGroupConverter;
 import superapp.converters.UserConverter;
-import superapp.data.Group.SplitGroupEntity;
+import superapp.data.group.SplitGroupEntity;
 import superapp.data.GroupEntity;
 import superapp.data.UserEntity;
 import superapp.data.split.SplitTransaction;

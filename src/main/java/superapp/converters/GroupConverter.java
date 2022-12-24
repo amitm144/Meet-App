@@ -1,6 +1,6 @@
 package superapp.converters;
 
-import superapp.boundaries.object.ObjectIdBoundary;
+import superapp.boundaries.object.SuperAppObjectIdBoundary;
 import superapp.boundaries.user.UserBoundary;
 import superapp.boundaries.split.GroupBoundary;
 import superapp.data.GroupEntity;
@@ -41,7 +41,7 @@ public class GroupConverter {
 				.map(userConvertor::toBoundary)
 				.collect(Collectors.toList()));
 
-		ObjectIdBoundary OIdB = new ObjectIdBoundary(group.getSuperapp(),group.getGroupId());
+		SuperAppObjectIdBoundary OIdB = new SuperAppObjectIdBoundary(group.getSuperapp(),group.getGroupId());
 
 		rv.setGroupId(OIdB);
 		rv.setGroupLeader(userConvertor.toBoundary(group.getGroupLeader()));

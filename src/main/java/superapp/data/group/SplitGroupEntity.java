@@ -1,5 +1,5 @@
 
-package superapp.data.Group;
+package superapp.data.group;
 
 import superapp.data.GroupEntity;
 import superapp.data.UserEntity;
