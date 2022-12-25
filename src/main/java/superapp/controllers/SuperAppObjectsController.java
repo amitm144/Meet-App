@@ -2,6 +2,7 @@ package superapp.controllers;
 
 import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.boundaries.object.SuperAppObjectIdBoundary;
+import superapp.logic.AdvancedSuperAppObjectsService;
 import superapp.logic.SuperAppObjectsService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +12,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class SuperAppObjectsController {
 
-    private SuperAppObjectsService objService;
+    private AdvancedSuperAppObjectsService objService;
 
     @Autowired
-    public void setObjectService(SuperAppObjectsService objService) {
+    public void setObjectService(AdvancedSuperAppObjectsService objService) {
         this.objService = objService;
     }
 
@@ -52,8 +53,11 @@ public class SuperAppObjectsController {
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
-    public SuperAppObjectBoundary[] getAllObjects() {
-        return this.objService.getAllObjects().toArray(new SuperAppObjectBoundary[0]);
+    public SuperAppObjectBoundary[] getAllObjects(
+            @RequestParam(name = "size", required = false, defaultValue = "10") int size,
+            @RequestParam(name="page", required = false, defaultValue = "0") int page) {
+        return this.objService.getAllObjects(size,page).toArray(new SuperAppObjectBoundary[0]);
+        //return this.objService.getAllObjects().toArray(new SuperAppObjectBoundary[0]);
     }
 
     @RequestMapping(
@@ -71,7 +75,9 @@ public class SuperAppObjectsController {
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public SuperAppObjectBoundary[] getAllChildren(@PathVariable String superapp,
-                                                   @PathVariable String internalObjectId) {
+                                                   @PathVariable String internalObjectId,
+                                                   @RequestParam(name = "size", required = false, defaultValue = "10") int size,
+                                                   @RequestParam(name="page", required = false, defaultValue = "0") int page) {
         return this.objService.getChildren(superapp, internalObjectId).toArray(new SuperAppObjectBoundary[0]);
     }
 
@@ -83,4 +89,25 @@ public class SuperAppObjectsController {
                                                   @PathVariable String internalObjectId) {
         return this.objService.getParents(superapp, internalObjectId).toArray(new SuperAppObjectBoundary[0]);
     }
+
+    @RequestMapping(
+            path="/superapp/objects//superapp/objects/search/byType/{type}",
+            method = {RequestMethod.GET},
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public SuperAppObjectBoundary[] SearchObjectsByType( @PathVariable String type,
+                                                         @RequestParam(name = "size", required = false, defaultValue = "10") int size,
+                                                         @RequestParam(name="page", required = false, defaultValue = "0") int page) {
+        return this.objService.getAllObjects(size, page).toArray(new SuperAppObjectBoundary[0]);
+    }
+
+    @RequestMapping(
+            path="/superapp/objects/search/byAlias/{alias}",
+            method = {RequestMethod.GET},
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public SuperAppObjectBoundary[] SearchObjectsByExactAlias(@PathVariable String alias,
+                                                              @RequestParam(name = "size", required = false, defaultValue = "10") int size,
+                                                              @RequestParam(name="page", required = false, defaultValue = "0") int page) {
+        return this.objService.getAllObjects(size, page).toArray(new SuperAppObjectBoundary[0]);
+    }
+
 }

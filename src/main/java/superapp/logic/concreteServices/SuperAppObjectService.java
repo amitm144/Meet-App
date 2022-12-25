@@ -1,5 +1,7 @@
 package superapp.logic.concreteServices;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +16,7 @@ import superapp.data.IdGeneratorEntity;
 import superapp.data.SuperAppObjectEntity;
 import superapp.data.SuperAppObjectEntity.SuperAppObjectId;
 import superapp.logic.AbstractService;
-import superapp.logic.SuperAppObjectsService;
+import superapp.logic.AdvancedSuperAppObjectsService;
 import superapp.util.exceptions.CannotProcessException;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.exceptions.NotFoundException;
@@ -24,11 +26,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+
+
 @Service
-public class SuperAppObjectService extends AbstractService implements SuperAppObjectsService {
-    private SuperAppObjectEntityRepository objectRepository;
+public abstract class SuperAppObjectService extends AbstractService implements AdvancedSuperAppObjectsService {
+    public SuperAppObjectEntityRepository objectRepository;
     private IdGeneratorRepository idGenerator;
-    private SuperAppObjectConverter converter;
+    public SuperAppObjectConverter converter;
 
     @Autowired
     public SuperAppObjectService(SuperAppObjectConverter converter,
@@ -120,11 +124,11 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
                 .findById(this.converter.idToEntity(newChild))
                 .orElseThrow(() -> new NotFoundException("Cannot find children object"));
 
-       if (parent.addChild(child) && child.addParent(parent)) {
-           this.objectRepository.save(parent);
-           this.objectRepository.save(child);
-       } else
-           throw new CannotProcessException("Failed to update parent or child object");
+        if (parent.addChild(child) && child.addParent(parent)) {
+            this.objectRepository.save(parent);
+            this.objectRepository.save(child);
+        } else
+            throw new CannotProcessException("Failed to update parent or child object");
     }
 
     @Override
@@ -139,6 +143,7 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
     }
 
     @Override
+    @Deprecated
     @Transactional(readOnly = true)
     public List<SuperAppObjectBoundary> getChildren(String objectSuperapp, String internalObjectId) {
         SuperAppObjectEntity parent = this.objectRepository
@@ -147,6 +152,22 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
 
         return parent
                 .getChildren()
+                .stream()
+                .map(this.converter::toBoundary)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SuperAppObjectBoundary> getChildren(String objectSuperapp, String internalObjectId, int size, int page) {
+        SuperAppObjectEntity parent = this.objectRepository
+                .findById(new SuperAppObjectId(objectSuperapp, internalObjectId))
+                .orElseThrow(() -> new NotFoundException("Cannot find parent object"));
+
+        return parent
+                .getChildren()
+                //PageRequest.of(page, size, Sort.Direction.DESC, "userSuperapp", "userEmail")
+                // TODO
                 .stream()
                 .map(this.converter::toBoundary)
                 .collect(Collectors.toList());
@@ -167,16 +188,45 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
     }
 
     @Override
+    @Deprecated
     @Transactional(readOnly = true)
     public List<SuperAppObjectBoundary> getAllObjects() {
         Iterable<SuperAppObjectEntity> objects = this.objectRepository.findAll();
         return StreamSupport
-                .stream(objects.spliterator() , false)
+                .stream(objects.spliterator(), false)
                 .map(this.converter::toBoundary)
                 .collect(Collectors.toList());
     }
 
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SuperAppObjectBoundary> getAllObjects(int size, int page) {
+        return this.objectRepository.findAll(PageRequest.of(page, size, Sort.Direction.DESC,
+                        "userSuperapp", "userEmail"))
+                .stream()
+                .map(this.converter::toBoundary)
+                .collect(Collectors.toList());
+    }
+
+//    public List<SuperAppObjectBoundary> SearchObjectsByType(String type, int size, int page) {
+//        // find by type is in the object repository class
+//        return this.objectRepository.findByType(type, PageRequest.of(page, size, Sort.Direction.DESC, "userSuperapp", "userEmail"))
+//                .stream()
+//                .map(this.converter::toBoundary)
+//                .collect(Collectors.toList());
+//    }
+//
+//    public List<SuperAppObjectBoundary> SearchObjectsByExactAlias(String alias, int size, int page) {
+//        // find by alias is in the object repository class
+//        return this.objectRepository.findByAlias(alias, PageRequest.of(page, size, Sort.Direction.DESC, "userSuperapp", "userEmail"))
+//                .stream()
+//                .map(this.converter::toBoundary)
+//                .collect(Collectors.toList());
+//    }
     @Override
     @Transactional
-    public void deleteAllObjects() { this.objectRepository.deleteAll(); }
+    public void deleteAllObjects() {
+        this.objectRepository.deleteAll();
+    }
 }
