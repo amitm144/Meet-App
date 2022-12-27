@@ -14,6 +14,7 @@ import superapp.data.IdGeneratorEntity;
 import superapp.data.SuperAppObjectEntity;
 import superapp.data.SuperAppObjectEntity.SuperAppObjectId;
 import superapp.logic.AbstractService;
+import superapp.logic.SuperAppObjectFactory;
 import superapp.logic.SuperAppObjectsService;
 import superapp.util.exceptions.CannotProcessException;
 import superapp.util.exceptions.InvalidInputException;
@@ -29,14 +30,16 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
     private SuperAppObjectEntityRepository objectRepository;
     private IdGeneratorRepository idGenerator;
     private SuperAppObjectConverter converter;
+    private SuperAppObjectFactory ObjectFactory;
 
     @Autowired
     public SuperAppObjectService(SuperAppObjectConverter converter,
                                  SuperAppObjectEntityRepository objectRepository,
-                                 IdGeneratorRepository idGenerator) {
+                                 IdGeneratorRepository idGenerator,SuperAppObjectFactory ObjectFactory) {
         this.converter = converter;
         this.objectRepository = objectRepository;
         this.idGenerator = idGenerator;
+        this.ObjectFactory= ObjectFactory;
     }
 
     @Override
@@ -66,10 +69,11 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
         object.setObjectId(new SuperAppObjectIdBoundary(this.superappName, objectId));
         object.setActive(active);
         object.setCreationTimestamp(new Date());
-
+        ObjectFactory.setObjectDetails(object);
         this.objectRepository.save(converter.toEntity(object));
         return object;
     }
+
 
     @Override
     @Transactional

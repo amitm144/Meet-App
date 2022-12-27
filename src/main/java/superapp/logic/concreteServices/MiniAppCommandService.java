@@ -33,10 +33,11 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
     @Autowired
     public MiniAppCommandService(MiniappCommandConverter miniAppConverter,
                                  MiniAppCommandRepository miniappRepository,
-                                 IdGeneratorRepository idGenerator) {
+                                 IdGeneratorRepository idGenerator,MiniappCommandFactory runner) {
         this.miniAppConverter = miniAppConverter;
         this.miniappRepository = miniappRepository;
         this.idGenerator = idGenerator;
+        this.runner = runner;
 
     }
 
