@@ -4,14 +4,12 @@ import superapp.boundaries.user.UserIdBoundary;
 import superapp.util.wrappers.UserIdWrapper;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Date;
-import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Table(name="Objects")
-@IdClass(SuperAppObjectEntity.SuperAppObjectId.class)
+@IdClass(SuperappObjectPK.class)
 public class SuperAppObjectEntity {
     @Id
     private String objectId;
@@ -138,42 +136,6 @@ public class SuperAppObjectEntity {
 
     public boolean addChild(SuperAppObjectEntity child) {
         return child != this && !this.parents.contains(child) && this.children.add(child);
-    }
-
-    public static class SuperAppObjectId implements Serializable {
-        /* This class creates composite primary key for SuperAppObject */
-        @Column(name = "superapp")
-        private String superapp;
-        @Column(name = "objectId")
-        private String objectId;
-
-        public SuperAppObjectId() {}
-
-        public SuperAppObjectId(String superapp, String objectId) {
-            this.superapp = superapp;
-            this.objectId = objectId;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            SuperAppObjectId object = (SuperAppObjectId)o;
-            return objectId.equals(object.objectId) && superapp.equals(object.superapp);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(objectId, superapp);
-        }
-
-        public String getSuperapp() { return superapp; }
-
-        public void setSuperapp(String superapp) { this.superapp = superapp; }
-
-        public String getObjectId() { return objectId; }
-
-        public void setObjectId(String objectId) { this.objectId = objectId; }
     }
 
     @Override
