@@ -1,10 +1,13 @@
 package superapp.data.split;
 
+import superapp.converters.SuperAppObjectConverter;
+import superapp.data.SuperAppObjectEntity;
 import superapp.data.UserEntity;
 import superapp.data.GroupEntity;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 public class SplitTransaction {
 
@@ -16,19 +19,25 @@ public class SplitTransaction {
     private boolean isOpen;
     private String id;//TODO DB gives an ID
 
-    public SplitTransaction(GroupEntity group, UserEntity user, Date timestamp, String description, double originalPayment) { //balance must be greater than 0
+    private SuperAppObjectConverter converter ;
+
+    public SplitTransaction(SuperAppObjectEntity group, UserEntity user, Date timestamp, String description, double originalPayment) { //balance must be greater than 0
+        this.converter = new SuperAppObjectConverter();
+
         this.userPaid = user;
         this.timestamp = timestamp;
         this.description = description;
         this.originalPayment = originalPayment;
         this.isOpen= true;
+
         initGroupDebts(group);
         this.groupDebts.put(userPaid,originalPayment);
     }
 
-    private void initGroupDebts(GroupEntity group) {
+    private void initGroupDebts(SuperAppObjectEntity group) {
         this.groupDebts = new HashMap<UserEntity,Double>();
-        for (UserEntity user:group.getAllUsers())
+        List<UserEntity> allUsers = (List<UserEntity>) converter.toBoundary(group).getObjectDetails().get("allUsers");
+        for (UserEntity user:allUsers)
             groupDebts.put(user,0.0);
     }
 

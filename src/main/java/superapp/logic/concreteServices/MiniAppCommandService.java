@@ -12,6 +12,7 @@ import superapp.data.IdGeneratorEntity;
 import superapp.data.MiniAppCommandEntity;
 import superapp.logic.AbstractService;
 import superapp.logic.MiniAppCommandsService;
+import superapp.logic.MiniappCommandFactory;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.EmailChecker;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
@@ -22,11 +23,12 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Service
-public class MiniAppCommandService extends AbstractService implements MiniAppCommandsService {
+public class MiniAppCommandService extends AbstractService implements MiniAppCommandsService  {
     private MiniappCommandConverter miniAppConverter;
     private MiniAppCommandRepository miniappRepository;
     private IdGeneratorRepository idGenerator;
     private SplitService splitService;
+    private MiniappCommandFactory runner;
 
     @Autowired
     public MiniAppCommandService(MiniappCommandConverter miniAppConverter,
@@ -35,6 +37,7 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
         this.miniAppConverter = miniAppConverter;
         this.miniappRepository = miniappRepository;
         this.idGenerator = idGenerator;
+
     }
 
     @Override
@@ -91,8 +94,14 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
              if known - point to miniapp service
              otherwise throw error (command is already been saved)
         */
+
+        runner.runCommand(command.getCommandId().getMiniapp(),targetObject,invokedBy,command.getCommandAttributes(), command.getCommand());
+
+
         return command;
     }
+
+
 
     @Override
     @Transactional(readOnly = true)
@@ -113,14 +122,16 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
                 .collect(Collectors.toList());
     }
 
-    private void invokeCommandAtMiniapp(MiniAppCommandBoundary command, String miniapp){
-        if (miniapp.equals("Split"))
-            splitService.invokeCommand(command);
-        else
-            throw new RuntimeException("Unknown miniApp");
-    }
+//    private void invokeCommandAtMiniapp(MiniAppCommandBoundary command, String miniapp){
+//        if (miniapp.equals("Split"))
+//            splitService.invokeCommand(command);
+//        else
+//            throw new RuntimeException("Unknown miniApp");
+//    }
 
     @Override
     @Transactional
     public void deleteALlCommands() { this.miniappRepository.deleteAll(); }
+
+
 }

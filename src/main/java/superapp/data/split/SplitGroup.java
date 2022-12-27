@@ -1,14 +1,13 @@
 
-package superapp.data.group;
+package superapp.data.split;
 
 import superapp.data.GroupEntity;
 import superapp.data.UserEntity;
-import superapp.data.split.SplitTransaction;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SplitGroupEntity {
+public class SplitGroup {
 
     private String groupId;
     private String superapp;
@@ -18,10 +17,10 @@ public class SplitGroupEntity {
     private ArrayList<SplitTransaction> expenses;
     private String SplitTitle;
 
-    public SplitGroupEntity() {
+    public SplitGroup() {
     }
 
-    public SplitGroupEntity(GroupEntity group, String splitTitle) {
+    public SplitGroup(GroupEntity group, String splitTitle) {
         this.groupId = group.getGroupId(); // todo
         this.allUsers= group.getAllUsers();
         this.avatar= group.getAvatar();

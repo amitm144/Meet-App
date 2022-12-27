@@ -1,168 +1,170 @@
 package superapp.logic.concreteServices;
 
-import superapp.boundaries.command.MiniAppCommandBoundary;
-import superapp.boundaries.split.GroupBoundary;
-import superapp.boundaries.user.UserBoundary;
-import superapp.converters.GroupConverter;
-import superapp.converters.SplitGroupConverter;
-import superapp.converters.UserConverter;
-import superapp.data.group.SplitGroupEntity;
-import superapp.data.GroupEntity;
+import superapp.converters.SuperAppObjectConverter;
+import superapp.dal.SuperAppObjectEntityRepository;
+import superapp.dal.UserEntityRepository;
+import superapp.data.SuperAppObjectEntity;
+import superapp.data.split.SplitGroup;
 import superapp.data.UserEntity;
 import superapp.data.split.SplitTransaction;
+import superapp.logic.MiniappCommandFactory;
 import superapp.logic.SplitsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import superapp.util.wrappers.SuperAppObjectIdWrapper;
+import superapp.util.wrappers.UserIdWrapper;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
-public class SplitService implements SplitsService {
+public class SplitService implements SplitsService, MiniappCommandFactory {
 
-        private SplitGroupConverter splitGroupConverter;
-        private GroupConverter groupConverter;
-        private UserConverter userConverter;
-        private ArrayList<SplitGroupEntity> groups;
+	private UserEntityRepository userEntityRepository;
+	private SuperAppObjectEntityRepository objectRepository;
+	private SuperAppObjectConverter converter ;
 
-    @Autowired
-        public SplitService(SplitGroupConverter splitGroupConverter ,GroupConverter groupConverter,UserConverter userConverter) {
-            this.splitGroupConverter = splitGroupConverter;
-            this.groupConverter = groupConverter;
-            this.userConverter= userConverter;
-            this.groups = new ArrayList<SplitGroupEntity>();
-        }
 
-    public void invokeCommand(MiniAppCommandBoundary command) {
-            String commandCase = command.getCommand();
-            GroupEntity group = this.groupConverter.toEntity((GroupBoundary) command.getCommandAttributes().get("group"));
-            //UserId From DB
+	@Autowired
+	public SplitService(UserEntityRepository userEntityRepository, SuperAppObjectEntityRepository objectRepository) {
+		this.userEntityRepository = userEntityRepository;
+		this.objectRepository = objectRepository;
+		this.converter = new SuperAppObjectConverter();
+	}
+
+	@Override
+	public void runCommand(String miniapp, SuperAppObjectIdWrapper targetObject, UserIdWrapper invokedBy, Map<String, Object> attributes, String commandCase) {
+        UserEntity user = userEntityRepository.findById(
+                new UserEntity.UserPK(invokedBy.getUserId().getSuperapp(), invokedBy.getUserId().getEmail()))
+                .get();
+        SuperAppObjectEntity group = objectRepository.findById(
+                (new SuperAppObjectEntity.SuperAppObjectId(targetObject.getObjectId().getSuperapp(), targetObject.getObjectId().getInternalObjectId())))
+                .get();
+
+
         switch (commandCase) {
-            case "openNewSplitGroup": {
-                String title = (String) command.getCommandAttributes().get("title");
-                this.openNewSplitGroup(group, title);
-                break;
-            }
-            case "openNewTransaction": {
-                String description = (String) command.getCommandAttributes().get("description");
-                Double splitBalance = (Double) command.getCommandAttributes().get("splitBalance");
-                UserBoundary user = (UserBoundary) command.getCommandAttributes().get("user");
-                this.openNewTransaction(group, userConverter.toEntity(user), description, splitBalance);//TODO add GET USER
-                break;
-            }
-            case "removeTransaction":{
-                //TODO ADD removeTrasnacion{
-                UserBoundary user = (UserBoundary) command.getCommandAttributes().get("user");
-                String transId = (String) command.getCommandAttributes().get("transactionId");
-                SplitTransaction trans = null;//DBfindByID
-                this.removeTransaction(this.userConverter.toEntity(user), group, trans);
-                    break;
-            }
-            case "updateTransaction": {
-                //TODO ADD updateTransacion
-                UserBoundary user = (UserBoundary) command.getCommandAttributes().get("user");
-                String transId = (String) command.getCommandAttributes().get("transactionId");
-                SplitTransaction trans = null;//DBfindByID
-                double updated_payment = (double) command.getCommandAttributes().get("payment");
-                this.updateTransaction(this.userConverter.toEntity(user), group, trans,updated_payment);
-                break;
-            }
-                case "showDebt": {//TODO Show All USERS{
-                    UserBoundary user = (UserBoundary) command.getCommandAttributes().get("user");
-                    this.showDebt(group, userConverter.toEntity(user));
-                    break;
-                }
-                case "payDebt": {
-                    UserBoundary user = (UserBoundary) command.getCommandAttributes().get("user");
-                    this.payDebt(group, userConverter.toEntity(user));
-                    break;
-                }
-                default:
-                    throw new RuntimeException("Command Not Found");
-            }
-    }
+
+			case "openNewTransaction": {
+				String description = (String) attributes.get("description");
+				Double splitBalance = (Double) attributes.get("splitBalance");
+
+				this.openNewTransaction(group, user, description, splitBalance);
+				break;
+			}
+			case "removeTransaction": {
+				String transId = (String) attributes.get("transactionId");
+				SplitTransaction tran = null; // repo.get(tranId)
+				this.removeTransaction(user, group, tran);
+				break;
+			}
+			case "updateTransaction": {
+				String transId = (String) attributes.get("transactionId");
+				SplitTransaction tran = null; // repo.get(tranId)
+
+				double updated_payment = (double) attributes.get("payment");
+				this.updateTransaction(user, group, tran, updated_payment);
+				break;
+			}
+			case "showDebt": {
+				this.showDebt(group, user);
+				break;
+			}
+			case "payDebt": {
+				this.payDebt(group, user);
+				break;
+			}
+			default:
+				throw new RuntimeException("Command Not Found");
+		}
+
+	}
+
+
+
+
+
+	@Override
+	public void openNewTransaction(SuperAppObjectEntity group, UserEntity payedUser, String description, double splitbalance) {
+
+		SplitTransaction trans = new SplitTransaction(group, payedUser, new Date(), description, splitbalance);
+//		split_group.addNewTransaction(trans);//  Example : Payed user : 200,Not payed :0,  Not payed :0,Not payed :0
+		computeTransactionBalance(group);//Example : Payed user : 150,Not payed :-50,  Not payed :-50,Not payed :-50
+	}
+
 
     @Override
-    public void openNewSplitGroup(GroupEntity group, String title) {
-        SplitGroupEntity newGroup = new SplitGroupEntity(group, title);
-        this.groups.add(newGroup);
-    }
+    public void removeTransaction(UserEntity user, SuperAppObjectEntity group, SplitTransaction transaction) {
 
-    @Override
-    public void openNewTransaction(GroupEntity group, UserEntity payedUser, String description, double splitbalance){
-        SplitGroupEntity split_group = getGroupSplit(group);
-        if(split_group == null )throw new RuntimeException("Incorrect Group!!!!!");
-        SplitTransaction trans = new SplitTransaction(group,payedUser,new Date(),description,splitbalance);
-        split_group.addNewTransaction(trans);//  Example : Payed user : 200,Not payed :0,  Not payed :0,Not payed :0
-        computeTransactionBalance(split_group);//Example : Payed user : 150,Not payed :-50,  Not payed :-50,Not payed :-50
-    }
-
-    @Override
-    public double showDebt(GroupEntity group, UserEntity user) {
-        SplitGroupEntity split_group = getGroupSplit(group);
-        double allDebt = 0;
-        for (SplitTransaction trans:split_group.getExpenses()) {
-            if(trans.getGroupDebts().containsKey(user))
-                allDebt+=trans.getGroupDebts().get(user);
-        }
-        return allDebt;
-    }
-
-    private SplitGroupEntity getGroupSplit(GroupEntity group){
-        for (SplitGroupEntity g:this.groups) {
-            if(group.equals(g.getGroup())) return g;
-        }
-        return null;
-    }
-    @Override
-    public void payDebt(GroupEntity group,UserEntity user) {//Example : Payed user : 150,Not payed :-50,  Not payed :-50,Not payed :-50
-        SplitGroupEntity split_group = getGroupSplit(group);
-        for (SplitTransaction trans:split_group.getExpenses()) {
-            HashMap<UserEntity, Double> debt = trans.getGroupDebts();
-            if(debt.get(user)!=null &&trans.isOpen()) {
-                trans.ComputeBank(user); //Example : Payed user : 100,Not payed :0,  Not payed :-50,Not payed :-50
-            }
-        }
-    }
-    @Override
-    public void computeTransactionBalance(SplitGroupEntity group) { // total_compute_per_group
-        for (UserEntity user:group.getGroup().getAllUsers()){
-            for (SplitTransaction trans:group.getExpenses()) {
-                HashMap<UserEntity, Double> debt = trans.getGroupDebts();
-                double balance = debt.get(user);
-                double new_balance = balance -trans.getOriginalPayment() / group.getGroup().getAllUsers().size();
-                debt.put(user,new_balance);
-            }
-        }
-    }
-
-    @Override
-    public void removeTransaction(UserEntity user,GroupEntity group, SplitTransaction transaction) {
-
-        if(!user.equals(transaction.getUserPaid()))
+        if (!user.equals(transaction.getUserPaid()))
             throw new RuntimeException("Only the payer can remove the transaction");
-        if(transaction.getGroupDebts().get(user) != transaction.getOriginalPayment())
+        if (transaction.getGroupDebts().get(user) != transaction.getOriginalPayment())
             throw new RuntimeException("Cannot close payment , Atleast one user has been paid");
-        SplitGroupEntity split_group = getGroupSplit(group);
+        SplitGroup split_group = getGroupSplit(group);
         for (UserEntity trans_user : transaction.getGroupDebts().keySet())
-            transaction.getGroupDebts().put(trans_user,0.0);
+            transaction.getGroupDebts().put(trans_user, 0.0);
 
         transaction.setOpen(false);
         split_group.getExpenses().remove(transaction);
     }
 
     @Override
-    public void updateTransaction(UserEntity user, GroupEntity group, SplitTransaction transaction,double updated_payment) {
-        SplitGroupEntity split_group = getGroupSplit(group);
-        if(!user.equals(transaction.getUserPaid()))
+    public void updateTransaction(UserEntity user, SuperAppObjectEntity group, SplitTransaction transaction, double updated_payment) {
+
+        if (!user.equals(transaction.getUserPaid()))
             throw new RuntimeException("Only the payer can remove the transaction");
-        if(transaction.getGroupDebts().get(user) != transaction.getOriginalPayment())
+        if (transaction.getGroupDebts().get(user) != transaction.getOriginalPayment())
             throw new RuntimeException("Cannot close payment , Atleast one user has been paid");
 
         for (UserEntity trans_user : transaction.getGroupDebts().keySet())
-            transaction.getGroupDebts().put(trans_user,0.0);
-        transaction.getGroupDebts().put(user,updated_payment);
-        computeTransactionBalance(split_group);
+            transaction.getGroupDebts().put(trans_user, 0.0);
+        transaction.getGroupDebts().put(user, updated_payment);
+        computeTransactionBalance(group);
     }
+	@Override
+	public double showDebt(SuperAppObjectEntity group, UserEntity user) {
+		SplitGroup split_group = getGroupSplit(group);
+		double allDebt = 0;
+		for (SplitTransaction trans : split_group.getExpenses()) {
+			if (trans.getGroupDebts().containsKey(user))
+				allDebt += trans.getGroupDebts().get(user);
+		}
+		return allDebt;
+	}
+
+	@Override
+	public void payDebt(SuperAppObjectEntity group, UserEntity user) {//Example : Payed user : 150,Not payed :-50,  Not payed :-50,Not payed :-50
+		SplitGroup split_group = getGroupSplit(group);
+		for (SplitTransaction trans : split_group.getExpenses()) {
+			HashMap<UserEntity, Double> debt = trans.getGroupDebts();
+			if (debt.get(user) != null && trans.isOpen()) {
+				trans.ComputeBank(user); //Example : Payed user : 100,Not payed :0,  Not payed :-50,Not payed :-50
+			}
+		}
+	}
+
+
+
+
+
+
+	public void computeTransactionBalance(SuperAppObjectEntity group) { // total_compute_per_group
+		List<UserEntity> allUsers = (List<UserEntity>) converter.toBoundary(group).getObjectDetails().get("allUsers");
+
+		for (UserEntity user : allUsers) {
+			for (SplitTransaction trans : group.getExpenses()) {
+				HashMap<UserEntity, Double> debt = trans.getGroupDebts();
+				double balance = debt.get(user);
+				double new_balance = balance - trans.getOriginalPayment() / group.getGroup().getAllUsers().size();
+				debt.put(user, new_balance);
+			}
+		}
+	}
+
+
+
+
+
+
 }
