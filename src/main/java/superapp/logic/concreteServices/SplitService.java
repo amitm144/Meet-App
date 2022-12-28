@@ -13,15 +13,16 @@ import org.springframework.stereotype.Service;
 import superapp.logic.SuperAppObjectFactory;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
 import superapp.util.wrappers.UserIdWrapper;
+
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class SplitService implements SplitsService,MiniappCommandFactory, SuperAppObjectFactory {
+public class SplitService implements SplitsService, MiniappCommandFactory, SuperAppObjectFactory {
 
 	private UserEntityRepository userEntityRepository;
 	private SuperAppObjectEntityRepository objectRepository;
-	private SuperAppObjectConverter converter ;
+	private SuperAppObjectConverter converter;
 
 	@Autowired
 	public SplitService(UserEntityRepository userEntityRepository, SuperAppObjectEntityRepository objectRepository) {
@@ -76,62 +77,78 @@ public class SplitService implements SplitsService,MiniappCommandFactory, SuperA
 	@Override
 	public double showDebt(SuperAppObjectEntity group, UserEntity user) {
 		double allDebt = 0;
-		for (SuperAppObjectEntity trans : group.getChildren()) {
-			if (trans.getType() == "Transaction") {
-				Map<UserEntity, Double> AllExpenses = (Map<UserEntity, Double>) this.converter.toBoundary(trans).getObjectDetails().get("AllExpenses");
-						allDebt += AllExpenses.get(user);
-			}
-		}
-		return allDebt;
-	}
-	@Override
-	public void payDebt(SuperAppObjectEntity group, UserEntity user) {//Example : Payed user : 150,Not payed :-50,  Not payed :-50,Not payed :-50
-		for (SuperAppObjectEntity transE : group.getChildren()) {
-			if (transE.getType() == "Transaction") {
-				SuperAppObjectBoundary trans = this.converter.toBoundary(transE);
-				Map<UserEntity, Double> AllExpenses = (Map<UserEntity, Double>) trans.getObjectDetails().get("AllExpenses");
-				UserEntity payed_user = (UserEntity) trans.getObjectDetails().get("payedUser");
-				double userDebt = AllExpenses.get(user);
-					if (userDebt <=0)
-					throw new RuntimeException("Only Users with debt can pay"); // For Example Trans owner will not able to pay due to his Negative Debt
-				else{
-					if(!ComputeTransaction(user,trans,userDebt,payed_user,AllExpenses))//Example : Payed user : 100,Not payed :0,  Not payed :-50,Not payed :-50
-						//TODO removeTransaction
-				}
-			}
+		for (SuperAppObjectEntity trans : group.getChildren().stream().filter(t -> t.getType().equals("Transaction")).toList()) {
+			Map<UserEntity, Double> AllExpenses = (Map<UserEntity, Double>) this.converter.detailsToMap(trans.getObjectDetails()).get("AllExpenses");
+			allDebt += AllExpenses.get(user);
 
 		}
+		return allDebt;
+
+		return group.getChildren()
+				.stream()
+				.filter(t -> t.getType().equals("Transaction"))
+				.map(this.converter::toBoundary)
+				.map(d->(double)d.getObjectDetails().get("AllExpenses"))
+				.reduce(a, b -> a + b);
+
 	}
-	private boolean ComputeTransaction(UserEntity user, SuperAppObjectBoundary trans, double userDebt, UserEntity payed_user, Map<UserEntity, Double> allExpenses) {
-		boolean isOpen=true;
-		double payedUserDebts = allExpenses.get(payed_user);
-		allExpenses.put(payed_user,payedUserDebts+userDebt);
-		allExpenses.put(user,0.0);
-		trans.getObjectDetails().put("AllExpenses",allExpenses);
-		if(allExpenses.get(payed_user)==0) {
-			trans.getObjectDetails().put("isTransOpen", false);
-			isOpen=false;
+
+	@Override
+	public void payDebt(SuperAppObjectEntity group, UserEntity user) {//Example : Payed user : 150,Not payed :-50,  Not payed :-50,Not payed :-50
+		for (SuperAppObjectEntity trans : group.getChildren().stream().filter(t -> t.getType().equals("Transaction")).toList()) {
+
+			Map<UserEntity, Double> AllExpenses = (Map<UserEntity, Double>) converter.detailsToMap(trans.getObjectDetails()).get("AllExpenses");
+			UserEntity paid_user = (UserEntity) converter.detailsToMap(trans.getObjectDetails()).get("paidUser");
+
+			double userDebt = AllExpenses.get(user);
+			if (userDebt <= 0)
+				throw new RuntimeException("Only Users with debt can pay"); // For Example Trans owner will not able to pay due to his Negative Debt
+			else {
+				if (!ComputeTransaction(user, converter.toBoundary(trans), userDebt, paid_user, AllExpenses)) { //Example : Payed user : 100,Not payed :0,  Not payed :-50,Not payed :-50
+					//TODO removeTransaction
+				}
+			}
+		}
+
+	}
+
+
+	private boolean ComputeTransaction(UserEntity user, SuperAppObjectBoundary trans, double userDebt, UserEntity paid_user, Map<UserEntity, Double> allExpenses) {
+		boolean isOpen = true;
+		double paidUserDebts = allExpenses.get(paid_user);
+		allExpenses.put(paid_user, paidUserDebts + userDebt);
+		allExpenses.put(user, 0.0);
+		trans.getObjectDetails().replace("AllExpenses", allExpenses);
+		if (allExpenses.get(paid_user) == 0) {
+			trans.getObjectDetails().replace("isTransOpen", false);
+			isOpen = false;
 		}
 		this.objectRepository.save(converter.toEntity(trans));
 		return isOpen;
 	}
+
 	public SuperAppObjectBoundary computeTransactionBalance(SuperAppObjectBoundary trans) { // total_compute_per_group
 		HashMap<UserEntity, Double> allExpenses = (HashMap<UserEntity, Double>) trans.getObjectDetails().get("AllExpenses");
-		double originalPayment = (Double) trans.getObjectDetails().get(originalPayment);
+		double originalPayment = (Double) trans.getObjectDetails().get("originalPayment");
 		for (UserEntity user : allExpenses.keySet()) {
-				double balance = allExpenses.get(user);
-				double new_balance = balance -originalPayment / allExpenses.keySet().size();
-				allExpenses.put(user, new_balance);
-			}
-		trans.getObjectDetails().put("allExpenses",allExpenses);
-		return trans;
+			double balance = allExpenses.get(user);
+			double new_balance = balance - originalPayment / allExpenses.keySet().size();
+			allExpenses.put(user, new_balance);
 		}
+		trans.getObjectDetails().replace("allExpenses", allExpenses);
+		return trans;
+	}
 
 
 	@Override
 	public SuperAppObjectBoundary setObjectDetails(SuperAppObjectBoundary object) {
-		if(object.getType() == "Transaction")
+		if (object.getType() == "Transaction")
 			return computeTransactionBalance(object);
+		return null;
+	}
+
+	@Override
+	public SuperAppObjectEntity updateObjectDetails(SuperAppObjectEntity object) {
 		return null;
 	}
 }
