@@ -12,7 +12,7 @@ import superapp.data.IdGeneratorEntity;
 import superapp.data.MiniAppCommandEntity;
 import superapp.logic.AbstractService;
 import superapp.logic.MiniAppCommandsService;
-import superapp.logic.MiniappCommandFactory;
+import superapp.logic.ServicesFactory;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.EmailChecker;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
@@ -27,17 +27,15 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
     private MiniappCommandConverter miniAppConverter;
     private MiniAppCommandRepository miniappRepository;
     private IdGeneratorRepository idGenerator;
-    private SplitService splitService;
-    private MiniappCommandFactory runner;
-
+    private ServicesFactory servicesFactory;
     @Autowired
     public MiniAppCommandService(MiniappCommandConverter miniAppConverter,
                                  MiniAppCommandRepository miniappRepository,
-                                 IdGeneratorRepository idGenerator,MiniappCommandFactory runner) {
+                                 IdGeneratorRepository idGenerator, ServicesFactory service) {
         this.miniAppConverter = miniAppConverter;
         this.miniappRepository = miniappRepository;
         this.idGenerator = idGenerator;
-        this.runner = runner;
+        this.servicesFactory = service;
 
     }
 
@@ -89,14 +87,8 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
         command.getCommandId().setSuperapp(this.superappName);
 
         this.miniappRepository.save(this.miniAppConverter.toEntity(command));
-        /*
-            TODO:
-             add check for known miniapp
-             if known - point to miniapp service
-             otherwise throw error (command is already been saved)
-        */
-
-        runner.runCommand(command.getCommandId().getMiniapp(),targetObject,invokedBy,command.getCommandAttributes(), command.getCommand());
+        //if Miniaap Not Found Service Throws runtime Exception
+        this.servicesFactory.runCommand(command.getCommandId().getMiniapp(),targetObject,invokedBy,command.getCommandAttributes(), command.getCommand());
 
 
         return command;

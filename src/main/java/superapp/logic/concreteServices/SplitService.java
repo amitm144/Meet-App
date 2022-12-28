@@ -6,19 +6,19 @@ import superapp.dal.SuperAppObjectEntityRepository;
 import superapp.dal.UserEntityRepository;
 import superapp.data.SuperAppObjectEntity;
 import superapp.data.UserEntity;
-import superapp.logic.MiniappCommandFactory;
+import superapp.logic.ServicesFactory;
 import superapp.logic.SplitsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import superapp.logic.SuperAppObjectFactory;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
 import superapp.util.wrappers.UserIdWrapper;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
-public class SplitService implements SplitsService, MiniappCommandFactory, SuperAppObjectFactory {
+public class SplitService implements SplitsService, ServicesFactory {
 
 	private UserEntityRepository userEntityRepository;
 	private SuperAppObjectEntityRepository objectRepository;
@@ -47,7 +47,7 @@ public class SplitService implements SplitsService, MiniappCommandFactory, Super
 			}
 			case "showAllDebts": {
 				//TODO add SHOW all Debts
-				//	this.showAllDebt(group);
+				this.showAllDebt(group);
 				break;
 			}
 			case "payDebt": {
@@ -59,43 +59,37 @@ public class SplitService implements SplitsService, MiniappCommandFactory, Super
 		}
 	}
 
-//TODO - Add in Object DeleteObject
-//		public void removeTransaction(UserEntity user, SuperAppObjectEntity group, SplitTransaction transaction) {
-//        if (!user.equals(transaction.getUserPaid()))
-//            throw new RuntimeException("Only the payer can remove the transaction");
-//        if (transaction.getGroupDebts().get(user) != transaction.getOriginalPayment())
-//            throw new RuntimeException("Cannot close payment , Atleast one user has been paid");
-//        SplitGroup split_group = getGroupSplit(group);
-//        for (UserEntity trans_user : transaction.getGroupDebts().keySet())
-//            transaction.getGroupDebts().put(trans_user, 0.0);
-//
-//        transaction.setOpen(false);
-//        split_group.getExpenses().remove(transaction);
-//    }
+
+	@Override
+	public SuperAppObjectBoundary setObjectDetails(SuperAppObjectBoundary object) { //  SplitGroup
+		if (object.getType() == "Transaction")
+			return computeTransactionBalance(object);
+		return null;
+	}
 
 
 	@Override
 	public double showDebt(SuperAppObjectEntity group, UserEntity user) {
 		double allDebt = 0;
-		for (SuperAppObjectEntity trans : group.getChildren().stream().filter(t -> t.getType().equals("Transaction")).toList()) {
+		for (SuperAppObjectEntity trans : group.getChildren().stream().filter(t -> t.getType().equals("Transaction")).collect(Collectors.toList())) {
 			Map<UserEntity, Double> AllExpenses = (Map<UserEntity, Double>) this.converter.detailsToMap(trans.getObjectDetails()).get("AllExpenses");
 			allDebt += AllExpenses.get(user);
 
 		}
 		return allDebt;
-
-		return group.getChildren()
-				.stream()
-				.filter(t -> t.getType().equals("Transaction"))
-				.map(this.converter::toBoundary)
-				.map(d->(double)d.getObjectDetails().get("AllExpenses"))
-				.reduce(a, b -> a + b);
+//
+//		return group.getChildren()
+//				.stream()
+//				.filter(t -> t.getType().equals("Transaction"))
+//				.map(this.converter::toBoundary)
+//				.map(d->(double)d.getObjectDetails().get("AllExpenses"))
+//				.reduce(a, b -> a + b);
 
 	}
 
 	@Override
 	public void payDebt(SuperAppObjectEntity group, UserEntity user) {//Example : Payed user : 150,Not payed :-50,  Not payed :-50,Not payed :-50
-		for (SuperAppObjectEntity trans : group.getChildren().stream().filter(t -> t.getType().equals("Transaction")).toList()) {
+		for (SuperAppObjectEntity trans : group.getChildren().stream().filter(t -> t.getType().equals("Transaction")).collect(Collectors.toList())) {
 
 			Map<UserEntity, Double> AllExpenses = (Map<UserEntity, Double>) converter.detailsToMap(trans.getObjectDetails()).get("AllExpenses");
 			UserEntity paid_user = (UserEntity) converter.detailsToMap(trans.getObjectDetails()).get("paidUser");
@@ -130,25 +124,40 @@ public class SplitService implements SplitsService, MiniappCommandFactory, Super
 	public SuperAppObjectBoundary computeTransactionBalance(SuperAppObjectBoundary trans) { // total_compute_per_group
 		HashMap<UserEntity, Double> allExpenses = (HashMap<UserEntity, Double>) trans.getObjectDetails().get("AllExpenses");
 		double originalPayment = (Double) trans.getObjectDetails().get("originalPayment");
-		for (UserEntity user : allExpenses.keySet()) {
-			double balance = allExpenses.get(user);
-			double new_balance = balance - originalPayment / allExpenses.keySet().size();
-			allExpenses.put(user, new_balance);
-		}
+		allExpenses.keySet().stream()
+				.map(user -> allExpenses.put(user, allExpenses.get(user) - originalPayment / allExpenses.keySet().size()))
+				.collect(Collectors.toList());
 		trans.getObjectDetails().replace("allExpenses", allExpenses);
 		return trans;
-	}
-
+	}//
 
 	@Override
-	public SuperAppObjectBoundary setObjectDetails(SuperAppObjectBoundary object) {
-		if (object.getType() == "Transaction")
-			return computeTransactionBalance(object);
-		return null;
+	public double showAllDebts(SuperAppObjectEntity group, UserEntity user) {
+		return 0;
 	}
 
 	@Override
-	public SuperAppObjectEntity updateObjectDetails(SuperAppObjectEntity object) {
+	public Map<UserEntity, Double> showAllDebt(SuperAppObjectEntity group) {
 		return null;
+	}
+
+
+	public void removeTransaction(UserEntity user, SuperAppObjectEntity group, SuperAppObjectEntity transaction) {
+		Map<UserEntity, Double> userDebt = (Map<UserEntity, Double>)this.converter.detailsToMap(transaction.getObjectDetails()).get("userDebt");
+		double originalPayment = (double) this.converter.detailsToMap(transaction.getObjectDetails()).get("originalPayment");
+
+		if (userDebt.get(user) !=originalPayment)
+            throw new RuntimeException("Cannot close payment, one user or more already paid");
+
+		objectRepository.delete(transaction); // ?
+    }
+
+
+
+	@Override
+	public SuperAppObjectEntity updateObjectDetails(SuperAppObjectEntity newTransaction) { //Case update Transaction
+		computeTransactionBalance(this.converter.toBoundary(newTransaction));
+		objectRepository.save(newTransaction);
+		return newTransaction;
 	}
 }

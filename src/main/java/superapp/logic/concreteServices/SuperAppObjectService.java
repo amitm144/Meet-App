@@ -20,6 +20,7 @@ import superapp.util.exceptions.CannotProcessException;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.exceptions.NotFoundException;
 import superapp.util.EmailChecker;
+import superapp.util.wrappers.factorys.ServiceFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,16 +31,16 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
     private SuperAppObjectEntityRepository objectRepository;
     private IdGeneratorRepository idGenerator;
     private SuperAppObjectConverter converter;
-    private SuperAppObjectFactory ObjectFactory;
+    private ServiceFactory serviceFactory;
 
     @Autowired
     public SuperAppObjectService(SuperAppObjectConverter converter,
                                  SuperAppObjectEntityRepository objectRepository,
-                                 IdGeneratorRepository idGenerator,SuperAppObjectFactory ObjectFactory) {
+                                 IdGeneratorRepository idGenerator,ServiceFactory serviceFactory) {
         this.converter = converter;
         this.objectRepository = objectRepository;
         this.idGenerator = idGenerator;
-        this.ObjectFactory= ObjectFactory;
+        this.serviceFactory= serviceFactory;
     }
 
     @Override
@@ -69,7 +70,7 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
         object.setObjectId(new SuperAppObjectIdBoundary(this.superappName, objectId));
         object.setActive(active);
         object.setCreationTimestamp(new Date());
-        ObjectFactory.setObjectDetails(object);
+        object =serviceFactory.setObjectDetails(object);
         this.objectRepository.save(converter.toEntity(object));
         return object;
     }
@@ -84,7 +85,6 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
                 this.objectRepository.findById(new SuperAppObjectId(objectSuperapp, internalObjectId));
         if (objectO.isEmpty())
             throw new NotFoundException("Unknown object");
-
         SuperAppObjectEntity objectE = objectO.get();
         Map<String, Object> newDetails = update.getObjectDetails();
         Boolean newActive = update.getActive();
@@ -109,7 +109,6 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
             else
                 objectE.setAlias(newAlias);
         }
-
         objectE = this.objectRepository.save(objectE);
         return this.converter.toBoundary(objectE);
     }
