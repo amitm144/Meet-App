@@ -14,6 +14,7 @@ import superapp.util.wrappers.SuperAppObjectIdWrapper;
 import superapp.util.wrappers.UserIdWrapper;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -134,7 +135,10 @@ public class SplitService implements SplitsService, ServicesFactory {
 
 	@Override
 	public Map<UserEntity, Double> showAllDebt(SuperAppObjectEntity group) {
-
+		List<UserEntity> allGroupUsers = (List<UserEntity>)converter.detailsToMap(group.getObjectDetails()).get("allUsers");
+		return allGroupUsers
+				.stream()
+				.collect(Collectors.toMap(user -> user, user -> showDebt(group, user)));
 	}
 
 
