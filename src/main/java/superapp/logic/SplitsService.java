@@ -13,8 +13,5 @@ public interface SplitsService {
 
  public double showDebt(SuperAppObjectEntity group, UserEntity user);
  public SuperAppObjectBoundary computeTransactionBalance(SuperAppObjectBoundary trans);
-
- public double showAllDebts(SuperAppObjectEntity group, UserEntity user);
-
  Map<UserEntity,Double> showAllDebt(SuperAppObjectEntity group);
 }

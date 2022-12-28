@@ -131,14 +131,10 @@ public class SplitService implements SplitsService, ServicesFactory {
 		return trans;
 	}//
 
-	@Override
-	public double showAllDebts(SuperAppObjectEntity group, UserEntity user) {
-		return 0;
-	}
 
 	@Override
 	public Map<UserEntity, Double> showAllDebt(SuperAppObjectEntity group) {
-		return null;
+
 	}
 
 
