@@ -6,9 +6,12 @@ import java.util.Objects;
 
 @Entity
 @Table(name="MiniAppCommand")
+@IdClass(MiniappCommandPK.class)
 public class MiniAppCommandEntity {
-    private String superapp ;
-    private String miniapp ;
+    @Id
+    private String superapp;
+    @Id
+    private String miniapp;
     @Id
     private String internalCommandId;
     private String command;
@@ -17,8 +20,8 @@ public class MiniAppCommandEntity {
     private String email ; // USERID
     private String commandAttributes;
 
-    public MiniAppCommandEntity(){
-    }
+    public MiniAppCommandEntity() {}
+
     public MiniAppCommandEntity(String superApp, String miniApp, String internalCommandId, String command, String internalObjectId, Date invocationTimeStamp, String email, String commandAttributes) {
         this();
         this.superapp = superApp;
