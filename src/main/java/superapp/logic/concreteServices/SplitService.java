@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
 import superapp.util.wrappers.UserIdWrapper;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +46,6 @@ public class SplitService implements SplitsService, ServicesFactory {
 				break;
 			}
 			case "showAllDebts": {
-				//TODO add SHOW all Debts
 				this.showAllDebt(group);
 				break;
 			}
@@ -59,16 +57,18 @@ public class SplitService implements SplitsService, ServicesFactory {
 				throw new RuntimeException("Command Not Found");
 		}
 	}
-
-
 	@Override
 	public SuperAppObjectBoundary setObjectDetails(SuperAppObjectBoundary object) { //  SplitGroup
 		if (object.getType() == "Transaction")
 			return computeTransactionBalance(object);
 		return null;
 	}
-
-
+	@Override
+	public SuperAppObjectEntity updateObjectDetails(SuperAppObjectEntity newTransaction) { //Case update Transaction
+		computeTransactionBalance(this.converter.toBoundary(newTransaction));
+		objectRepository.save(newTransaction);
+		return newTransaction;
+	}
 	@Override
 	public double showDebt(SuperAppObjectEntity group, UserEntity user) {
 		double allDebt = 0;
@@ -87,7 +87,6 @@ public class SplitService implements SplitsService, ServicesFactory {
 //				.reduce(a, b -> a + b);
 
 	}
-
 	@Override
 	public void payDebt(SuperAppObjectEntity group, UserEntity user) {//Example : Payed user : 150,Not payed :-50,  Not payed :-50,Not payed :-50
 		for (SuperAppObjectEntity trans : group.getChildren().stream().filter(t -> t.getType().equals("Transaction")).collect(Collectors.toList())) {
@@ -106,8 +105,6 @@ public class SplitService implements SplitsService, ServicesFactory {
 		}
 
 	}
-
-
 	private boolean ComputeTransaction(UserEntity user, SuperAppObjectBoundary trans, double userDebt, UserEntity paid_user, Map<UserEntity, Double> allExpenses) {
 		boolean isOpen = true;
 		double paidUserDebts = allExpenses.get(paid_user);
@@ -121,7 +118,6 @@ public class SplitService implements SplitsService, ServicesFactory {
 		this.objectRepository.save(converter.toEntity(trans));
 		return isOpen;
 	}
-
 	public SuperAppObjectBoundary computeTransactionBalance(SuperAppObjectBoundary trans) { // total_compute_per_group
 		HashMap<UserEntity, Double> allExpenses = (HashMap<UserEntity, Double>) trans.getObjectDetails().get("AllExpenses");
 		double originalPayment = (Double) trans.getObjectDetails().get("originalPayment");
@@ -130,9 +126,7 @@ public class SplitService implements SplitsService, ServicesFactory {
 				.collect(Collectors.toList());
 		trans.getObjectDetails().replace("allExpenses", allExpenses);
 		return trans;
-	}//
-
-
+	}
 	@Override
 	public Map<UserEntity, Double> showAllDebt(SuperAppObjectEntity group) {
 		List<UserEntity> allGroupUsers = (List<UserEntity>)converter.detailsToMap(group.getObjectDetails()).get("allUsers");
@@ -140,24 +134,12 @@ public class SplitService implements SplitsService, ServicesFactory {
 				.stream()
 				.collect(Collectors.toMap(user -> user, user -> showDebt(group, user)));
 	}
-
-
 	public void removeTransaction(UserEntity user, SuperAppObjectEntity group, SuperAppObjectEntity transaction) {
 		Map<UserEntity, Double> userDebt = (Map<UserEntity, Double>)this.converter.detailsToMap(transaction.getObjectDetails()).get("userDebt");
 		double originalPayment = (double) this.converter.detailsToMap(transaction.getObjectDetails()).get("originalPayment");
 
 		if (userDebt.get(user) !=originalPayment)
             throw new RuntimeException("Cannot close payment, one user or more already paid");
-
 		objectRepository.delete(transaction); // ?
     }
-
-
-
-	@Override
-	public SuperAppObjectEntity updateObjectDetails(SuperAppObjectEntity newTransaction) { //Case update Transaction
-		computeTransactionBalance(this.converter.toBoundary(newTransaction));
-		objectRepository.save(newTransaction);
-		return newTransaction;
-	}
 }
