@@ -100,6 +100,7 @@ public class SplitService implements SplitsService, ServicesFactory {
 			else {
 				if (!ComputeTransaction(user, converter.toBoundary(trans), userDebt, paid_user, AllExpenses)) { //Example : Payed user : 100,Not payed :0,  Not payed :-50,Not payed :-50
 					//TODO removeTransaction
+					removeTransaction(paid_user,group,trans);
 				}
 			}
 		}
