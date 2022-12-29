@@ -11,4 +11,5 @@ import java.util.List;
 public interface UserEntityRepository extends CrudRepository<UserEntity, UserEntity.UserPK> {
     @Query(value = "SELECT * FROM USERS WHERE EMAIL=email;", nativeQuery = true)
     List<UserEntity> findByEmail(String email);
+
 }

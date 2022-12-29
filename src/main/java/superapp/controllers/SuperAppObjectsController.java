@@ -44,7 +44,9 @@ public class SuperAppObjectsController {
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public SuperAppObjectBoundary retrieveObject(@PathVariable String superapp,
-                                                 @PathVariable String InternalObjectId) {
+                                                 @PathVariable String InternalObjectId,
+                                                 @RequestParam(name="userSupperapp", required = false, defaultValue = "") String userSupperapp,
+                                                 @RequestParam(name="userEmail", required = false, defaultValue = "") String email) {
         return this.objService.getSpecificObject(superapp,InternalObjectId);
     }
 
@@ -54,9 +56,11 @@ public class SuperAppObjectsController {
             produces = {MediaType.APPLICATION_JSON_VALUE})
     @ResponseBody
     public SuperAppObjectBoundary[] getAllObjects(
+            @RequestParam(name="userSupperapp", required = false, defaultValue = "") String userSupperapp,
+            @RequestParam(name="userEmail", required = false, defaultValue = "") String email,
             @RequestParam(name = "size", required = false, defaultValue = "10") int size,
             @RequestParam(name="page", required = false, defaultValue = "0") int page) {
-        return this.objService.getAllObjects(size,page).toArray(new SuperAppObjectBoundary[0]);
+        return this.objService.getAllObjects(userSupperapp,email,size,page).toArray(new SuperAppObjectBoundary[0]);
         //return this.objService.getAllObjects().toArray(new SuperAppObjectBoundary[0]);
     }
 
@@ -95,9 +99,11 @@ public class SuperAppObjectsController {
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public SuperAppObjectBoundary[] SearchObjectsByType( @PathVariable String type,
+                                                         @RequestParam(name="userSupperapp", required = false, defaultValue = "") String userSupperapp,
+                                                         @RequestParam(name="userEmail", required = false, defaultValue = "") String email,
                                                          @RequestParam(name = "size", required = false, defaultValue = "10") int size,
                                                          @RequestParam(name="page", required = false, defaultValue = "0") int page) {
-        return this.objService.getAllObjects(size, page).toArray(new SuperAppObjectBoundary[0]);
+        return this.objService.SearchObjectsByType(type,userSupperapp, email, size, page).toArray(new SuperAppObjectBoundary[0]);
     }
 
     @RequestMapping(
@@ -105,9 +111,11 @@ public class SuperAppObjectsController {
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public SuperAppObjectBoundary[] SearchObjectsByExactAlias(@PathVariable String alias,
+                                                              @RequestParam(name="userSupperapp", required = false, defaultValue = "") String userSupperapp,
+                                                              @RequestParam(name="userEmail", required = false, defaultValue = "") String email,
                                                               @RequestParam(name = "size", required = false, defaultValue = "10") int size,
                                                               @RequestParam(name="page", required = false, defaultValue = "0") int page) {
-        return this.objService.getAllObjects(size, page).toArray(new SuperAppObjectBoundary[0]);
+        return this.objService.SearchObjectsByExactAlias(alias, userSupperapp, email, size, page).toArray(new SuperAppObjectBoundary[0]);
     }
 
 }
