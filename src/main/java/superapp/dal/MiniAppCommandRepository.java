@@ -11,6 +11,5 @@ import java.util.List;
 
 @Repository
 public interface MiniAppCommandRepository extends PagingAndSortingRepository<MiniAppCommandEntity, String> {
-    @Query(value ="SELECT * FROM MINI_APP_COMMAND WHERE MINIAPP = ?1", nativeQuery=true)
     List<MiniAppCommandEntity> findAllByMiniapp(@Param("miniapp") String miniapp, Pageable page);
 }
