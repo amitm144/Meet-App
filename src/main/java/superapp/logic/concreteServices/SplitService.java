@@ -69,20 +69,12 @@ public class SplitService implements SplitsService, ServicesFactory {
 	}
 	@Override
 	public double showDebt(SuperAppObjectEntity group, UserEntity user) {
-		double allDebt = 0;
-		for (SuperAppObjectEntity trans : group.getChildren().stream().filter(t -> t.getType().equals("Transaction")).collect(Collectors.toList())) {
-			Map<UserEntity, Double> AllExpenses = (Map<UserEntity, Double>) this.converter.detailsToMap(trans.getObjectDetails()).get("AllExpenses");
-			allDebt += AllExpenses.get(user);
-		}
-		return allDebt;
-//
-//		return group.getChildren()
-//				.stream()
-//				.filter(t -> t.getType().equals("Transaction"))
-//				.map(this.converter::toBoundary)
-//				.map(d->(double)d.getObjectDetails().get("AllExpenses"))
-//				.reduce(a, b -> a + b);
-
+		return group.getChildren()
+				.stream()
+				.filter(t -> t.getType().equals("Transaction"))
+				.map(t -> (Map<UserEntity, Double>) this.converter.detailsToMap(t.getObjectDetails()).get("AllExpenses"))
+				.mapToDouble(expenses -> expenses.get(user))
+				.sum();
 	}
 	@Override
 	public void payDebt(SuperAppObjectEntity group, UserEntity user) {//Example : Payed user : 150,Not payed :-50,  Not payed :-50,Not payed :-50
@@ -96,7 +88,6 @@ public class SplitService implements SplitsService, ServicesFactory {
 				throw new RuntimeException("Only Users with debt can pay"); // For Example Trans owner will not able to pay due to his Negative Debt
 			else {
 				if (!ComputeTransaction(user, converter.toBoundary(trans), userDebt, paid_user, AllExpenses)) { //Example : Payed user : 100,Not payed :0,  Not payed :-50,Not payed :-50
-					//TODO removeTransaction
 					removeTransaction(paid_user,group,trans);
 				}
 			}
@@ -119,7 +110,8 @@ public class SplitService implements SplitsService, ServicesFactory {
 	public SuperAppObjectBoundary computeTransactionBalance(SuperAppObjectBoundary trans) { // total_compute_per_group
 		HashMap<UserEntity, Double> allExpenses = (HashMap<UserEntity, Double>) trans.getObjectDetails().get("AllExpenses");
 		double originalPayment = (Double) trans.getObjectDetails().get("originalPayment");
-		allExpenses.keySet().stream()
+		allExpenses.keySet()
+				.stream()
 				.map(user -> allExpenses.put(user, allExpenses.get(user) - originalPayment / allExpenses.keySet().size()))
 				.collect(Collectors.toList());
 		trans.getObjectDetails().replace("allExpenses", allExpenses);
