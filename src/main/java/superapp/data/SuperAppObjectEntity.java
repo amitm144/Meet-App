@@ -23,7 +23,7 @@ public class SuperAppObjectEntity {
     private String userSuperapp;
     private String objectDetails;
     @ManyToMany
-    @JoinTable(name="ObjectsRelations")
+    @JoinTable(name="objects_relations")
     private Set<SuperAppObjectEntity> parents;
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "parents")
     private Set<SuperAppObjectEntity> children;
