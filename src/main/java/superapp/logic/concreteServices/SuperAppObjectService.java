@@ -10,25 +10,33 @@ import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.SuperAppObjectConverter;
 import superapp.dal.IdGeneratorRepository;
 import superapp.dal.SuperAppObjectEntityRepository;
+import superapp.dal.UserEntityRepository;
 import superapp.data.IdGeneratorEntity;
 import superapp.data.SuperAppObjectEntity;
 import superapp.data.SuperAppObjectEntity.SuperAppObjectId;
+import superapp.data.UserEntity;
 import superapp.logic.AbstractService;
-import superapp.logic.SuperAppObjectsService;
+import superapp.logic.AdvancedSuperAppObjectsService;
 import superapp.util.exceptions.CannotProcessException;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.exceptions.NotFoundException;
 import superapp.util.EmailChecker;
+import superapp.util.exceptions.UnsupportedOpertaionException;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static superapp.data.UserRole.ADMIN;
+
 @Service
-public class SuperAppObjectService extends AbstractService implements SuperAppObjectsService {
+public class SuperAppObjectService extends AbstractService implements AdvancedSuperAppObjectsService {
     private SuperAppObjectEntityRepository objectRepository;
     private IdGeneratorRepository idGenerator;
     private SuperAppObjectConverter converter;
+
+    public UserEntityRepository userRepository;
+
 
     @Autowired
     public SuperAppObjectService(SuperAppObjectConverter converter,
@@ -177,6 +185,23 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
     }
 
     @Override
+    @Deprecated
     @Transactional
-    public void deleteAllObjects() { this.objectRepository.deleteAll(); }
+    public void deleteAllObjects() {
+        throw new UnsupportedOpertaionException("Method is Dperecated");
+    }
+
+    @Override
+    @Transactional
+    public void deleteAllObjects(String userSuperapp, String email) {
+        if (!isSuperappUser(userSuperapp, email))
+            throw new NotFoundException("Error: Only ADMIN is allowed to access this method.");
+        this.objectRepository.deleteAll(); }
+
+    private boolean isSuperappUser(String userSuperapp, String email) {
+        Optional<UserEntity> userE = userRepository.findById(new UserEntity.UserPK(userSuperapp, email));
+        if (userE.isPresent() && userE.get().getRole().equals(ADMIN))
+            return true;
+        return false;
+    }
 }

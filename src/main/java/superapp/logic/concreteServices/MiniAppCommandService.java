@@ -1,5 +1,7 @@
 package superapp.logic.concreteServices;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,12 +10,16 @@ import superapp.boundaries.command.MiniAppCommandBoundary;
 import superapp.converters.MiniappCommandConverter;
 import superapp.dal.IdGeneratorRepository;
 import superapp.dal.MiniAppCommandRepository;
+import superapp.dal.UserEntityRepository;
 import superapp.data.IdGeneratorEntity;
 import superapp.data.MiniAppCommandEntity;
+import superapp.data.UserEntity;
 import superapp.logic.AbstractService;
-import superapp.logic.MiniAppCommandsService;
+import superapp.logic.AdvancedMiniAppCommandsService;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.EmailChecker;
+import superapp.util.exceptions.NotFoundException;
+import superapp.util.exceptions.UnsupportedOpertaionException;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
 import superapp.util.wrappers.UserIdWrapper;
 
@@ -21,19 +27,25 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static superapp.data.UserRole.ADMIN;
+
 @Service
-public class MiniAppCommandService extends AbstractService implements MiniAppCommandsService {
+public class MiniAppCommandService extends AbstractService implements AdvancedMiniAppCommandsService {
     private MiniappCommandConverter miniAppConverter;
     private MiniAppCommandRepository miniappRepository;
+    private UserEntityRepository userRepository;
+
     private IdGeneratorRepository idGenerator;
 
     @Autowired
     public MiniAppCommandService(MiniappCommandConverter miniAppConverter,
                                  MiniAppCommandRepository miniappRepository,
-                                 IdGeneratorRepository idGenerator) {
+                                 IdGeneratorRepository idGenerator,
+                                 UserEntityRepository userRepository) {
         this.miniAppConverter = miniAppConverter;
         this.miniappRepository = miniappRepository;
         this.idGenerator = idGenerator;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -83,24 +95,66 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
 
     @Override
     @Transactional(readOnly = true)
+    @Deprecated
+    public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniappName) {
+        throw new UnsupportedOpertaionException("Method is Dperecated");
+    }
+
+    @Override
+    @Deprecated
+    @Transactional(readOnly = true)
     public List<MiniAppCommandBoundary> getALlCommands() {
+        throw new UnsupportedOpertaionException("Method is Dperecated");
+    }
+
+    @Override
+    @Deprecated
+    @Transactional
+    public void deleteALlCommands() {
+        throw new UnsupportedOpertaionException("Method is Dperecated");
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MiniAppCommandBoundary> getALlCommands(String userSuperapp, String email,int size,int page) {
+        if (!isSuperappUser(userSuperapp, email))
+            throw new NotFoundException("Error: Only ADMIN is allowed to access this method.");
+
+        Iterable<MiniAppCommandEntity> allCommands = this.miniappRepository
+                .findAll(PageRequest.of(page,size, Sort.Direction.DESC,"miniapp","internalCommandId"));
         return StreamSupport
-                .stream(this.miniappRepository.findAll().spliterator(), false)
+                .stream(allCommands.spliterator(), false)
                 .map(this.miniAppConverter::toBoundary)
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniappName) {
-        Iterable<MiniAppCommandEntity> miniappCommands = this.miniappRepository.findAllByMiniapp(miniappName);
-        return StreamSupport
-                .stream(miniappCommands.spliterator(), false)
+    public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniappName ,String userSuperapp, String email,int size,int page) {
+        if (!isSuperappUser(userSuperapp, email))
+            throw new NotFoundException("Error: Only ADMIN is allowed to access this method.");
+
+        return this.miniappRepository.findAllByMiniapp(miniappName,
+                        PageRequest.of(page,size, Sort.Direction.DESC,"miniapp","internalCommandId"))
+                .stream()
                 .map(this.miniAppConverter::toBoundary)
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public void deleteALlCommands() { this.miniappRepository.deleteAll(); }
+    public void deleteALlCommands(String userSupperapp, String email)
+    {
+        if (!isSuperappUser(userSupperapp, email))
+            throw new NotFoundException("Error: Only ADMIN is allowed to access this method.");
+
+        this.miniappRepository.deleteAll();
+    }
+
+    private boolean isSuperappUser(String userSuperapp, String email) {
+        Optional<UserEntity> userE = userRepository.findById(new UserEntity.UserPK(userSuperapp, email));
+        if (userE.isPresent() && userE.get().getRole().equals(ADMIN))
+            return true;
+        return false;
+    }
 }

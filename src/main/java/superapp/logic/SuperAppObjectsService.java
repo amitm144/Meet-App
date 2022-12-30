@@ -19,6 +19,6 @@ public interface SuperAppObjectsService {
     public List<SuperAppObjectBoundary> getParents(String objectSuperapp, String internalObjectId);
 
     public List<SuperAppObjectBoundary> getAllObjects();
-
+    @Deprecated
     public void deleteAllObjects();
 }
