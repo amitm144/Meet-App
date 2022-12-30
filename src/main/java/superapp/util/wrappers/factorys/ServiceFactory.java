@@ -24,21 +24,25 @@ public class ServiceFactory implements ServicesFactory {
     }
 
     @Override
-    public SuperAppObjectBoundary setObjectDetails(SuperAppObjectBoundary object) {
+    public void setObjectDetails(SuperAppObjectBoundary object) {
             switch (object.getType()){
                 case ("Transaction"): // Only Object in Miniap that need to be modifyed
-                    return this.splitService.setObjectDetails(object);
+                {
+                    this.splitService.setObjectDetails(object);
+                    break;
+                }
         }
-        return null;
     }
 
     @Override
-    public SuperAppObjectEntity updateObjectDetails(SuperAppObjectEntity object) {
+    public void updateObjectDetails(SuperAppObjectEntity object) {
         switch (object.getType()){
             case ("Transaction"):// Only Object in Miniap that need to be modifyed
-                return this.splitService.updateObjectDetails(object);
+            {
+                splitService.updateObjectDetails(object);
+                break;
+            }
         }
-        return null;
     }
 
     @Override

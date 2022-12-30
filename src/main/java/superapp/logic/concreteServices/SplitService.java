@@ -58,16 +58,14 @@ public class SplitService implements SplitsService, ServicesFactory {
 		}
 	}
 	@Override
-	public SuperAppObjectBoundary setObjectDetails(SuperAppObjectBoundary object) { //  SplitGroup
+	public void setObjectDetails(SuperAppObjectBoundary object) { //  SplitGroup
 		if (object.getType() == "Transaction")
-			return computeTransactionBalance(object);
-		return null;
+			 computeTransactionBalance(object);
 	}
 	@Override
-	public SuperAppObjectEntity updateObjectDetails(SuperAppObjectEntity newTransaction) { //Case update Transaction
+	public void updateObjectDetails(SuperAppObjectEntity newTransaction) { //Case update Transaction
 		computeTransactionBalance(this.converter.toBoundary(newTransaction));
 		objectRepository.save(newTransaction);
-		return newTransaction;
 	}
 	@Override
 	public double showDebt(SuperAppObjectEntity group, UserEntity user) {
@@ -75,7 +73,6 @@ public class SplitService implements SplitsService, ServicesFactory {
 		for (SuperAppObjectEntity trans : group.getChildren().stream().filter(t -> t.getType().equals("Transaction")).collect(Collectors.toList())) {
 			Map<UserEntity, Double> AllExpenses = (Map<UserEntity, Double>) this.converter.detailsToMap(trans.getObjectDetails()).get("AllExpenses");
 			allDebt += AllExpenses.get(user);
-
 		}
 		return allDebt;
 //
@@ -138,9 +135,8 @@ public class SplitService implements SplitsService, ServicesFactory {
 	public void removeTransaction(UserEntity user, SuperAppObjectEntity group, SuperAppObjectEntity transaction) {
 		Map<UserEntity, Double> userDebt = (Map<UserEntity, Double>)this.converter.detailsToMap(transaction.getObjectDetails()).get("userDebt");
 		double originalPayment = (double) this.converter.detailsToMap(transaction.getObjectDetails()).get("originalPayment");
-
 		if (userDebt.get(user) !=originalPayment)
             throw new RuntimeException("Cannot close payment, one user or more already paid");
-		objectRepository.delete(transaction); // ?
+		objectRepository.delete(transaction);
     }
 }

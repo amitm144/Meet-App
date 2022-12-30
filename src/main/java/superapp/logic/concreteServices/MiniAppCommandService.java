@@ -17,6 +17,7 @@ import superapp.util.exceptions.InvalidInputException;
 import superapp.util.EmailChecker;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
 import superapp.util.wrappers.UserIdWrapper;
+import superapp.util.wrappers.factorys.ServiceFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,15 +28,15 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
     private MiniappCommandConverter miniAppConverter;
     private MiniAppCommandRepository miniappRepository;
     private IdGeneratorRepository idGenerator;
-    private ServicesFactory servicesFactory;
+    private ServiceFactory serviceFactory;
     @Autowired
     public MiniAppCommandService(MiniappCommandConverter miniAppConverter,
                                  MiniAppCommandRepository miniappRepository,
-                                 IdGeneratorRepository idGenerator, ServicesFactory service) {
+                                 IdGeneratorRepository idGenerator, ServiceFactory service) {
         this.miniAppConverter = miniAppConverter;
         this.miniappRepository = miniappRepository;
         this.idGenerator = idGenerator;
-        this.servicesFactory = service;
+        this.serviceFactory = service;
 
     }
 
@@ -88,7 +89,7 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
 
         this.miniappRepository.save(this.miniAppConverter.toEntity(command));
         //if Miniaap Not Found Service Throws runtime Exception
-        this.servicesFactory.runCommand(command.getCommandId().getMiniapp(),targetObject,invokedBy,command.getCommandAttributes(), command.getCommand());
+        this.serviceFactory.runCommand(command.getCommandId().getMiniapp(),targetObject,invokedBy,command.getCommandAttributes(), command.getCommand());
 
 
         return command;

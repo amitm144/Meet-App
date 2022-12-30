@@ -8,8 +8,8 @@ import superapp.util.wrappers.UserIdWrapper;
 import java.util.Map;
 
 public interface ServicesFactory {
-   public SuperAppObjectBoundary setObjectDetails(SuperAppObjectBoundary object);
-   public SuperAppObjectEntity updateObjectDetails(SuperAppObjectEntity object);
+   public void setObjectDetails(SuperAppObjectBoundary object);
+   public void updateObjectDetails(SuperAppObjectEntity object);
    public void runCommand(String miniapp , SuperAppObjectIdWrapper targetObject , UserIdWrapper user , Map<String,Object> attributes , String commandCase);
 
 }

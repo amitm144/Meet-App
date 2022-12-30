@@ -14,7 +14,6 @@ import superapp.data.IdGeneratorEntity;
 import superapp.data.SuperAppObjectEntity;
 import superapp.data.SuperAppObjectEntity.SuperAppObjectId;
 import superapp.logic.AbstractService;
-import superapp.logic.SuperAppObjectFactory;
 import superapp.logic.SuperAppObjectsService;
 import superapp.util.exceptions.CannotProcessException;
 import superapp.util.exceptions.InvalidInputException;
@@ -70,7 +69,7 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
         object.setObjectId(new SuperAppObjectIdBoundary(this.superappName, objectId));
         object.setActive(active);
         object.setCreationTimestamp(new Date());
-        object =serviceFactory.setObjectDetails(object);
+        serviceFactory.setObjectDetails(object);
         this.objectRepository.save(converter.toEntity(object));
         return object;
     }
