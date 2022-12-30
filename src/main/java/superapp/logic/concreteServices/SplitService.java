@@ -130,7 +130,7 @@ public class SplitService implements SplitsService, ServicesFactory {
 	private ExpensesBoundary getUserExpensess(UserIdWrapper user, List<ExpensesBoundary> allExpenses)
 	{
 		return allExpenses.stream()
-				.reduce(u -> u.getUser().getUserId().equals(user.getUserId()))
+				.filter(u -> u.getUser().getUserId().equals(user.getUserId()))
 				.collect(Collectors.toList()).get(0);
 	}
 
@@ -139,12 +139,13 @@ public class SplitService implements SplitsService, ServicesFactory {
 									UserIdWrapper creatingUser,
 									List<ExpensesBoundary> allExpenses) {
 		if(transaction.getActive() == false)
-			throw new CannotProcessException("Cannot make a payment when a transaction is closed");
+			throw new CannotProcessException("Cannot make a payment on a closed transaction");
+
 		ExpensesBoundary createUserExpenses = getUserExpensess(creatingUser, allExpenses);
 		ExpensesBoundary payingUserExpenses = getUserExpensess(payingUser, allExpenses);
 		double userPayDebt =payingUserExpenses.getAmount();
 		if (userPayDebt <= 0)
-			throw new RuntimeException("Only Users with debt can pay");
+			throw new RuntimeException("Paying user has no debt to pay");
 		createUserExpenses.setAmount(createUserExpenses.getAmount()+userPayDebt);
 		payingUserExpenses.setAmount(0);
 		Map<String,Object> details =this.converter.detailsToMap(transaction.getObjectDetails());
