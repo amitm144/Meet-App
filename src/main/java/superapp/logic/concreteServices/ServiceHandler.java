@@ -1,4 +1,4 @@
-package superapp.util.wrappers.factorys;
+package superapp.logic.concreteServices;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,12 +10,12 @@ import superapp.util.wrappers.SuperAppObjectIdWrapper;
 import superapp.util.wrappers.UserIdWrapper;
 import java.util.Map;
 @Service
-public class ServiceFactory implements ServicesFactory {
+public class ServiceHandler implements ServicesFactory {
     private SplitService splitService;
     //private GrabService grabService
     //private LiftService liftService
     @Autowired
-    public ServiceFactory(SplitService splitService//GrabService grabService , LiftService liftService
+    public ServiceHandler(SplitService splitService//GrabService grabService , LiftService liftService
 
     ) {
         this.splitService = splitService;
@@ -24,11 +24,11 @@ public class ServiceFactory implements ServicesFactory {
     }
 
     @Override
-    public void setObjectDetails(SuperAppObjectBoundary object) {
+    public void handleObjectByType(SuperAppObjectBoundary object) {
             switch (object.getType()){
                 case ("Transaction"): // Only Object in Miniap that need to be modifyed
                 {
-                    this.splitService.setObjectDetails(object);
+                    this.splitService.handleObjectByType(object);
                     break;
                 }
         }

@@ -3,7 +3,6 @@ package superapp.logic;
 import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.data.SuperAppObjectEntity;
 import superapp.data.UserEntity;
-import superapp.data.split.SplitTransaction;
 
 import java.util.Map;
 

@@ -12,12 +12,10 @@ import superapp.data.IdGeneratorEntity;
 import superapp.data.MiniAppCommandEntity;
 import superapp.logic.AbstractService;
 import superapp.logic.MiniAppCommandsService;
-import superapp.logic.ServicesFactory;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.EmailChecker;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
 import superapp.util.wrappers.UserIdWrapper;
-import superapp.util.wrappers.factorys.ServiceFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,15 +26,15 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
     private MiniappCommandConverter miniAppConverter;
     private MiniAppCommandRepository miniappRepository;
     private IdGeneratorRepository idGenerator;
-    private ServiceFactory serviceFactory;
+    private ServiceHandler serviceHandler;
     @Autowired
     public MiniAppCommandService(MiniappCommandConverter miniAppConverter,
                                  MiniAppCommandRepository miniappRepository,
-                                 IdGeneratorRepository idGenerator, ServiceFactory service) {
+                                 IdGeneratorRepository idGenerator, ServiceHandler service) {
         this.miniAppConverter = miniAppConverter;
         this.miniappRepository = miniappRepository;
         this.idGenerator = idGenerator;
-        this.serviceFactory = service;
+        this.serviceHandler = service;
 
     }
 
@@ -89,7 +87,7 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
 
         this.miniappRepository.save(this.miniAppConverter.toEntity(command));
         //if Miniaap Not Found Service Throws runtime Exception
-        this.serviceFactory.runCommand(command.getCommandId().getMiniapp(),targetObject,invokedBy,command.getCommandAttributes(), command.getCommand());
+        this.serviceHandler.runCommand(command.getCommandId().getMiniapp(),targetObject,invokedBy,command.getCommandAttributes(), command.getCommand());
 
 
         return command;

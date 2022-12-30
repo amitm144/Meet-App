@@ -19,7 +19,6 @@ import superapp.util.exceptions.CannotProcessException;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.exceptions.NotFoundException;
 import superapp.util.EmailChecker;
-import superapp.util.wrappers.factorys.ServiceFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,16 +29,16 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
     private SuperAppObjectEntityRepository objectRepository;
     private IdGeneratorRepository idGenerator;
     private SuperAppObjectConverter converter;
-    private ServiceFactory serviceFactory;
+    private ServiceHandler serviceHandler;
 
     @Autowired
     public SuperAppObjectService(SuperAppObjectConverter converter,
                                  SuperAppObjectEntityRepository objectRepository,
-                                 IdGeneratorRepository idGenerator,ServiceFactory serviceFactory) {
+                                 IdGeneratorRepository idGenerator, ServiceHandler serviceHandler) {
         this.converter = converter;
         this.objectRepository = objectRepository;
         this.idGenerator = idGenerator;
-        this.serviceFactory= serviceFactory;
+        this.serviceHandler = serviceHandler;
     }
 
     @Override
@@ -69,8 +68,8 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
         object.setObjectId(new SuperAppObjectIdBoundary(this.superappName, objectId));
         object.setActive(active);
         object.setCreationTimestamp(new Date());
-        serviceFactory.setObjectDetails(object);
         this.objectRepository.save(converter.toEntity(object));
+        serviceHandler.handleObjectByType(object);
         return object;
     }
 

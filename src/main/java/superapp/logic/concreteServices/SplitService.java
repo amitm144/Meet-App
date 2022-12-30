@@ -39,7 +39,7 @@ public class SplitService implements SplitsService, ServicesFactory {
 				.get();
 		SuperAppObjectEntity group = objectRepository.findById(
 						(new SuperAppObjectEntity.SuperAppObjectId(targetObject.getObjectId().getSuperapp(), targetObject.getObjectId().getInternalObjectId())))
-				.get();
+				.get();// TODO Or else Throw
 		switch (commandCase) {
 			case "showDebt": {
 				this.showDebt(group, user);
@@ -57,8 +57,9 @@ public class SplitService implements SplitsService, ServicesFactory {
 				throw new RuntimeException("Command Not Found");
 		}
 	}
+	// TODO replace private Functions
 	@Override
-	public void setObjectDetails(SuperAppObjectBoundary object) { //  SplitGroup
+	public void handleObjectByType(SuperAppObjectBoundary object) { //  SplitGroup
 		if (object.getType() == "Transaction")
 			 computeTransactionBalance(object);
 	}
