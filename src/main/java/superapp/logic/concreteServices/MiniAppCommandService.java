@@ -114,13 +114,6 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
                 .collect(Collectors.toList());
     }
 
-//    private void invokeCommandAtMiniapp(MiniAppCommandBoundary command, String miniapp){
-//        if (miniapp.equals("Split"))
-//            splitService.invokeCommand(command);
-//        else
-//            throw new RuntimeException("Unknown miniApp");
-//    }
-
     @Override
     @Transactional
     public void deleteALlCommands() { this.miniappRepository.deleteAll(); }

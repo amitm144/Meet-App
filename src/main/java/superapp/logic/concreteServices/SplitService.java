@@ -10,6 +10,8 @@ import superapp.logic.ServicesFactory;
 import superapp.logic.SplitsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import superapp.util.exceptions.CannotProcessException;
+import superapp.util.exceptions.NotFoundException;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
 import superapp.util.wrappers.UserIdWrapper;
 import java.util.HashMap;
@@ -26,7 +28,7 @@ public class SplitService implements SplitsService, ServicesFactory {
 
 	@Autowired
 	public SplitService(UserEntityRepository userEntityRepository, SuperAppObjectEntityRepository objectRepository) {
-		super();//
+		super();
 		this.userEntityRepository = userEntityRepository;
 		this.objectRepository = objectRepository;
 		this.converter = new SuperAppObjectConverter();
@@ -36,10 +38,10 @@ public class SplitService implements SplitsService, ServicesFactory {
 	public void runCommand(String miniapp, SuperAppObjectIdWrapper targetObject, UserIdWrapper invokedBy, Map<String, Object> attributes, String commandCase) {
 		UserEntity user = userEntityRepository.findById(
 						new UserEntity.UserPK(invokedBy.getUserId().getSuperapp(), invokedBy.getUserId().getEmail()))
-				.get();
+				.orElseThrow(() -> new NotFoundException());
 		SuperAppObjectEntity group = objectRepository.findById(
 						(new SuperAppObjectEntity.SuperAppObjectId(targetObject.getObjectId().getSuperapp(), targetObject.getObjectId().getInternalObjectId())))
-				.get();// TODO Or else Throw
+				.orElseThrow(() -> new NotFoundException());
 		switch (commandCase) {
 			case "showDebt": {
 				this.showDebt(group, user);
@@ -54,13 +56,12 @@ public class SplitService implements SplitsService, ServicesFactory {
 				break;
 			}
 			default:
-				throw new RuntimeException("Command Not Found");
+				throw new NotFoundException("Command Not Found");
 		}
 	}
 	// TODO replace private Functions
 	@Override
 	public void handleObjectByType(SuperAppObjectBoundary object) { //  SplitGroup
-		if (object.getType() == "Transaction")
 			 computeTransactionBalance(object);
 	}
 	@Override
@@ -129,7 +130,7 @@ public class SplitService implements SplitsService, ServicesFactory {
 		Map<UserEntity, Double> userDebt = (Map<UserEntity, Double>)this.converter.detailsToMap(transaction.getObjectDetails()).get("userDebt");
 		double originalPayment = (double) this.converter.detailsToMap(transaction.getObjectDetails()).get("originalPayment");
 		if (userDebt.get(user) !=originalPayment)
-            throw new RuntimeException("Cannot close payment, one user or more already paid");
+            throw new CannotProcessException("Cannot close payment, one user or more already paid");
 		objectRepository.delete(transaction);
     }
 }

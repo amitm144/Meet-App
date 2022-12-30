@@ -6,6 +6,7 @@ import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.data.SuperAppObjectEntity;
 import superapp.logic.ServicesFactory;
 import superapp.logic.concreteServices.SplitService;
+import superapp.util.exceptions.NotFoundException;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
 import superapp.util.wrappers.UserIdWrapper;
 import java.util.Map;
@@ -60,7 +61,7 @@ public class ServiceHandler implements ServicesFactory {
                 return;
             }
             default:{
-                throw new RuntimeException("Miniapp Not Found");
+                throw new NotFoundException("MiniApp Not Found");
             }
         }
         }
