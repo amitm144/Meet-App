@@ -5,7 +5,7 @@ import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.UserConverter;
 import superapp.dal.UserEntityRepository;
 import superapp.data.UserEntity;
-import superapp.data.UserEntity.UserPK;
+import superapp.data.UserPK;
 import superapp.data.UserRole;
 import superapp.logic.AbstractService;
 import superapp.util.exceptions.AlreadyExistsException;

@@ -12,7 +12,7 @@ import superapp.dal.IdGeneratorRepository;
 import superapp.dal.SuperAppObjectEntityRepository;
 import superapp.data.IdGeneratorEntity;
 import superapp.data.SuperAppObjectEntity;
-import superapp.data.SuperAppObjectEntity.SuperAppObjectId;
+import superapp.data.SuperappObjectPK;
 import superapp.logic.AbstractService;
 import superapp.logic.SuperAppObjectsService;
 import superapp.util.exceptions.CannotProcessException;
@@ -77,7 +77,7 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
                                                String internalObjectId,
                                                SuperAppObjectBoundary update) {
         Optional<SuperAppObjectEntity> objectO =
-                this.objectRepository.findById(new SuperAppObjectId(objectSuperapp, internalObjectId));
+                this.objectRepository.findById(new SuperappObjectPK(objectSuperapp, internalObjectId));
         if (objectO.isEmpty())
             throw new NotFoundException("Unknown object");
 
@@ -114,7 +114,7 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
     @Transactional
     public void bindNewChild(String parentSuperapp, String parentObjectId, SuperAppObjectIdBoundary newChild) {
         SuperAppObjectEntity parent = this.objectRepository
-                .findById(new SuperAppObjectId(parentSuperapp, parentObjectId))
+                .findById(new SuperappObjectPK(parentSuperapp, parentObjectId))
                 .orElseThrow(() -> new NotFoundException("Cannot find parent object"));
         SuperAppObjectEntity child = this.objectRepository
                 .findById(this.converter.idToEntity(newChild))
@@ -131,7 +131,7 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
     @Transactional(readOnly = true)
     public SuperAppObjectBoundary getSpecificObject(String objectSuperapp, String internalObjectId) {
         Optional<SuperAppObjectEntity> objectE =
-                this.objectRepository.findById(new SuperAppObjectId(objectSuperapp, internalObjectId));
+                this.objectRepository.findById(new SuperappObjectPK(objectSuperapp, internalObjectId));
         if (objectE.isEmpty())
             throw new NotFoundException("Object does not exist");
 
@@ -142,7 +142,7 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
     @Transactional(readOnly = true)
     public List<SuperAppObjectBoundary> getChildren(String objectSuperapp, String internalObjectId) {
         SuperAppObjectEntity parent = this.objectRepository
-                .findById(new SuperAppObjectId(objectSuperapp, internalObjectId))
+                .findById(new SuperappObjectPK(objectSuperapp, internalObjectId))
                 .orElseThrow(() -> new NotFoundException("Cannot find parent object"));
 
         return parent
@@ -156,7 +156,7 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
     @Transactional(readOnly = true)
     public List<SuperAppObjectBoundary> getParents(String objectSuperapp, String internalObjectId) {
         SuperAppObjectEntity object = this.objectRepository
-                .findById(new SuperAppObjectId(objectSuperapp, internalObjectId))
+                .findById(new SuperappObjectPK(objectSuperapp, internalObjectId))
                 .orElseThrow(() -> new NotFoundException("Cannot find requested object"));
 
         return object
