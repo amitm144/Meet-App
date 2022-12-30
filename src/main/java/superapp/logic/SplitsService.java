@@ -5,10 +5,9 @@ import superapp.data.UserEntity;
 import superapp.util.wrappers.UserIdWrapper;
 
 public interface SplitsService {
- // public void openNewSplitGroup(GroupEntity group, String title);
- public void payDebt(SuperAppObjectEntity group, UserIdWrapper user);
-
+ public void payAllDebts(SuperAppObjectEntity group, UserIdWrapper payingUser);
  public double showDebt(SuperAppObjectEntity group, UserIdWrapper user);
  public SuperAppObjectEntity computeTransactionBalance(SuperAppObjectEntity trans);
  public Object showAllDebt(SuperAppObjectEntity group);
+ public void removeTransaction(UserIdWrapper user, SuperAppObjectEntity group, SuperAppObjectEntity transaction);
 }
