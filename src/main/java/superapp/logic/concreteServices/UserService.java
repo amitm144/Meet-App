@@ -58,12 +58,6 @@ public class UserService extends AbstractService implements UsersService {
     }
 
     @Override
-    public UserBoundary createUser(NewUserBoundary newUser) {
-        return createUser(new UserBoundary(newUser.getEmail(), newUser.getRole(),
-                newUser.getUsername(), newUser.getAvatar()));
-    }
-
-    @Override
     @Transactional(readOnly = true)
     public UserBoundary login(String superapp, String userEmail) {
         if (!isValidSuperapp(superapp))
