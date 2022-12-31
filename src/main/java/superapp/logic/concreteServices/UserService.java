@@ -27,10 +27,8 @@ import static superapp.data.UserRole.ADMIN;
 
 @Service
 public class UserService extends AbstractService implements AdvancedUsersService {
-
     private UserEntityRepository userEntityRepository;
     private UserConverter converter;
-
 
     @Autowired
     public UserService(UserConverter converter,

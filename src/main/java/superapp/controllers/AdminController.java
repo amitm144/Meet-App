@@ -10,19 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-
 @RestController
 public class AdminController {
 
     private UserService userService;
     private MiniAppCommandService miniappService;
     private SuperAppObjectService objectService;
-
-    public final String DEFAULT_PAGE_SIZE = "10";
-
-    public final String DEFAULT_PAGE = "0";
-
-
+    private final String DEFAULT_PAGE_SIZE = "10";
+    private final String DEFAULT_PAGE = "0";
 
     @Autowired
     public void setMessageService(UserService userService) {
@@ -44,8 +39,8 @@ public class AdminController {
     public UserBoundary[] getAllUsers(
             @RequestParam(name = "userSuperapp", required = true,defaultValue = "") String userSuperapp,
             @RequestParam(name = "userEmail", required = true,defaultValue = "") String email,
-            @RequestParam(name = "size", required = false,defaultValue = "DEFAULT_PAGE_SIZE") int size,
-            @RequestParam(name = "page", required = false,defaultValue = "DEFAULT_PAGE") int page) {
+            @RequestParam(name = "size", required = false,defaultValue = DEFAULT_PAGE_SIZE) int size,
+            @RequestParam(name = "page", required = false,defaultValue = DEFAULT_PAGE) int page) {
         return this.userService.getAllUsers(userSuperapp,email,size,page).toArray(new UserBoundary[0]);
     }
 
@@ -56,8 +51,8 @@ public class AdminController {
     public MiniAppCommandBoundary[] exportMiniAppsCommands(
             @RequestParam(name = "userSuperapp", required = true,defaultValue = "") String userSuperapp,
             @RequestParam(name = "userEmail", required = true,defaultValue = "") String email,
-            @RequestParam(name = "size", required = false,defaultValue = "DEFAULT_PAGE_SIZE") int size,
-            @RequestParam(name = "page", required = false,defaultValue = "DEFAULT_PAGE") int page) {
+            @RequestParam(name = "size", required = false,defaultValue = DEFAULT_PAGE_SIZE) int size,
+            @RequestParam(name = "page", required = false,defaultValue = DEFAULT_PAGE) int page) {
         return this.miniappService.getAllCommands(userSuperapp, email,size,page)
                 .toArray(new MiniAppCommandBoundary[0]);
     }
@@ -70,8 +65,8 @@ public class AdminController {
             @PathVariable("miniAppName") String miniAppName,
             @RequestParam(name = "userSuperapp", required = true,defaultValue = "") String userSuperapp,
             @RequestParam(name = "userEmail", required = true,defaultValue = "") String email,
-            @RequestParam(name = "size", required = false,defaultValue = "DEFAULT_PAGE_SIZE") int size,
-            @RequestParam(name = "page", required = false,defaultValue = "DEFAULT_PAGE") int page) {
+            @RequestParam(name = "size", required = false,defaultValue = DEFAULT_PAGE_SIZE) int size,
+            @RequestParam(name = "page", required = false,defaultValue = DEFAULT_PAGE) int page) {
         return this.miniappService.getAllMiniAppCommands(miniAppName,userSuperapp, email,size,page)
                 .toArray(new MiniAppCommandBoundary[0]);
     }

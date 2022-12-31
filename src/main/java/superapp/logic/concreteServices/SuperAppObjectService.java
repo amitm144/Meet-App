@@ -40,10 +40,12 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     @Autowired
     public SuperAppObjectService(SuperAppObjectConverter converter,
                                  SuperAppObjectEntityRepository objectRepository,
-                                 IdGeneratorRepository idGenerator) {
+                                 IdGeneratorRepository idGenerator,
+                                 UserEntityRepository userRepository) {
         this.converter = converter;
         this.objectRepository = objectRepository;
         this.idGenerator = idGenerator;
+        this.userRepository = userRepository;
     }
 
     @Override
