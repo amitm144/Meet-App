@@ -75,11 +75,17 @@ public class SplitService implements SplitsService, ServicesFactory {
 		objectRepository.save(newTransaction);
 	}
 
+
+
+
+
+
 	@Override
 	public double showDebt(SuperAppObjectEntity group, UserIdWrapper user) {
-		System.err.println("show debt");
+
 		ArrayList<SuperAppObjectEntity> allTransaction = new ArrayList<SuperAppObjectEntity>();
 		allTransaction.addAll(group.getChildren());
+
 
 
 
@@ -88,70 +94,9 @@ public class SplitService implements SplitsService, ServicesFactory {
 			double temp = calculateTransactionUsersDebts(tran, user);
 			if (temp <= 0)
 				debt += (-1) * temp;
-
 		}
 		return debt;
 	}
-
-//		    return group
-//				.getChildren()
-//				.stream()
-//				.mapToDouble(t -> (calculateTransactionUsersDebts(t,user)))
-//				.sum();
-//	}
-	private double calculateTransactionUsersDebts(SuperAppObjectEntity trans,UserIdWrapper user){
-
-		List<ExpensesBoundary> allExpenses =
-				fromLinkedHashMapToListExpensesBoundary((ArrayList<Object>)converter.detailsToMap(trans.getObjectDetails()).get("allExpenses"));
-
-		ExpensesBoundary expense = allExpenses.stream().filter(tran->tran.getUser().equals(user)).toList().get(0);
-
-		return expense.getAmount();
-
-//		return allExpenses.get(allExpenses.indexOf(user)).getAmount() ;
-//				.stream()
-//				.filter(expenses -> expenses.getUser().equals(user))
-//				.map(ExpensesBoundary::getAmount)
-//				.toList().get(0);
-
-
-	}
-//	@Override
-//	public double showDebt(SuperAppObjectEntity group, UserIdWrapper user) {
-//		return group.getChildren()
-//				.stream()
-//				.filter(t -> t.getType().equals("Transaction"))
-//				.map(t -> (Map<UserIdWrapper, Double>)this.converter.detailsToMap(t.getObjectDetails()).get("allExpenses"))
-//				.mapToDouble(expenses -> expenses.get(user))
-//				.sum();
-//	}
-
-	@Override
-	public void payAllDebts(SuperAppObjectEntity group, UserIdWrapper payingUser) { //Example : Payed user : 150,Not payed :-50,  Not payed :-50,Not payed :-50
-		List<SuperAppObjectEntity> allTransactions = group.getChildren().stream().collect(Collectors.toList());
-
-		allTransactions.forEach(transaction -> ComputeTransaction(payingUser, transaction, group.getCreatedBy(),
-				fromLinkedHashMapToListExpensesBoundary((ArrayList<Object>)converter.detailsToMap(transaction.getObjectDetails()).get("allExpenses"))));
-	}
-	@Override
-	public SuperAppObjectEntity computeTransactionBalance(SuperAppObjectEntity trans) { // total_compute_per_group
-		Map<String,Object> details = converter.detailsToMap(trans.getObjectDetails());
-
-		List<ExpensesBoundary> allExpenses = fromLinkedHashMapToListExpensesBoundary((ArrayList<Object>)details.get("allExpenses")) ;
-
-		Double originalPayment = (Double)details.get("originalPayment");
-
-		allExpenses.forEach(user -> user.setAmount(user.getAmount() - originalPayment / allExpenses.size()));
-
-		details.put("allExpenses", allExpenses);
-
-		trans.setObjectDetails(converter.detailsToString(details));
-
-		this.objectRepository.save(trans);
-
-		return trans;
-	}
-
 
 
 	@Override
@@ -163,13 +108,50 @@ public class SplitService implements SplitsService, ServicesFactory {
 	}
 
 	@Override
-	public void removeTransaction(UserIdWrapper user, SuperAppObjectEntity group, SuperAppObjectEntity transaction) {
-		Map<UserIdWrapper, Double> userDebt = (Map<UserIdWrapper, Double>)this.converter.detailsToMap(transaction.getObjectDetails()).get("userDebt");
-		double originalPayment = (double) this.converter.detailsToMap(transaction.getObjectDetails()).get("originalPayment");
-		if (userDebt.get(user) !=originalPayment)
-            throw new CannotProcessException("Cannot close payment, one user or more already paid");
-		objectRepository.delete(transaction);
-    }
+	public void payAllDebts(SuperAppObjectEntity group, UserIdWrapper payingUser) { //Example : Payed user : 150,Not payed :-50,  Not payed :-50,Not payed :-50
+		List<SuperAppObjectEntity> allTransactions = group.getChildren().stream().collect(Collectors.toList());
+
+		allTransactions.forEach(transaction -> ComputeTransaction(payingUser, transaction, group.getCreatedBy(),
+				fromLinkedHashMapToListExpensesBoundary((ArrayList<Object>)converter.detailsToMap(transaction.getObjectDetails()).get("allExpenses"))));
+	}
+
+
+
+
+
+
+
+	private double calculateTransactionUsersDebts(SuperAppObjectEntity trans,UserIdWrapper user) {
+		Map<String,Object> details = converter.detailsToMap(trans.getObjectDetails());
+		List<ExpensesBoundary> allExpenses = fromLinkedHashMapToListExpensesBoundary((ArrayList<Object>)details.get("allExpenses"));
+
+
+		ExpensesBoundary expense = allExpenses.stream().filter(tran -> tran.getUser().equals(user)).toList().get(0);
+
+		return expense.getAmount();
+	}
+
+
+	@Override
+	public SuperAppObjectEntity computeTransactionBalance(SuperAppObjectEntity trans) { // total_compute_per_group
+
+		Map<String,Object> details = converter.detailsToMap(trans.getObjectDetails());
+		List<ExpensesBoundary> allExpenses = fromLinkedHashMapToListExpensesBoundary((ArrayList<Object>)details.get("allExpenses")) ;
+		Double originalPayment = (Double)details.get("originalPayment");
+
+		allExpenses.forEach(user -> user.setAmount(user.getAmount() - originalPayment / allExpenses.size()));
+
+		details.put("allExpenses", allExpenses);
+
+		trans.setObjectDetails(converter.detailsToString(details));
+		this.objectRepository.save(trans);
+
+		return trans;
+	}
+
+
+
+
 
 	private ExpensesBoundary getUserExpenses(UserIdWrapper user, List<ExpensesBoundary> allExpenses)
 	{
@@ -202,8 +184,13 @@ public class SplitService implements SplitsService, ServicesFactory {
 		this.objectRepository.save(transaction);
 	}
 
+	private List<ExpensesBoundary> getAllExpenses(SuperAppObjectEntity trans){
+		Map<String,Object> details = converter.detailsToMap(trans.getObjectDetails());
+		return  fromLinkedHashMapToListExpensesBoundary((ArrayList<Object>)details.get("allExpenses")) ;
+	}
 
 	private List<ExpensesBoundary> fromLinkedHashMapToListExpensesBoundary(ArrayList<Object> allExpenses) {
+
 		return allExpenses
 				.stream()
 				.map(expense -> fromLinkedHashMapToExpensesBoundary((LinkedHashMap<String,Object>)expense))
@@ -211,11 +198,14 @@ public class SplitService implements SplitsService, ServicesFactory {
 	}
 
 	private ExpensesBoundary fromLinkedHashMapToExpensesBoundary(LinkedHashMap<String,Object> expenses) {
+
+		System.err.println(expenses);
+
 		LinkedHashMap<String,String> userId  = (LinkedHashMap<String,String> )expenses.get("userId") ;
 		if (userId == null)
-			userId=(LinkedHashMap<String,String> )expenses.get("user") ;
+			userId=((LinkedHashMap<String,String> )expenses.get("user"));
 
-		System.err.println(userId);
+
 		return new ExpensesBoundary(fromLinkedHashMapToWrapperId(userId) ,(Double) expenses.get("amount"));
 	}
 
@@ -225,5 +215,12 @@ public class SplitService implements SplitsService, ServicesFactory {
 		return new UserIdWrapper(new UserIdBoundary(linkedWrapperId.get("superapp"), linkedWrapperId.get("email")));
 	}
 
-
+	@Override
+	public void removeTransaction(UserIdWrapper user, SuperAppObjectEntity group, SuperAppObjectEntity transaction) {
+		Map<UserIdWrapper, Double> userDebt = (Map<UserIdWrapper, Double>)this.converter.detailsToMap(transaction.getObjectDetails()).get("userDebt");
+		double originalPayment = (double) this.converter.detailsToMap(transaction.getObjectDetails()).get("originalPayment");
+		if (userDebt.get(user) !=originalPayment)
+			throw new CannotProcessException("Cannot close payment, one user or more already paid");
+		objectRepository.delete(transaction);
+	}
 	}
