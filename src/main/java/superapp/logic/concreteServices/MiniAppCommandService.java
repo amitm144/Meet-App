@@ -9,10 +9,7 @@ import superapp.converters.MiniappCommandConverter;
 import superapp.dal.IdGeneratorRepository;
 import superapp.dal.MiniAppCommandRepository;
 import superapp.dal.SuperAppObjectEntityRepository;
-import superapp.data.IdGeneratorEntity;
-import superapp.data.MiniAppCommandEntity;
-import superapp.data.SuperAppObjectEntity;
-import superapp.data.SuperappObjectPK;
+import superapp.data.*;
 import superapp.logic.AbstractService;
 import superapp.logic.MiniAppCommandsService;
 import superapp.logic.SuperAppObjectsService;
@@ -76,6 +73,8 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
             throw new NotFoundException("Object Not Found");
         if(objectE.get().getActive() ==false)
             throw new CannotProcessException("Cannot preform a command on an inactive object");
+        if(super.isMiniappUser(targetObject.getObjectId().getSuperapp(),objectE.get().getUserEmail()))
+            throw new CannotProcessException("Only a MINIAPP_USER preform a command");
         IdGeneratorEntity helper = this.idGenerator.save(new IdGeneratorEntity());
         String commandId = helper.getId().toString();
         this.idGenerator.delete(helper);
@@ -116,4 +115,5 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
     @Override
     @Transactional
     public void deleteALlCommands() { this.miniappRepository.deleteAll(); }
+
 }
