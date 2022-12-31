@@ -27,17 +27,10 @@ public abstract class AbstractService {
 
     public final boolean isValidSuperapp(String superapp) { return this.superappName.equals(superapp);
     }
-    public final boolean isMiniappUser(String userSuperapp, String email){
+    public final boolean isUserRole(String userSuperapp, String email,UserRole usersRole){
             Optional<UserEntity> userE = userEntityRepository.findById(new UserPK(userSuperapp, email));
-            if (userE.isPresent() && userE.get().getRole().equals(UserRole.MINIAPP_USER))
+            if (userE.isPresent() && userE.get().getRole().equals(usersRole))
                 return true;
             return false;
     }
-    private boolean isSuperappUser(String userSuperapp, String email) {
-        Optional<UserEntity> userE = userEntityRepository.findById(new UserPK(userSuperapp, email));
-        if (userE.isPresent() && userE.get().getRole().equals(UserRole.ADMIN))
-            return true;
-        return false;
-    }
-
 }

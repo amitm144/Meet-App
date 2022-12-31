@@ -73,7 +73,7 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
             throw new NotFoundException("Object Not Found");
         if(objectE.get().getActive() ==false)
             throw new CannotProcessException("Cannot preform a command on an inactive object");
-        if(super.isMiniappUser(targetObject.getObjectId().getSuperapp(),objectE.get().getUserEmail()))
+        if(super.isUserRole(targetObject.getObjectId().getSuperapp(),objectE.get().getUserEmail(),UserRole.MINIAPP_USER))
             throw new CannotProcessException("Only a MINIAPP_USER preform a command");
         IdGeneratorEntity helper = this.idGenerator.save(new IdGeneratorEntity());
         String commandId = helper.getId().toString();
