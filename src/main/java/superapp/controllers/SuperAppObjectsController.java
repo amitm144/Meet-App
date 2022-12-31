@@ -83,4 +83,5 @@ public class SuperAppObjectsController {
                                                   @PathVariable String internalObjectId) {
         return this.objService.getParents(superapp, internalObjectId).toArray(new SuperAppObjectBoundary[0]);
     }
+
 }

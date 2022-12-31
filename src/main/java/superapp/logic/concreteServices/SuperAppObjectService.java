@@ -134,6 +134,9 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
                 this.objectRepository.findById(new SuperappObjectPK(objectSuperapp, internalObjectId));
         if (objectE.isEmpty())
             throw new NotFoundException("Object does not exist");
+        if(objectE.get().getActive() == false)
+            throw new NotFoundException("Cannot access an inactive Object");
+
 
         return this.converter.toBoundary(objectE.get());
     }
@@ -149,6 +152,7 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
                 .getChildren()
                 .stream()
                 .map(this.converter::toBoundary)
+                .filter(child -> child.getActive())//if not Active state cannot acsess
                 .collect(Collectors.toList());
     }
 
@@ -163,6 +167,7 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
                 .getParents()
                 .stream()
                 .map(this.converter::toBoundary)
+                .filter(parent -> parent.getActive())
                 .collect(Collectors.toList());
     }
 
@@ -170,6 +175,7 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
     @Transactional(readOnly = true)
     public List<SuperAppObjectBoundary> getAllObjects() {
         Iterable<SuperAppObjectEntity> objects = this.objectRepository.findAll();
+
         return StreamSupport
                 .stream(objects.spliterator() , false)
                 .map(this.converter::toBoundary)
