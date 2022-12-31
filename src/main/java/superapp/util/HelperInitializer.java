@@ -17,7 +17,7 @@ import superapp.util.wrappers.UserIdWrapper;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component // TODO fix to initialize object ONLY when testing manually the server
+//@Component // TODO fix to initialize object ONLY when testing manually the server
 public class HelperInitializer implements CommandLineRunner {
 	private MiniAppCommandService commands;
 	private SuperAppObjectService objects;

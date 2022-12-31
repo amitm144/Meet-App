@@ -28,12 +28,12 @@ import java.util.stream.StreamSupport;
 public class UserService extends AbstractService implements UsersService {
 
     private UserConverter converter;
-
     @Autowired
     public UserService(UserConverter converter,
                        UserEntityRepository userEntityRepository) {
         super(userEntityRepository);
         this.converter = converter;
+        this.userEntityRepository =userEntityRepository;
     }
 
     @Override
@@ -52,7 +52,7 @@ public class UserService extends AbstractService implements UsersService {
         if (userE.isPresent())
             throw new AlreadyExistsException("User already exists");
 
-        super.userEntityRepository.save(this.converter.toEntity(user));
+        this.userEntityRepository.save(this.converter.toEntity(user));
         return user;
     }
 

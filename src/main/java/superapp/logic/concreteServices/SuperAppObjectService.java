@@ -34,7 +34,7 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
     @Autowired
     public SuperAppObjectService(SuperAppObjectConverter converter,
                                  SuperAppObjectEntityRepository objectRepository,
-                                 IdGeneratorRepository idGenerator, UserEntityRepository userEntityRepository) {
+                                 IdGeneratorRepository idGenerator,UserEntityRepository userEntityRepository) {
         super(userEntityRepository);
         this.converter = converter;
         this.objectRepository = objectRepository;

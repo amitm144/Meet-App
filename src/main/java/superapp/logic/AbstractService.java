@@ -8,6 +8,7 @@ import superapp.data.UserEntity;
 import superapp.data.UserPK;
 import superapp.data.UserRole;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -26,10 +27,9 @@ public abstract class AbstractService {
 
     public final boolean isValidSuperapp(String superapp) { return this.superappName.equals(superapp);
     }
-    public final boolean isUserRole(String userSuperapp, String email,UserRole usersRole){
-            Optional<UserEntity> userE = userEntityRepository.findById(new UserPK(userSuperapp, email));
-            if (userE.isPresent() && userE.get().getRole().equals(usersRole))
-                return true;
-            return false;
+    public final boolean isUserRole(String email,UserRole usersRole){
+        List<UserEntity> userE = userEntityRepository.findByEmail(email);
+        if(userE.size() ==0) return false;
+        return userE.get(0).getRole().equals(usersRole);
     }
 }

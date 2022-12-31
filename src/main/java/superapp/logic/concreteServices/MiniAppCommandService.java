@@ -71,11 +71,11 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
         // issue internalCommandId, tie with superapp and set invocation timestamp
         Optional<SuperAppObjectEntity> objectE =
                 this.objectRepository.findById(new SuperappObjectPK(targetObject.getObjectId().getSuperapp(), targetObject.getObjectId().getInternalObjectId()));
-        if( objectE.isEmpty())
+        if(objectE.isEmpty())
             throw new NotFoundException("Object Not Found");
         if(objectE.get().getActive() ==false)
             throw new CannotProcessException("Cannot preform a command on an inactive object");
-        if(this.isUserRole(targetObject.getObjectId().getSuperapp(),objectE.get().getUserEmail(),UserRole.MINIAPP_USER))
+        if(this.isUserRole(command.getInvokedBy().getUserId().getEmail(),UserRole.MINIAPP_USER))
             throw new CannotProcessException("Only a MINIAPP_USER preform a command");
         IdGeneratorEntity helper = this.idGenerator.save(new IdGeneratorEntity());
         String commandId = helper.getId().toString();
@@ -117,5 +117,4 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
     @Override
     @Transactional
     public void deleteALlCommands() { this.miniappRepository.deleteAll(); }
-
 }
