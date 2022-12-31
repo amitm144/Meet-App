@@ -14,7 +14,6 @@ import java.util.Optional;
 public abstract class AbstractService {
     protected String superappName;
     protected  UserEntityRepository userEntityRepository;
-    public AbstractService(){};
     @Autowired
     public AbstractService( UserEntityRepository userEntityRepository)
     {

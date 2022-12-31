@@ -10,6 +10,7 @@ import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.SuperAppObjectConverter;
 import superapp.dal.IdGeneratorRepository;
 import superapp.dal.SuperAppObjectEntityRepository;
+import superapp.dal.UserEntityRepository;
 import superapp.data.IdGeneratorEntity;
 import superapp.data.SuperAppObjectEntity;
 import superapp.data.SuperappObjectPK;
@@ -33,7 +34,8 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
     @Autowired
     public SuperAppObjectService(SuperAppObjectConverter converter,
                                  SuperAppObjectEntityRepository objectRepository,
-                                 IdGeneratorRepository idGenerator) {
+                                 IdGeneratorRepository idGenerator, UserEntityRepository userEntityRepository) {
+        super(userEntityRepository);
         this.converter = converter;
         this.objectRepository = objectRepository;
         this.idGenerator = idGenerator;

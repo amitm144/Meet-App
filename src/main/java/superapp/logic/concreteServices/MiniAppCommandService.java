@@ -9,6 +9,7 @@ import superapp.converters.MiniappCommandConverter;
 import superapp.dal.IdGeneratorRepository;
 import superapp.dal.MiniAppCommandRepository;
 import superapp.dal.SuperAppObjectEntityRepository;
+import superapp.dal.UserEntityRepository;
 import superapp.data.*;
 import superapp.logic.AbstractService;
 import superapp.logic.MiniAppCommandsService;
@@ -33,7 +34,8 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
     @Autowired
     public MiniAppCommandService(MiniappCommandConverter miniAppConverter,
                                  MiniAppCommandRepository miniappRepository,
-                                 IdGeneratorRepository idGenerator, SuperAppObjectEntityRepository objectRepository) {
+                                 IdGeneratorRepository idGenerator, SuperAppObjectEntityRepository objectRepository, UserEntityRepository userEntityRepository) {
+        super(userEntityRepository);
         this.miniAppConverter = miniAppConverter;
         this.miniappRepository = miniappRepository;
         this.idGenerator = idGenerator;
@@ -73,7 +75,7 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
             throw new NotFoundException("Object Not Found");
         if(objectE.get().getActive() ==false)
             throw new CannotProcessException("Cannot preform a command on an inactive object");
-        if(super.isUserRole(targetObject.getObjectId().getSuperapp(),objectE.get().getUserEmail(),UserRole.MINIAPP_USER))
+        if(this.isUserRole(targetObject.getObjectId().getSuperapp(),objectE.get().getUserEmail(),UserRole.MINIAPP_USER))
             throw new CannotProcessException("Only a MINIAPP_USER preform a command");
         IdGeneratorEntity helper = this.idGenerator.save(new IdGeneratorEntity());
         String commandId = helper.getId().toString();
