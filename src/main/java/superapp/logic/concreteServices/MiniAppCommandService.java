@@ -41,18 +41,6 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
     @Override
     @Transactional
     public Object invokeCommand(MiniAppCommandBoundary command) {
-        /*
-        if (miniAppsCommands.get(command.getCommandId().getMiniapp()) == null) {// TODO Check if miniapp is one of the miniapps
-            ArrayList<MiniAppCommandEntity> commandList = new ArrayList<MiniAppCommandEntity>();
-            invokeCommandAtMiniapp(command, command.getCommandId().getMiniapp());
-            commandList.add(this.miniAppConverter.toEntity(command));
-            miniAppsCommands.put(command.getCommandId().getMiniapp(),commandList);
-        } else {
-            invokeCommandAtMiniapp(command, command.getCommandId().getMiniapp());
-            miniAppsCommands.get(command.getCommandId().getMiniapp()).add(this.miniAppConverter.toEntity(command));
-        }
-        return command;
-         */
         UserIdWrapper invokedBy = command.getInvokedBy();
         if (invokedBy == null ||
                 invokedBy.getUserId() == null ||
@@ -86,13 +74,11 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
         command.getCommandId().setSuperapp(this.superappName);
 
         this.miniappRepository.save(this.miniAppConverter.toEntity(command));
-        //if Miniaap Not Found Service Throws runtime Exception
-        this.serviceHandler.runCommand(command.getCommandId().getMiniapp(),targetObject,invokedBy,command.getCommandAttributes(), command.getCommand());
-
-
-        return command;
+        //run command will handle any unknown miniapp by 400 - Bad request.
+        return this.serviceHandler.runCommand(command.getCommandId().getMiniapp(),
+                targetObject,invokedBy.getUserId(), command.getCommand());
+//        return command;
     }
-
 
 
     @Override

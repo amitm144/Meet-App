@@ -2,17 +2,18 @@ package superapp.logic.concreteServices;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import superapp.boundaries.object.SuperAppObjectBoundary;
+import superapp.boundaries.user.UserIdBoundary;
 import superapp.data.SuperAppObjectEntity;
 import superapp.logic.ServicesFactory;
-import superapp.logic.concreteServices.SplitService;
-import superapp.util.exceptions.NotFoundException;
+import superapp.util.exceptions.InvalidInputException;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
-import superapp.util.wrappers.UserIdWrapper;
-import java.util.Map;
+
 @Service
 public class ServiceHandler implements ServicesFactory {
     private SplitService splitService;
+
     //private GrabService grabService
     //private LiftService liftService
     @Autowired
@@ -26,18 +27,18 @@ public class ServiceHandler implements ServicesFactory {
 
     @Override
     public void handleObjectByType(SuperAppObjectBoundary object) {
-            switch (object.getType()){
-                case ("Transaction"): // Only Object in Miniap that need to be modifyed
-                {
-                    this.splitService.handleObjectByType(object);
-                    break;
-                }
+        switch (object.getType()) {
+            case ("Transaction"): // Only Object in Miniap that need to be modifyed
+            {
+                this.splitService.handleObjectByType(object);
+                break;
+            }
         }
     }
 
     @Override
     public void updateObjectDetails(SuperAppObjectEntity object) {
-        switch (object.getType()){
+        switch (object.getType()) {
             case ("Transaction"):// Only Object in Miniap that need to be modifyed
             {
                 splitService.updateObjectDetails(object);
@@ -47,22 +48,26 @@ public class ServiceHandler implements ServicesFactory {
     }
 
     @Override
-    public void runCommand(String miniapp, SuperAppObjectIdWrapper targetObject, UserIdWrapper user, Map<String, Object> attributes, String commandCase) {
+    public Object runCommand(String miniapp,
+                             SuperAppObjectIdWrapper targetObject,
+                             UserIdBoundary invokedBy,
+                             String commandCase) {
         switch (miniapp) {
-            case("Split"):{
-                    this.splitService.runCommand(miniapp,targetObject,user,attributes,commandCase);
-                }
-            case ("Grab"):{
+            case ("Split"): {
+                return this.splitService.runCommand(miniapp, targetObject, invokedBy, commandCase);
+            }
+            case ("Grab"): {
                 //this.grabService.runCommand(miniapp,targetObject,user,attributes,commandCase);
-                return;
+                break;
             }
-            case("Lift"):{
-                    //this.liftService.runCommand(miniapp,targetObject,user,attributes,commandCase);
-                return;
+            case ("Lift"): {
+                //this.liftService.runCommand(miniapp,targetObject,user,attributes,commandCase);
+                break;
             }
-            default:{
-                throw new NotFoundException("MiniApp Not Found");
+            default: {
+                throw new InvalidInputException("MiniApp Not Found");
             }
         }
-        }
+        return null;
     }
+}
