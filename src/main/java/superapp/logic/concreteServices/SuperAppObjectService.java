@@ -21,7 +21,6 @@ import superapp.util.exceptions.CannotProcessException;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.exceptions.NotFoundException;
 import superapp.util.EmailChecker;
-import superapp.util.exceptions.UnsupportedOpertaionException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -188,7 +187,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     @Deprecated
     @Transactional
     public void deleteAllObjects() {
-        throw new UnsupportedOpertaionException("Method is Dperecated");
+        throw new InvalidInputException("Method is Dperecated");
     }
 
     @Override

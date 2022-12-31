@@ -121,7 +121,7 @@ public class UserService extends AbstractService implements AdvancedUsersService
     @Deprecated
     @Transactional(readOnly = true)
     public List<UserBoundary> getAllUsers() {
-        throw new UnsupportedOpertaionException("Method is Dperecated");
+        throw new InvalidInputException("Method is Dperecated");
     }
 
     @Override
@@ -142,7 +142,7 @@ public class UserService extends AbstractService implements AdvancedUsersService
     @Deprecated
     @Transactional
     public void deleteAllUsers() {
-        throw new UnsupportedOpertaionException("Method is Dperecated");
+        throw new InvalidInputException("Method is Dperecated");
     }
 
     @Override

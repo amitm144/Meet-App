@@ -7,9 +7,9 @@ import java.util.List;
 public interface MiniAppCommandsService {
     public Object invokeCommand(MiniAppCommandBoundary command);
     @Deprecated
-    public List<MiniAppCommandBoundary> getALlCommands();
+    public List<MiniAppCommandBoundary> getAllCommands();
     @Deprecated
     public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniAppName);
     @Deprecated
-    public void deleteALlCommands();
+    public void deleteAllCommands();
 }
