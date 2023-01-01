@@ -8,8 +8,7 @@ import java.util.List;
 public interface AdvancedSuperAppObjectsService extends SuperAppObjectsService {
     public SuperAppObjectBoundary updateObject(String objectSuperapp, String internalObjectId, SuperAppObjectBoundary update,
                                                String userSuperapp,String email);
-    public void bindNewChild(String parentSuperapp, String parentObjectId, SuperAppObjectIdBoundary newChild,String userSuperapp,String email);
-
+    public void bindNewChild(String parentSuperapp, String parentObjectId, SuperAppObjectIdBoundary newChild,String userSuperapp, String email);
     public List<SuperAppObjectBoundary> getAllObjects(String userSuperapp, String email, int size , int page);
 
     public List<SuperAppObjectBoundary> getChildren(String objectSuperapp, String internalObjectId,String userSuperapp, String email, int size, int page);
@@ -22,7 +21,7 @@ public interface AdvancedSuperAppObjectsService extends SuperAppObjectsService {
 
     public SuperAppObjectBoundary getSpecificObject(String objectSuperapp, String internalObjectId, String userSuperapp, String email);
 
-    public List<SuperAppObjectBoundary> SearchObjectsByExactAliasContainingText(String text, String userSupperapp, String email, int size, int page);
+    public List<SuperAppObjectBoundary> SearchObjectsByExactAliasContainingText(String text, String userSuperapp, String email, int size, int page);
 
     public void deleteAllObjects(String userSuperapp, String email);
     }

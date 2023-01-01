@@ -19,16 +19,18 @@ import superapp.data.SuperAppObjectEntity.SuperAppObjectId;
 import superapp.data.UserEntity;
 import superapp.logic.AbstractService;
 import superapp.logic.AdvancedSuperAppObjectsService;
+import superapp.util.ControllersConstants;
 import superapp.util.exceptions.CannotProcessException;
+import superapp.util.exceptions.ForbiddenInsteadException;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.exceptions.NotFoundException;
 import superapp.util.EmailChecker;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static superapp.data.UserRole.*;
+import static superapp.util.ControllersConstants.DEFAULT_SORTING_DIRECTION;
 
 @Service
 public class SuperAppObjectService extends AbstractService implements AdvancedSuperAppObjectsService {
@@ -87,8 +89,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                                                String internalObjectId,
                                                SuperAppObjectBoundary update)
     {
-        //TODO need to change exception
-        throw new NotFoundException("Method is Dperecated");
+        throw new ForbiddenInsteadException("Method is Dperecated");
     }
 
     @Override
@@ -96,9 +97,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     public SuperAppObjectBoundary updateObject(String objectSuperapp,
                                                String internalObjectId,
                                                SuperAppObjectBoundary update,String userSuperapp,String email) {
-        if (!isSuperappUser(userSuperapp, email))
-            //TODO need to change exception
-            throw new NotFoundException("Error: Only SUPERAPP_USER is allowed to access this method.");
+        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
         Optional<SuperAppObjectEntity> objectO =
                 this.objectRepository.findById(new SuperAppObjectId(objectSuperapp, internalObjectId));
@@ -138,14 +138,15 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     @Deprecated
     @Transactional
     public void bindNewChild(String parentSuperapp, String parentObjectId, SuperAppObjectIdBoundary newChild) {
-        //TODO need to change exception
         throw new NotFoundException("Method is Dperecated");
     }
+
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public void bindNewChild(String parentSuperapp, String parentObjectId, SuperAppObjectIdBoundary newChild,String userSuperapp, String email) {
-        if (!isSuperappUser(userSuperapp, email))
-            throw new NotFoundException("Error: Only SUPERAPP_USER is allowed to access this method.");
+        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
+
         SuperAppObjectEntity parent = this.objectRepository
                 .findById(new SuperAppObjectId(parentSuperapp, parentObjectId))
                 .orElseThrow(() -> new NotFoundException("Cannot find parent object"));
@@ -171,8 +172,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     @Override
     @Transactional(readOnly = true)
     public SuperAppObjectBoundary getSpecificObject(String objectSuperapp, String internalObjectId, String userSuperapp, String email) {
-        if (!isSuperappUser(userSuperapp, email))
-            throw new NotFoundException("Error: Only SUPERAPP_USER is allowed to access this method.");
+        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
         Optional<SuperAppObjectEntity> objectE =
                 this.objectRepository.findById(new SuperAppObjectId(objectSuperapp, internalObjectId));
@@ -185,16 +186,15 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     @Override
     @Transactional(readOnly = true)
     public List<SuperAppObjectBoundary> getChildren(String objectSuperapp, String internalObjectId,String userSuperapp, String email, int size, int page) {
-        if (!isSuperappUser(userSuperapp, email))
-            throw new NotFoundException("Error: Only SUPERAPP_USER is allowed to access this method.");
+        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
-        SuperAppObjectEntity parent = this.objectRepository
-                .findById(new SuperAppObjectId(objectSuperapp, internalObjectId), PageRequest.of(page, size, Sort.Direction.DESC, "objectSuperapp", "internalObjectId"))
-                .orElseThrow(() -> new NotFoundException("Cannot find parent object"));
+        SuperAppObjectId parentId = new SuperAppObjectId(objectSuperapp, internalObjectId);
 
-        return parent
-                .getChildren()
+        return this.objectRepository
+                .findAll(PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "objectSuperapp", "internalObjectId"))
                 .stream()
+                .filter(obj -> obj.getParents().contains(parentId))
                 .map(this.converter::toBoundary)
                 .collect(Collectors.toList());
     }
@@ -202,13 +202,14 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     @Override
     @Transactional(readOnly = true)
     public List<SuperAppObjectBoundary> getParents(String objectSuperapp, String internalObjectId,String userSuperapp, String email, int size, int page) {
-        SuperAppObjectEntity object = this.objectRepository
-                .findById(new SuperAppObjectId(objectSuperapp, internalObjectId))
-                .orElseThrow(() -> new NotFoundException("Cannot find requested object"));
+        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
-        return object
-                .getParents()
+        SuperAppObjectId parentId = new SuperAppObjectId(objectSuperapp, internalObjectId);
+
+        return  this.objectRepository.findAll(PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "objectSuperapp", "internalObjectId"))
                 .stream()
+                .filter(obj -> obj.getParents().contains(parentId))
                 .map(this.converter::toBoundary)
                 .collect(Collectors.toList());
     }
@@ -217,16 +218,16 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     @Deprecated
     @Transactional(readOnly = true)
     public List<SuperAppObjectBoundary> getAllObjects() {
-        throw new InvalidInputException("Method is Dperecated");
+        throw new NotFoundException("Method is Dperecated");
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<SuperAppObjectBoundary> getAllObjects(String userSuperapp, String email, int size, int page) {
-        if (!isSuperappUser(userSuperapp, email))
-            throw new NotFoundException("Error: Only SUPERAPP_USER is allowed to access this method.");
+        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
-        return this.objectRepository.findAll(PageRequest.of(page, size, Sort.Direction.DESC,
+        return this.objectRepository.findAll(PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION,
                         "userSuperapp", "userEmail"))
                     .stream()
                     .map(this.converter::toBoundary)
@@ -235,40 +236,38 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
 
     @Override
     public List<SuperAppObjectBoundary> SearchObjectsByType(String type, String userSuperapp, String email, int size, int page) {
-        if (!isSuperappUser(userSuperapp, email))
-            //TODO need to change exception
-            throw new NotFoundException("Error: Only SUPERAPP_USER is allowed to access this method.");
+        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
-        return this.objectRepository.findByType(type, userSuperapp, email, PageRequest.of(page, size, Sort.Direction.DESC, "objectId"))
+        return this.objectRepository.findByType(type, PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "objectId"))
                 .stream()
                 .map(this.converter::toBoundary)
                 .collect(Collectors.toList());
     }
-
     @Override
     @Deprecated
     @Transactional
     public void deleteAllObjects() {
-        throw new InvalidInputException("Method is Dperecated");
+        throw new NotFoundException("Method is Dperecated");
     }
 
     @Override
     @Transactional
     public List<SuperAppObjectBoundary> SearchObjectsByExactAlias(String alias, String userSuperapp, String email, int size, int page) {
-        if (!isSuperappUser(userSuperapp, email))
-            //TODO need to change exception
-            throw new NotFoundException("Error: Only SUPERAPP_USER is allowed to access this method.");
+        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
-        return this.objectRepository.findByAlias(alias, userSuperapp,email, PageRequest.of(page, size, Sort.Direction.DESC, "objectId"))
+        return this.objectRepository
+                .findByAlias(alias, PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "objectId"))
                 .stream()
                 .map(this.converter::toBoundary)
                 .collect(Collectors.toList());
     }
     @Override
     @Transactional
-    public void deleteAllObjects() {
-        if (!isSuperappUser(userSuperapp, email))
-            throw new NotFoundException("Error: Only ADMIN is allowed to access this method.");
+    public void deleteAllObjects(String userSuperapp, String email) {
+        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, ADMIN, this.userRepository);
         this.objectRepository.deleteAll();
     }
 
@@ -276,16 +275,13 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     @Transactional
     public List<SuperAppObjectBoundary> SearchObjectsByExactAliasContainingText(String text, String userSuperapp, String email, int size, int page)
     {
-        if (!isSuperappUser(userSuperapp, email))
-            //TODO need to change exception
-            throw new NotFoundException("Error: Only SUPERAPP_USER is allowed to access this method.");
-        return null;
-    }
+        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
-    private boolean isSuperappUser(String userSuperapp, String email) {
-        Optional<UserEntity> userE = userRepository.findById(new UserEntity.UserPK(userSuperapp, email));
-        if (userE.isPresent() && userE.get().getRole().equals(SUPERAPP_USER))
-            return true;
-        return false;
+        return this.objectRepository
+                .findByAliasContaining(text, PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "objectId"))
+                .stream()
+                .map(this.converter::toBoundary)
+                .collect(Collectors.toList());
     }
 }

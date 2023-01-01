@@ -3,6 +3,13 @@ package superapp.logic;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import superapp.dal.UserEntityRepository;
+import superapp.data.UserEntity;
+import superapp.data.UserRole;
+import superapp.util.exceptions.ForbiddenInsteadException;
+
+import java.util.Optional;
+
 @Service
 public abstract  class AbstractService {
     protected String superappName;
@@ -13,4 +20,12 @@ public abstract  class AbstractService {
     public final String getSuperappName() { return this.superappName; }
 
     public final boolean isValidSuperapp(String superapp) { return this.superappName.equals(superapp); }
+
+    public final boolean isValidUserCredentials(UserEntity.UserPK userId, UserRole role,
+                                                UserEntityRepository repository) {
+        Optional<UserEntity> userE = repository.findById(userId);
+        if (!(userE.isPresent() && userE.get().getRole().equals(role)))
+            throw new ForbiddenInsteadException("Error: Only users of type %s is allowed to use this method.".formatted(role));
+        return true;
+    }
 }

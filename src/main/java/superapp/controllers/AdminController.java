@@ -10,14 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import static superapp.util.ControllersConstants.DEFAULT_PAGE;
+import static superapp.util.ControllersConstants.DEFAULT_PAGE_SIZE;
+
 @RestController
 public class AdminController {
 
     private UserService userService;
     private MiniAppCommandService miniappService;
     private SuperAppObjectService objectService;
-    private final String DEFAULT_PAGE_SIZE = "10";
-    private final String DEFAULT_PAGE = "0";
 
     @Autowired
     public void setMessageService(UserService userService) {

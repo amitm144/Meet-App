@@ -8,12 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import static superapp.util.ControllersConstants.DEFAULT_PAGE;
+import static superapp.util.ControllersConstants.DEFAULT_PAGE_SIZE;
+
 @RestController
 public class SuperAppObjectsController {
 
     private AdvancedSuperAppObjectsService objService;
-    private final String DEFAULT_PAGE_SIZE = "10";
-    private final String DEFAULT_PAGE = "0";
 
     @Autowired
     public void setObjectService(AdvancedSuperAppObjectsService objService) {
@@ -62,7 +63,7 @@ public class SuperAppObjectsController {
             @RequestParam(name="userSuperapp", required = true, defaultValue = "") String userSupperapp,
             @RequestParam(name="userEmail", required = true, defaultValue = "") String email,
             @RequestParam(name = "size", required = false, defaultValue = DEFAULT_PAGE_SIZE) int size,
-            @RequestParam(name="page", required = false, defaultValue = "0") int page) {
+            @RequestParam(name="page", required = false, defaultValue = DEFAULT_PAGE) int page) {
         return this.objService.getAllObjects(userSupperapp,email,size,page).toArray(new SuperAppObjectBoundary[0]);
     }
 
@@ -72,8 +73,10 @@ public class SuperAppObjectsController {
             consumes = {MediaType.APPLICATION_JSON_VALUE})
     public void bindExistingObjects(@RequestBody SuperAppObjectIdBoundary toBind,
                                     @PathVariable String superapp,
-                                    @PathVariable String internalObjectId) {
-        this.objService.bindNewChild(superapp, internalObjectId, toBind);
+                                    @PathVariable String internalObjectId,
+                                    @RequestParam(name="userSuperapp", required = true, defaultValue = "") String userSuperapp,
+                                    @RequestParam(name="userEmail", required = true, defaultValue = "") String email) {
+        this.objService.bindNewChild(superapp, internalObjectId, toBind,userSuperapp,email);
     }
 
     @RequestMapping(
@@ -103,7 +106,7 @@ public class SuperAppObjectsController {
     }
 
     @RequestMapping(
-            path="/superapp/objects//superapp/objects/search/byType/{type}",
+            path="superapp/objects/search/byType/{type}",
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public SuperAppObjectBoundary[] SearchObjectsByType( @PathVariable String type,
@@ -118,16 +121,18 @@ public class SuperAppObjectsController {
             path="/superapp/objects/search/byAlias/{alias}",
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    public SuperAppObjectBoundary[] SearchObjectsByExactAlias(@PathVariable String alias,
-                                                              @RequestParam(name="userSuperapp", required = true, defaultValue = "") String userSuperapp,
-                                                              @RequestParam(name="userEmail", required = true, defaultValue = "") String email,
-                                                              @RequestParam(name = "size", required = false, defaultValue = DEFAULT_PAGE_SIZE) int size,
-                                                              @RequestParam(name="page", required = false, defaultValue = DEFAULT_PAGE) int page) {
-        return this.objService.SearchObjectsByExactAlias(alias, userSuperapp, email, size, page).toArray(new SuperAppObjectBoundary[0]);
+    public SuperAppObjectBoundary[] SearchObjectsByExactAlias(
+            @PathVariable String alias,
+            @RequestParam(name="userSuperapp", required = true, defaultValue = "") String userSuperapp,
+            @RequestParam(name="userEmail", required = true, defaultValue = "") String email,
+            @RequestParam(name = "size", required = false, defaultValue = DEFAULT_PAGE_SIZE) int size,
+            @RequestParam(name="page", required = false, defaultValue = DEFAULT_PAGE) int page) {
+        return this.objService.SearchObjectsByExactAlias(alias, userSuperapp, email, size, page)
+                .toArray(new SuperAppObjectBoundary[0]);
     }
 
     @RequestMapping(
-            path="/superapp//superapp/objects/search/byAliasContaining/{text}",
+            path="/superapp/objects/search/byAliasContaining/{text}",
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public SuperAppObjectBoundary[] SearchObjectsByExactAliasContainingText(@PathVariable String text,
@@ -137,5 +142,4 @@ public class SuperAppObjectsController {
                                                               @RequestParam(name="page", required = false, defaultValue = DEFAULT_PAGE) int page) {
         return this.objService.SearchObjectsByExactAliasContainingText(text, userSuperapp, email, size, page).toArray(new SuperAppObjectBoundary[0]);
     }
-
 }

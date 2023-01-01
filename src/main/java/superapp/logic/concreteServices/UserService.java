@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static superapp.data.UserRole.ADMIN;
+import static superapp.util.ControllersConstants.DEFAULT_SORTING_DIRECTION;
 
 @Service
 public class UserService extends AbstractService implements AdvancedUsersService {
@@ -125,11 +126,11 @@ public class UserService extends AbstractService implements AdvancedUsersService
     @Override
     @Transactional(readOnly = true)
     public List<UserBoundary> getAllUsers(String userSuperapp, String email,int size,int page) {
-        if (!isSuperappUser(userSuperapp, email))
-            throw new NotFoundException("Error: Only ADMIN is allowed to access this method.");
+        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, ADMIN, this.userEntityRepository);
 
         Iterable<UserEntity> users = this.userEntityRepository
-                .findAll(PageRequest.of(page,size, Sort.Direction.DESC,"superapp","email"));
+                .findAll(PageRequest.of(page,size, DEFAULT_SORTING_DIRECTION,"superapp","email"));
         return StreamSupport
                 .stream(users.spliterator() , false)
                 .map(this.converter::toBoundary)
@@ -146,16 +147,9 @@ public class UserService extends AbstractService implements AdvancedUsersService
     @Override
     @Transactional
     public void deleteAllUsers(String userSuperapp, String email) {
-        if (!isSuperappUser(userSuperapp, email))
-            throw new NotFoundException("Error: Only ADMIN is allowed to access this method.");
+        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, ADMIN, this.userEntityRepository);
 
         this.userEntityRepository.deleteAll();
-    }
-
-    private boolean isSuperappUser(String userSuperapp, String email) {
-        Optional<UserEntity> userE = userEntityRepository.findById(new UserEntity.UserPK(userSuperapp, email));
-        if (userE.isPresent() && userE.get().getRole().equals(ADMIN))
-            return true;
-        return false;
     }
 }

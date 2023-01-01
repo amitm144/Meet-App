@@ -15,9 +15,9 @@ import superapp.data.IdGeneratorEntity;
 import superapp.data.UserEntity;
 import superapp.logic.AbstractService;
 import superapp.logic.AdvancedMiniAppCommandsService;
-import superapp.util.exceptions.ForbiddenInsteadException;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.EmailChecker;
+import superapp.util.exceptions.NotFoundException;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
 import superapp.util.wrappers.UserIdWrapper;
 
@@ -25,6 +25,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static superapp.data.UserRole.ADMIN;
+import static superapp.util.ControllersConstants.DEFAULT_SORTING_DIRECTION;
 
 @Service
 public class MiniAppCommandService extends AbstractService implements AdvancedMiniAppCommandsService {
@@ -93,31 +94,31 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     @Transactional(readOnly = true)
     @Deprecated
     public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniappName) {
-        throw new InvalidInputException("Method is Dperecated");
+        throw new NotFoundException("Method is Dperecated");
     }
 
     @Override
     @Deprecated
     @Transactional(readOnly = true)
     public List<MiniAppCommandBoundary> getAllCommands() {
-        throw new InvalidInputException("Method is Dperecated");
+        throw new NotFoundException("Method is Dperecated");
     }
 
     @Override
     @Deprecated
     @Transactional
     public void deleteAllCommands() {
-        throw new InvalidInputException("Method is Dperecated");
+        throw new NotFoundException("Method is Dperecated");
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<MiniAppCommandBoundary> getAllCommands(String userSuperapp, String email,int size,int page) {
-        if (!isSuperappUser(userSuperapp, email))
-            throw new ForbiddenInsteadException("Error: Only ADMIN is allowed to access this method.");
+        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, ADMIN, this.userRepository);
 
         return this.miniappRepository
-                .findAll(PageRequest.of(page,size, Sort.Direction.DESC,"miniapp","internalCommandId"))
+                .findAll(PageRequest.of(page,size, DEFAULT_SORTING_DIRECTION,"miniapp","internalCommandId"))
                 .stream()
                 .map(this.miniAppConverter::toBoundary)
                 .collect(Collectors.toList());
@@ -126,11 +127,11 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     @Override
     @Transactional(readOnly = true)
     public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniappName ,String userSuperapp, String email,int size,int page) {
-        if (!isSuperappUser(userSuperapp, email))
-            throw new ForbiddenInsteadException("Error: Only ADMIN is allowed to access this method.");
+        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, ADMIN, this.userRepository);
 
         return this.miniappRepository.findAllByMiniapp(miniappName,
-                        PageRequest.of(page,size, Sort.Direction.DESC,"miniapp","internalCommandId"))
+                        PageRequest.of(page,size, DEFAULT_SORTING_DIRECTION,"miniapp","internalCommandId"))
                 .stream()
                 .map(this.miniAppConverter::toBoundary)
                 .collect(Collectors.toList());
@@ -138,18 +139,10 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
 
     @Override
     @Transactional
-    public void deleteAllCommands(String userSupperapp, String email)
+    public void deleteAllCommands(String userSuperapp, String email)
     {
-        if (!isSuperappUser(userSupperapp, email))
-            throw new ForbiddenInsteadException("Error: Only ADMIN is allowed to access this method.");
-
+        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, ADMIN, this.userRepository);
         this.miniappRepository.deleteAll();
-    }
-
-    private boolean isSuperappUser(String userSuperapp, String email) {
-        Optional<UserEntity> userE = userRepository.findById(new UserEntity.UserPK(userSuperapp, email));
-        if (userE.isPresent() && userE.get().getRole().equals(ADMIN))
-            return true;
-        return false;
     }
 }
