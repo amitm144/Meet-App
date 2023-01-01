@@ -14,6 +14,7 @@ import superapp.dal.UserEntityRepository;
 import superapp.data.IdGeneratorEntity;
 import superapp.data.SuperAppObjectEntity;
 import superapp.data.SuperappObjectPK;
+import superapp.data.UserRole;
 import superapp.logic.AbstractService;
 import superapp.logic.SuperAppObjectsService;
 import superapp.util.exceptions.CannotProcessException;
@@ -30,15 +31,16 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
     private SuperAppObjectEntityRepository objectRepository;
     private IdGeneratorRepository idGenerator;
     private SuperAppObjectConverter converter;
+    private UserEntityRepository userEntityRepository;
 
     @Autowired
     public SuperAppObjectService(SuperAppObjectConverter converter,
                                  SuperAppObjectEntityRepository objectRepository,
                                  IdGeneratorRepository idGenerator,UserEntityRepository userEntityRepository) {
-        super(userEntityRepository);
         this.converter = converter;
         this.objectRepository = objectRepository;
         this.idGenerator = idGenerator;
+        this.userEntityRepository =userEntityRepository;
     }
 
     @Override
@@ -136,9 +138,6 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
                 this.objectRepository.findById(new SuperappObjectPK(objectSuperapp, internalObjectId));
         if (objectE.isEmpty())
             throw new NotFoundException("Object does not exist");
-        if(objectE.get().getActive() == false)
-            throw new NotFoundException("Cannot access an inactive Object");
-
 
         return this.converter.toBoundary(objectE.get());
     }
@@ -149,12 +148,10 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
         SuperAppObjectEntity parent = this.objectRepository
                 .findById(new SuperappObjectPK(objectSuperapp, internalObjectId))
                 .orElseThrow(() -> new NotFoundException("Cannot find parent object"));
-
         return parent
                 .getChildren()
                 .stream()
                 .map(this.converter::toBoundary)
-                .filter(child -> child.getActive())//if not Active state cannot acsess
                 .collect(Collectors.toList());
     }
 
@@ -169,7 +166,6 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
                 .getParents()
                 .stream()
                 .map(this.converter::toBoundary)
-                .filter(parent -> parent.getActive())
                 .collect(Collectors.toList());
     }
 

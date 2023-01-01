@@ -13,7 +13,6 @@ import superapp.dal.UserEntityRepository;
 import superapp.data.*;
 import superapp.logic.AbstractService;
 import superapp.logic.MiniAppCommandsService;
-import superapp.logic.SuperAppObjectsService;
 import superapp.util.exceptions.CannotProcessException;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.EmailChecker;
@@ -31,20 +30,37 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
     private MiniAppCommandRepository miniappRepository;
     private IdGeneratorRepository idGenerator;
     private SuperAppObjectEntityRepository objectRepository;
+    private UserEntityRepository userEntityRepository;
     @Autowired
     public MiniAppCommandService(MiniappCommandConverter miniAppConverter,
                                  MiniAppCommandRepository miniappRepository,
                                  IdGeneratorRepository idGenerator, SuperAppObjectEntityRepository objectRepository, UserEntityRepository userEntityRepository) {
-        super(userEntityRepository);
         this.miniAppConverter = miniAppConverter;
         this.miniappRepository = miniappRepository;
         this.idGenerator = idGenerator;
         this.objectRepository = objectRepository;
+        this.userEntityRepository = userEntityRepository;
     }
-
     @Override
     @Transactional
     public Object invokeCommand(MiniAppCommandBoundary command) {
+        checkInvokedCommand(command);
+        IdGeneratorEntity helper = this.idGenerator.save(new IdGeneratorEntity());
+        String commandId = helper.getId().toString();
+        this.idGenerator.delete(helper);
+        command.getCommandId().setInternalCommandId(commandId);
+        command.setInvocationTimestamp(new Date());
+        command.getCommandId().setSuperapp(this.superappName);
+        this.miniappRepository.save(this.miniAppConverter.toEntity(command));
+        /*
+            TODO:
+             add check for known miniapp
+             if known - point to miniapp service
+             otherwise throw error (command is already been saved)
+        */
+        return command;
+    }
+    private void checkInvokedCommand(MiniAppCommandBoundary command){
         UserIdWrapper invokedBy = command.getInvokedBy();
         if (invokedBy == null ||
                 invokedBy.getUserId() == null ||
@@ -73,28 +89,11 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
                 this.objectRepository.findById(new SuperappObjectPK(targetObject.getObjectId().getSuperapp(), targetObject.getObjectId().getInternalObjectId()));
         if(objectE.isEmpty())
             throw new NotFoundException("Object Not Found");
+//        if(isUser(objectE.get().getCreatedBy().getUserId(), UserRole.MINIAPP_USER,userEntityRepository))
+//            throw new CannotProcessException("Only a MINIAPP_USER preform a command");
         if(objectE.get().getActive() ==false)
             throw new CannotProcessException("Cannot preform a command on an inactive object");
-        if(this.isUserRole(command.getInvokedBy().getUserId().getEmail(),UserRole.MINIAPP_USER))
-            throw new CannotProcessException("Only a MINIAPP_USER preform a command");
-        IdGeneratorEntity helper = this.idGenerator.save(new IdGeneratorEntity());
-        String commandId = helper.getId().toString();
-        this.idGenerator.delete(helper);
-        command.getCommandId().setInternalCommandId(commandId);
-        command.setInvocationTimestamp(new Date());
-        command.getCommandId().setSuperapp(this.superappName);
-
-
-        this.miniappRepository.save(this.miniAppConverter.toEntity(command));
-        /*
-            TODO:
-             add check for known miniapp
-             if known - point to miniapp service
-             otherwise throw error (command is already been saved)
-        */
-        return command;
     }
-
     @Override
     @Transactional(readOnly = true)
     public List<MiniAppCommandBoundary> getALlCommands() {
