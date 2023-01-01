@@ -4,10 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import superapp.boundaries.object.SuperAppObjectBoundary;
+import superapp.boundaries.split.SplitDebtBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.SuperAppObjectConverter;
 import superapp.dal.SuperAppObjectEntityRepository;
-import superapp.dal.UserEntityRepository;
 import superapp.data.SuperAppObjectEntity;
 import superapp.logic.ServicesFactory;
 import superapp.logic.SplitsService;
@@ -19,15 +19,12 @@ import java.util.*;
 
 @Service
 public class SplitService implements SplitsService, ServicesFactory {
-	private UserEntityRepository userEntityRepository;
 	private SuperAppObjectEntityRepository objectRepository;
 	private SuperAppObjectConverter converter;
 
 	@Autowired
-	public SplitService(SuperAppObjectEntityRepository objectRepository, UserEntityRepository userEntityRepository) {
-		super();
+	public SplitService(SuperAppObjectEntityRepository objectRepository) {
 		this.objectRepository = objectRepository;
-		this.userEntityRepository = userEntityRepository;
 		this.converter = new SuperAppObjectConverter();
 	}
 
@@ -81,7 +78,7 @@ public class SplitService implements SplitsService, ServicesFactory {
 	}
 
 	@Override
-	public float showDebt(SuperAppObjectEntity group, UserIdBoundary user) {
+	public SplitDebtBoundary showDebt(SuperAppObjectEntity group, UserIdBoundary user) {
 		Set<SuperAppObjectEntity> transactions = group.getChildren();
 		List<UserIdBoundary> users = (List<UserIdBoundary>)this.converter.detailsToMap(group.getObjectDetails()).get("members");
 		int totalUsers = users.size();
@@ -96,19 +93,19 @@ public class SplitService implements SplitsService, ServicesFactory {
 			totalPayments += amount;
 		}
 		float debt = userPayments - (totalPayments / totalUsers);
-		return debt > 0 ? 0 : debt;
+		return new SplitDebtBoundary(user, debt > 0 ? 0 : debt);
 	}
 
 	@Override
 	public Object showAllDebts(SuperAppObjectEntity group) {
-		Map<UserIdBoundary, Float> allDebt = new HashMap<>();
+		List<SplitDebtBoundary> allDebts = new ArrayList<>();
 		((List<LinkedHashMap<String, String>>)this.converter
 				.detailsToMap(group.getObjectDetails()).get("members"))
 				.forEach(userData -> {
 					UserIdBoundary user = new UserIdBoundary(userData.get("superapp"), userData.get("email"));
-					allDebt.put(user, showDebt(group, user));
+					allDebts.add(showDebt(group, user));
 				});
-		return allDebt;
+		return allDebts.toArray(new SplitDebtBoundary[0]);
 	}
 
 	@Override
