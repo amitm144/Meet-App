@@ -2,15 +2,14 @@ package superapp.logic.concreteServices;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.SuperAppObjectConverter;
 import superapp.dal.SuperAppObjectEntityRepository;
 import superapp.dal.UserEntityRepository;
+import superapp.data.GrabCuisines;
 import superapp.data.SuperAppObjectEntity;
 import superapp.logic.ServicesFactory;
-import superapp.logic.SplitsService;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.exceptions.NotFoundException;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
@@ -18,13 +17,13 @@ import superapp.util.wrappers.SuperAppObjectIdWrapper;
 import java.util.*;
 
 @Service
-public class SplitService implements SplitsService, ServicesFactory {
+public class GrabService implements ServicesFactory , superapp.logic.GrabService {
 	private UserEntityRepository userEntityRepository;
 	private SuperAppObjectEntityRepository objectRepository;
 	private SuperAppObjectConverter converter;
 
 	@Autowired
-	public SplitService(SuperAppObjectEntityRepository objectRepository, UserEntityRepository userEntityRepository) {
+	public GrabService(SuperAppObjectEntityRepository objectRepository, UserEntityRepository userEntityRepository) {
 		super();
 		this.objectRepository = objectRepository;
 		this.userEntityRepository = userEntityRepository;
@@ -54,17 +53,21 @@ public class SplitService implements SplitsService, ServicesFactory {
 				.orElseThrow(() ->  new NotFoundException("group not found"));
 		if (!checkUserInGroup(group, invokedBy))
 			throw new InvalidInputException("Invoking user is not part of this group");
+
+		SuperAppObjectEntity grab = (SuperAppObjectEntity)group.getChildren().stream().toList().get(0);
+
+
 		switch(commandCase) {
-			case "showDebt": {
-				return this.showDebt(group, invokedBy);
+			case "addCuisine": {
+				this.addCuisine(grab,commandAttributes);
 			}
-			case "showAllDebts": {
-				return this.showAllDebts(group);
+			case "selectRandomCuisine": {
+				return this.selectRandomCuisine(grab);
 			}
-			case "settleGroupDebts": {
-				this.settleGroupDebts(group);
-				return null;
+			case "resetGrabGroup": {
+				this.resetGrabGroup(grab);
 			}
+
 			default:
 				throw new NotFoundException("Unknown command");
 		}
@@ -80,39 +83,30 @@ public class SplitService implements SplitsService, ServicesFactory {
 				.contains(linkedMap);
 	}
 
-	@Override
-	public float showDebt(SuperAppObjectEntity group, UserIdBoundary user) {
-		Set<SuperAppObjectEntity> transactions = group.getChildren();
-		List<UserIdBoundary> users = (List<UserIdBoundary>)this.converter.detailsToMap(group.getObjectDetails()).get("members");
-		int totalUsers = users.size();
-		float totalPayments = 0, userPayments = 0;
-		for (SuperAppObjectEntity t : transactions) {
-			if (!t.getActive()) // check if transaction has alredy been settled
-				continue;
 
-			float amount = Double.valueOf((double)this.converter.detailsToMap(t.getObjectDetails()).get("amount")).floatValue();
-			if (t.getCreatedBy().getUserId().equals(user))
-				userPayments += amount;
-			totalPayments += amount;
-		}
-		float debt = userPayments - (totalPayments / totalUsers);
-		return debt > 0 ? 0 : debt;
+	@Override
+	public void addCuisine(SuperAppObjectEntity grab, Map<String, Object> commandAttributes) {
+		ArrayList<GrabCuisines> chosenCuisines = (ArrayList<GrabCuisines>)this.converter.detailsToMap(grab.getObjectDetails()).get("cuisines");
+		GrabCuisines additionalCuisines = (GrabCuisines)this.converter.detailsToMap(grab.getObjectDetails()).get("cuisine");
+		chosenCuisines.add(additionalCuisines);
+
+		Map<String,Object> chosenCuisinesToSave = new HashMap<>();
+		chosenCuisinesToSave.put("cuisines",chosenCuisines);
+		grab.setObjectDetails(converter.detailsToString(chosenCuisinesToSave));
+
+		//todo need to save new object's details
 	}
 
 	@Override
-	public Object showAllDebts(SuperAppObjectEntity group) {
-		Map<UserIdBoundary, Float> allDebt = new HashMap<>();
-		((List<LinkedHashMap<String, String>>)this.converter
-				.detailsToMap(group.getObjectDetails()).get("members"))
-				.forEach(userData -> {
-					UserIdBoundary user = new UserIdBoundary(userData.get("superapp"), userData.get("email"));
-					allDebt.put(user, showDebt(group, user));
-				});
-		return allDebt;
+	public Object selectRandomCuisine(SuperAppObjectEntity grab) {
+		ArrayList<GrabCuisines> chosenCuisines = (ArrayList<GrabCuisines>)this.converter.detailsToMap(grab.getObjectDetails()).get("cuisines");
+
+		return chosenCuisines.get(new Random().nextInt(chosenCuisines.size()));
+
 	}
 
 	@Override
-	public void settleGroupDebts(SuperAppObjectEntity group) {
-		group.getChildren().forEach(t -> t.setActive(false));
+	public void resetGrabGroup(SuperAppObjectEntity grab) {
+		grab.setActive(false);
 	}
 }

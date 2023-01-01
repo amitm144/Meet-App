@@ -10,9 +10,12 @@ import superapp.logic.ServicesFactory;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
 
+import java.util.Map;
+
 @Service
 public class ServiceHandler implements ServicesFactory {
     private SplitService splitService;
+    private GrabService grabService;
 
     //private GrabService grabService
     //private LiftService liftService
@@ -51,13 +54,13 @@ public class ServiceHandler implements ServicesFactory {
     public Object runCommand(String miniapp,
                              SuperAppObjectIdWrapper targetObject,
                              UserIdBoundary invokedBy,
-                             String commandCase) {
+                             String commandCase, Map<String, Object> commandAttributes) {
         switch (miniapp) {
             case ("Split"): {
-                return this.splitService.runCommand(miniapp, targetObject, invokedBy, commandCase);
+                return this.splitService.runCommand(miniapp, targetObject, invokedBy, commandCase, commandAttributes);
             }
             case ("Grab"): {
-                //this.grabService.runCommand(miniapp,targetObject,user,attributes,commandCase);
+                this.grabService.runCommand(miniapp, targetObject, invokedBy, commandCase, commandAttributes);
                 break;
             }
             case ("Lift"): {

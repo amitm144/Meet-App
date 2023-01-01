@@ -76,7 +76,7 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
         this.miniappRepository.save(this.miniAppConverter.toEntity(command));
         //run command will handle any unknown miniapp by 400 - Bad request.
         return this.serviceHandler.runCommand(command.getCommandId().getMiniapp(),
-                targetObject,invokedBy.getUserId(), command.getCommand());
+                targetObject,invokedBy.getUserId(), command.getCommand(), command.getCommandAttributes());
 //        return command;
     }
 
