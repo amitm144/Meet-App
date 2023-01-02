@@ -24,6 +24,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static superapp.data.ObjectTypes.isValidObjectType;
+
 @Service
 public class SuperAppObjectService extends AbstractService implements SuperAppObjectsService {
     private SuperAppObjectEntityRepository objectRepository;
@@ -45,7 +47,7 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
     @Transactional
     public SuperAppObjectBoundary createObject(SuperAppObjectBoundary object) {
         String alias = object.getAlias();
-        String type = object.getType(); // TODO: check type corresponds to future object types
+        String type = object.getType();
         if (alias == null || type == null || alias.isBlank() || type.isBlank())
             throw new InvalidInputException("Object alias and/or type must be specified");
 
@@ -68,8 +70,9 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
         object.setObjectId(new SuperAppObjectIdBoundary(this.superappName, objectId));
         object.setActive(active);
         object.setCreationTimestamp(new Date());
-        this.objectRepository.save(converter.toEntity(object));
+        // handleObjectByType will handle any unknown object type by 400 - Bad request.
         serviceHandler.handleObjectByType(object);
+        this.objectRepository.save(converter.toEntity(object));
         return object;
     }
 
@@ -86,7 +89,7 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
         SuperAppObjectEntity objectE = objectO.get();
         Map<String, Object> newDetails = update.getObjectDetails();
         Boolean newActive = update.getActive();
-        String newType = update.getType(); // TODO: check type corresponds to future object types
+        String newType = update.getType();
         String newAlias = update.getAlias();
 
         if (newDetails != null)
@@ -97,6 +100,8 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
         if (newType != null) {
             if (newType.isBlank())
                 throw new InvalidInputException("Object alias and/or type must be specified");
+            else if (!isValidObjectType(newType))
+                throw new InvalidInputException("Unknown object type");
             else
                 objectE.setType(newType);
         }
@@ -107,8 +112,14 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
             else
                 objectE.setAlias(newAlias);
         }
-        objectE = this.objectRepository.save(objectE);
-        return this.converter.toBoundary(objectE);
+        SuperAppObjectBoundary result = this.converter.toBoundary(objectE);
+        /*
+            handleObjectByType will handle any unknown object type by 400 - Bad request.
+            if object details after update doesn't fit into miniapp restrictions, an exception will be thrown as well
+        */
+        serviceHandler.handleObjectByType(result);
+        this.objectRepository.save(objectE);
+        return result;
     }
 
     @Override

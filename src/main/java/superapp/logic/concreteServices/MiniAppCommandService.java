@@ -27,6 +27,7 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
     private MiniAppCommandRepository miniappRepository;
     private IdGeneratorRepository idGenerator;
     private ServiceHandler serviceHandler;
+
     @Autowired
     public MiniAppCommandService(MiniappCommandConverter miniAppConverter,
                                  MiniAppCommandRepository miniappRepository,
@@ -35,7 +36,6 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
         this.miniappRepository = miniappRepository;
         this.idGenerator = idGenerator;
         this.serviceHandler = service;
-
     }
 
     @Override
@@ -74,10 +74,9 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
         command.getCommandId().setSuperapp(this.superappName);
 
         this.miniappRepository.save(this.miniAppConverter.toEntity(command));
-        //run command will handle any unknown miniapp by 400 - Bad request.
+        // run command will handle any unknown miniapp by 400 - Bad request.
         return this.serviceHandler.runCommand(command.getCommandId().getMiniapp(),
                 targetObject,invokedBy.getUserId(), command.getCommand());
-//        return command;
     }
 
 
@@ -103,6 +102,4 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
     @Override
     @Transactional
     public void deleteALlCommands() { this.miniappRepository.deleteAll(); }
-
-
 }

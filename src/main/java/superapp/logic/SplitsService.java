@@ -6,6 +6,6 @@ import superapp.data.SuperAppObjectEntity;
 
 public interface SplitsService {
  public void settleGroupDebts(SuperAppObjectEntity group);
- public SplitDebtBoundary showDebt(SuperAppObjectEntity group, UserIdBoundary user);
+ public SplitDebtBoundary showDebt(SuperAppObjectEntity.SuperAppObjectId group, UserIdBoundary user);
  public Object showAllDebts(SuperAppObjectEntity group);
 }

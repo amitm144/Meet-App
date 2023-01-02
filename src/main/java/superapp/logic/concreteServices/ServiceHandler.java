@@ -5,45 +5,31 @@ import org.springframework.stereotype.Service;
 
 import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.boundaries.user.UserIdBoundary;
-import superapp.data.SuperAppObjectEntity;
-import superapp.logic.ServicesFactory;
+import superapp.logic.MiniAppServiceHandler;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
 
-@Service
-public class ServiceHandler implements ServicesFactory {
-    private SplitService splitService;
+import static superapp.data.ObjectTypes.isValidObjectType;
 
+@Service
+public class ServiceHandler implements MiniAppServiceHandler {
+    private SplitService splitService;
     //private GrabService grabService
     //private LiftService liftService
-    @Autowired
-    public ServiceHandler(SplitService splitService//GrabService grabService , LiftService liftService
 
-    ) {
+    @Autowired
+    public ServiceHandler(SplitService splitService/*,GrabService grabService , LiftService liftService*/) {
         this.splitService = splitService;
         //grabService = grabService;
         //liftService =liftService;
     }
 
-    @Override
     public void handleObjectByType(SuperAppObjectBoundary object) {
-        switch (object.getType()) {
-            case ("Transaction"): // Only Object in Miniap that need to be modifyed
-            {
-                this.splitService.handleObjectByType(object);
-                break;
-            }
-        }
-    }
-
-    @Override
-    public void updateObjectDetails(SuperAppObjectEntity object) {
-        switch (object.getType()) {
-            case ("Transaction"):// Only Object in Miniap that need to be modifyed
-            {
-                splitService.updateObjectDetails(object);
-                break;
-            }
+        String objectType = object.getType();
+        if (!isValidObjectType(objectType))
+            objectType = "";
+        switch (objectType) {
+            case ("TRANSACTION"), ("GROUP") -> this.splitService.handleObjectByType(object);
         }
     }
 
@@ -53,21 +39,14 @@ public class ServiceHandler implements ServicesFactory {
                              UserIdBoundary invokedBy,
                              String commandCase) {
         switch (miniapp) {
-            case ("Split"): {
-                return this.splitService.runCommand(miniapp, targetObject, invokedBy, commandCase);
-            }
-            case ("Grab"): {
+            case ("Split") -> { return this.splitService.runCommand(miniapp, targetObject, invokedBy, commandCase); }
+            case ("Grab") -> { return null;
                 //this.grabService.runCommand(miniapp,targetObject,user,attributes,commandCase);
-                break;
             }
-            case ("Lift"): {
+            case ("Lift") -> { return null;
                 //this.liftService.runCommand(miniapp,targetObject,user,attributes,commandCase);
-                break;
             }
-            default: {
-                throw new InvalidInputException("MiniApp Not Found");
-            }
+            default -> { throw new InvalidInputException("MiniApp Not Found"); }
         }
-        return null;
     }
 }
