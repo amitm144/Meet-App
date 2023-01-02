@@ -13,6 +13,7 @@ import superapp.dal.MiniAppCommandRepository;
 import superapp.dal.UserEntityRepository;
 import superapp.data.IdGeneratorEntity;
 import superapp.data.UserEntity;
+import superapp.data.UserPK;
 import superapp.logic.AbstractService;
 import superapp.logic.AdvancedMiniAppCommandsService;
 import superapp.util.exceptions.InvalidInputException;
@@ -114,7 +115,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     @Override
     @Transactional(readOnly = true)
     public List<MiniAppCommandBoundary> getAllCommands(String userSuperapp, String email,int size,int page) {
-        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        UserPK userId = new UserPK(userSuperapp, email);
         this.isValidUserCredentials(userId, ADMIN, this.userRepository);
 
         return this.miniappRepository
@@ -127,7 +128,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     @Override
     @Transactional(readOnly = true)
     public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniappName ,String userSuperapp, String email,int size,int page) {
-        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        UserPK userId = new UserPK(userSuperapp, email);
         this.isValidUserCredentials(userId, ADMIN, this.userRepository);
 
         return this.miniappRepository.findAllByMiniapp(miniappName,
@@ -141,7 +142,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     @Transactional
     public void deleteAllCommands(String userSuperapp, String email)
     {
-        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        UserPK userId = new UserPK(userSuperapp, email);
         this.isValidUserCredentials(userId, ADMIN, this.userRepository);
         this.miniappRepository.deleteAll();
     }

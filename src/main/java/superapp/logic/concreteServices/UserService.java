@@ -5,7 +5,7 @@ import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.UserConverter;
 import superapp.dal.UserEntityRepository;
 import superapp.data.UserEntity;
-import superapp.data.UserEntity.UserPK;
+import superapp.data.UserPK;
 import superapp.data.UserRole;
 import superapp.logic.AbstractService;
 import superapp.logic.AdvancedUsersService;
@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -126,7 +125,7 @@ public class UserService extends AbstractService implements AdvancedUsersService
     @Override
     @Transactional(readOnly = true)
     public List<UserBoundary> getAllUsers(String userSuperapp, String email,int size,int page) {
-        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        UserPK userId = new UserPK(userSuperapp, email);
         this.isValidUserCredentials(userId, ADMIN, this.userEntityRepository);
 
         Iterable<UserEntity> users = this.userEntityRepository
@@ -147,7 +146,7 @@ public class UserService extends AbstractService implements AdvancedUsersService
     @Override
     @Transactional
     public void deleteAllUsers(String userSuperapp, String email) {
-        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        UserPK userId = new UserPK(userSuperapp, email);
         this.isValidUserCredentials(userId, ADMIN, this.userEntityRepository);
 
         this.userEntityRepository.deleteAll();

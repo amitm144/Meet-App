@@ -12,10 +12,7 @@ import superapp.converters.SuperAppObjectConverter;
 import superapp.dal.IdGeneratorRepository;
 import superapp.dal.SuperAppObjectEntityRepository;
 import superapp.dal.UserEntityRepository;
-import superapp.data.IdGeneratorEntity;
-import superapp.data.SuperAppObjectEntity;
-import superapp.data.SuperAppObjectEntity.SuperAppObjectId;
-import superapp.data.UserEntity;
+import superapp.data.*;
 import superapp.logic.AbstractService;
 import superapp.logic.AdvancedSuperAppObjectsService;
 import superapp.util.exceptions.CannotProcessException;
@@ -23,12 +20,11 @@ import superapp.util.exceptions.ForbiddenInsteadException;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.exceptions.NotFoundException;
 import superapp.util.EmailChecker;
+import static superapp.data.UserRole.*;
+import static superapp.util.ControllersConstants.DEFAULT_SORTING_DIRECTION;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static superapp.data.UserRole.*;
-import static superapp.util.ControllersConstants.DEFAULT_SORTING_DIRECTION;
 
 @Service
 public class SuperAppObjectService extends AbstractService implements AdvancedSuperAppObjectsService {
@@ -122,11 +118,11 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     public SuperAppObjectBoundary updateObject(String objectSuperapp,
                                                String internalObjectId,
                                                SuperAppObjectBoundary update,String userSuperapp,String email) {
-        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        UserPK userId = new UserPK(userSuperapp, email);
         this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
         Optional<SuperAppObjectEntity> objectO =
-                this.objectRepository.findById(new SuperAppObjectId(objectSuperapp, internalObjectId));
+                this.objectRepository.findById(new SuperappObjectPK(objectSuperapp, internalObjectId));
         if (objectO.isEmpty())
             throw new NotFoundException("Unknown object");
 
@@ -164,11 +160,11 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     public void bindNewChild(String parentSuperapp, String parentObjectId,
                              SuperAppObjectIdBoundary newChild,
                              String userSuperapp, String email) {
-        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        UserPK userId = new UserPK(userSuperapp, email);
         this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
         SuperAppObjectEntity parent = this.objectRepository
-                .findById(new SuperAppObjectId(parentSuperapp, parentObjectId))
+                .findById(new SuperappObjectPK(parentSuperapp, parentObjectId))
                 .orElseThrow(() -> new NotFoundException("Cannot find parent object"));
         SuperAppObjectEntity child = this.objectRepository
                 .findById(this.converter.idToEntity(newChild))
@@ -184,11 +180,11 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     @Override
     @Transactional(readOnly = true)
     public SuperAppObjectBoundary getSpecificObject(String objectSuperapp, String internalObjectId, String userSuperapp, String email) {
-        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        UserPK userId = new UserPK(userSuperapp, email);
         this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
         Optional<SuperAppObjectEntity> objectE =
-                this.objectRepository.findById(new SuperAppObjectId(objectSuperapp, internalObjectId));
+                this.objectRepository.findById(new SuperappObjectPK(objectSuperapp, internalObjectId));
         if (objectE.isEmpty())
             throw new NotFoundException("Object does not exist");
 
@@ -200,7 +196,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     public List<SuperAppObjectBoundary> getChildren(String objectSuperapp, String internalObjectId,
                                                     String userSuperapp, String email,
                                                     int size, int page) {
-        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        UserPK userId = new UserPK(userSuperapp, email);
         this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
         return this.objectRepository.findAll(PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId"))
@@ -215,7 +211,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     @Transactional(readOnly = true)
     public List<SuperAppObjectBoundary> getParents(String objectSuperapp, String internalObjectId,String userSuperapp,
                                                    String email, int size, int page) {
-        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        UserPK userId = new UserPK(userSuperapp, email);
         this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
         return this.objectRepository.findAll(PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId"))
@@ -229,7 +225,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     @Override
     @Transactional(readOnly = true)
     public List<SuperAppObjectBoundary> getAllObjects(String userSuperapp, String email, int size, int page) {
-        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        UserPK userId = new UserPK(userSuperapp, email);
         this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
         return this.objectRepository.findAll(PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION,
@@ -241,7 +237,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
 
     @Override
     public List<SuperAppObjectBoundary> SearchObjectsByType(String type, String userSuperapp, String email, int size, int page) {
-        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        UserPK userId = new UserPK(userSuperapp, email);
         this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
         return this.objectRepository.findByType(type, PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "objectId"))
@@ -253,7 +249,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     @Override
     @Transactional
     public List<SuperAppObjectBoundary> SearchObjectsByExactAlias(String alias, String userSuperapp, String email, int size, int page) {
-        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        UserPK userId = new UserPK(userSuperapp, email);
         this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
         return this.objectRepository
@@ -267,7 +263,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     @Transactional
     public List<SuperAppObjectBoundary> SearchObjectsByExactAliasContainingText(String text, String userSuperapp, String email, int size, int page)
     {
-        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        UserPK userId = new UserPK(userSuperapp, email);
         this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
         return this.objectRepository
@@ -280,7 +276,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     @Override
     @Transactional
     public void deleteAllObjects(String userSuperapp, String email) {
-        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        UserPK userId = new UserPK(userSuperapp, email);
         this.isValidUserCredentials(userId, ADMIN, this.userRepository);
         this.objectRepository.deleteAll();
     }

@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import superapp.boundaries.object.SuperAppObjectIdBoundary;
 import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.data.SuperAppObjectEntity;
-import superapp.data.SuperAppObjectEntity.SuperAppObjectId;
 import org.springframework.stereotype.Component;
+import superapp.data.SuperappObjectPK;
 import superapp.util.exceptions.InvalidInputException;
 
 import java.util.Map;
@@ -44,11 +44,11 @@ public class SuperAppObjectConverter {
         return objBoundary;
     }
 
-    public SuperAppObjectId idToEntity(SuperAppObjectIdBoundary obj) {
-        return new SuperAppObjectId(obj.getSuperapp(), obj.getInternalObjectId());
+    public SuperappObjectPK idToEntity(SuperAppObjectIdBoundary obj) {
+        return new SuperappObjectPK(obj.getSuperapp(), obj.getInternalObjectId());
     }
 
-    public SuperAppObjectIdBoundary idToBoundary(SuperAppObjectId obj) {
+    public SuperAppObjectIdBoundary idToBoundary(SuperappObjectPK obj) {
         return new SuperAppObjectIdBoundary(obj.getSuperapp(), obj.getObjectId());
     }
 
