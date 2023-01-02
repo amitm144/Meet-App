@@ -1,5 +1,7 @@
 package superapp.logic.concreteServices;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,9 +13,14 @@ import superapp.dal.MiniAppCommandRepository;
 import superapp.dal.SuperAppObjectEntityRepository;
 import superapp.dal.UserEntityRepository;
 import superapp.data.*;
+import superapp.dal.UserEntityRepository;
+import superapp.data.IdGeneratorEntity;
+import superapp.data.UserEntity;
+import superapp.data.UserPK;
 import superapp.logic.AbstractService;
 import superapp.logic.MiniAppCommandsService;
 import superapp.util.exceptions.CannotProcessException;
+import superapp.logic.AdvancedMiniAppCommandsService;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.EmailChecker;
 import superapp.util.exceptions.NotFoundException;
@@ -22,25 +29,29 @@ import superapp.util.wrappers.UserIdWrapper;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+
+import static superapp.data.UserRole.ADMIN;
+import static superapp.util.ControllersConstants.DEFAULT_SORTING_DIRECTION;
 
 @Service
-public class MiniAppCommandService extends AbstractService implements MiniAppCommandsService {
+public class MiniAppCommandService extends AbstractService implements AdvancedMiniAppCommandsService {
     private MiniappCommandConverter miniAppConverter;
     private MiniAppCommandRepository miniappRepository;
+    private UserEntityRepository userRepository;
     private IdGeneratorRepository idGenerator;
     private SuperAppObjectEntityRepository objectRepository;
     private UserEntityRepository userEntityRepository;
     @Autowired
     public MiniAppCommandService(MiniappCommandConverter miniAppConverter,
                                  MiniAppCommandRepository miniappRepository,
-                                 IdGeneratorRepository idGenerator, SuperAppObjectEntityRepository objectRepository, UserEntityRepository userEntityRepository) {
+                                 IdGeneratorRepository idGenerator,
+                                 UserEntityRepository userRepository) {
         this.miniAppConverter = miniAppConverter;
         this.miniappRepository = miniappRepository;
         this.idGenerator = idGenerator;
-        this.objectRepository = objectRepository;
-        this.userEntityRepository = userEntityRepository;
+        this.userRepository = userRepository;
     }
+
     @Override
     @Transactional
     public Object invokeCommand(MiniAppCommandBoundary command) {
@@ -84,6 +95,7 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
 
         if (command.getCommand() == null || command.getCommand().isEmpty())
             throw new InvalidInputException("Command attribute cannot be missing or empty");
+
         // issue internalCommandId, tie with superapp and set invocation timestamp
         Optional<SuperAppObjectEntity> objectE =
                 this.objectRepository.findById(new SuperappObjectPK(targetObject.getObjectId().getSuperapp(), targetObject.getObjectId().getInternalObjectId()));
@@ -96,24 +108,57 @@ public class MiniAppCommandService extends AbstractService implements MiniAppCom
     }
     @Override
     @Transactional(readOnly = true)
-    public List<MiniAppCommandBoundary> getALlCommands() {
-        return StreamSupport
-                .stream(this.miniappRepository.findAll().spliterator(), false)
+    @Deprecated
+    public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniappName) {
+        throw new NotFoundException("Method is Dperecated");
+    }
+
+    @Override
+    @Deprecated
+    @Transactional(readOnly = true)
+    public List<MiniAppCommandBoundary> getAllCommands() {
+        throw new NotFoundException("Method is Dperecated");
+    }
+
+    @Override
+    @Deprecated
+    @Transactional
+    public void deleteAllCommands() {
+        throw new NotFoundException("Method is Dperecated");
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MiniAppCommandBoundary> getAllCommands(String userSuperapp, String email,int size,int page) {
+        UserPK userId = new UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, ADMIN, this.userRepository);
+
+        return this.miniappRepository
+                .findAll(PageRequest.of(page,size, DEFAULT_SORTING_DIRECTION,"miniapp","internalCommandId"))
+                .stream()
                 .map(this.miniAppConverter::toBoundary)
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniappName) {
-        Iterable<MiniAppCommandEntity> miniappCommands = this.miniappRepository.findAllByMiniapp(miniappName);
-        return StreamSupport
-                .stream(miniappCommands.spliterator(), false)
+    public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniappName ,String userSuperapp, String email,int size,int page) {
+        UserPK userId = new UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, ADMIN, this.userRepository);
+
+        return this.miniappRepository.findAllByMiniapp(miniappName,
+                        PageRequest.of(page,size, DEFAULT_SORTING_DIRECTION,"miniapp","internalCommandId"))
+                .stream()
                 .map(this.miniAppConverter::toBoundary)
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public void deleteALlCommands() { this.miniappRepository.deleteAll(); }
+    public void deleteAllCommands(String userSuperapp, String email)
+    {
+        UserPK userId = new UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, ADMIN, this.userRepository);
+        this.miniappRepository.deleteAll();
+    }
 }
