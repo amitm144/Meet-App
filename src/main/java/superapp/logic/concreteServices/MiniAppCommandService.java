@@ -1,7 +1,6 @@
 package superapp.logic.concreteServices;
 
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,7 +11,6 @@ import superapp.dal.IdGeneratorRepository;
 import superapp.dal.MiniAppCommandRepository;
 import superapp.dal.UserEntityRepository;
 import superapp.data.IdGeneratorEntity;
-import superapp.data.UserEntity;
 import superapp.data.UserPK;
 import superapp.logic.AbstractService;
 import superapp.logic.AdvancedMiniAppCommandsService;
@@ -27,6 +25,7 @@ import java.util.stream.Collectors;
 
 import static superapp.data.UserRole.ADMIN;
 import static superapp.util.ControllersConstants.DEFAULT_SORTING_DIRECTION;
+import static superapp.util.ControllersConstants.DEPRECATED_EXCEPTION;
 
 @Service
 public class MiniAppCommandService extends AbstractService implements AdvancedMiniAppCommandsService {
@@ -95,21 +94,21 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     @Transactional(readOnly = true)
     @Deprecated
     public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniappName) {
-        throw new NotFoundException("Method is Dperecated");
+        throw new NotFoundException(DEPRECATED_EXCEPTION);
     }
 
     @Override
     @Deprecated
     @Transactional(readOnly = true)
     public List<MiniAppCommandBoundary> getAllCommands() {
-        throw new NotFoundException("Method is Dperecated");
+        throw new NotFoundException(DEPRECATED_EXCEPTION);
     }
 
     @Override
     @Deprecated
     @Transactional
     public void deleteAllCommands() {
-        throw new NotFoundException("Method is Dperecated");
+        throw new NotFoundException(DEPRECATED_EXCEPTION);
     }
 
     @Override

@@ -7,7 +7,7 @@ import superapp.dal.UserEntityRepository;
 import superapp.data.UserEntity;
 import superapp.data.UserPK;
 import superapp.data.UserRole;
-import superapp.util.exceptions.ForbiddenInsteadException;
+import superapp.util.exceptions.ForbbidenOperationException;
 
 import java.util.Optional;
 
@@ -26,7 +26,7 @@ public abstract  class AbstractService {
                                                 UserEntityRepository repository) {
         Optional<UserEntity> userE = repository.findById(userId);
         if (!(userE.isPresent() && userE.get().getRole().equals(role)))
-            throw new ForbiddenInsteadException("Error: Only users of type %s is allowed to use this method.".formatted(role));
+            throw new ForbbidenOperationException("Error: Only users of type %s is allowed to use this method.".formatted(role));
         return true;
     }
 }

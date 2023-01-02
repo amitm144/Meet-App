@@ -16,12 +16,13 @@ import superapp.data.*;
 import superapp.logic.AbstractService;
 import superapp.logic.AdvancedSuperAppObjectsService;
 import superapp.util.exceptions.CannotProcessException;
-import superapp.util.exceptions.ForbiddenInsteadException;
+import superapp.util.exceptions.ForbbidenOperationException;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.exceptions.NotFoundException;
 import superapp.util.EmailChecker;
 import static superapp.data.UserRole.*;
 import static superapp.util.ControllersConstants.DEFAULT_SORTING_DIRECTION;
+import static superapp.util.ControllersConstants.DEPRECATED_EXCEPTION;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -82,34 +83,34 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     public SuperAppObjectBoundary updateObject(String objectSuperapp,
                                                String internalObjectId,
                                                SuperAppObjectBoundary update) {
-        throw new ForbiddenInsteadException("Method is Dperecated");
+        throw new ForbbidenOperationException(DEPRECATED_EXCEPTION);
     }
     @Override
     @Deprecated
     @Transactional
     public void bindNewChild(String parentSuperapp, String parentObjectId, SuperAppObjectIdBoundary newChild) {
-        throw new NotFoundException("Method is Dperecated");
+        throw new NotFoundException(DEPRECATED_EXCEPTION);
     }
 
     @Override
     @Deprecated
     @Transactional(readOnly = true)
     public SuperAppObjectBoundary getSpecificObject(String objectSuperapp, String internalObjectId) {
-        throw new NotFoundException("Method is Dperecated");
+        throw new NotFoundException(DEPRECATED_EXCEPTION);
     }
 
     @Override
     @Deprecated
     @Transactional(readOnly = true)
     public List<SuperAppObjectBoundary> getAllObjects() {
-        throw new NotFoundException("Method is Dperecated");
+        throw new NotFoundException(DEPRECATED_EXCEPTION);
     }
 
     @Override
     @Deprecated
     @Transactional
     public void deleteAllObjects() {
-        throw new NotFoundException("Method is Dperecated");
+        throw new NotFoundException(DEPRECATED_EXCEPTION);
     }
 
 
@@ -203,7 +204,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .stream()
                 .filter(obj -> obj.getObjectId().equals(internalObjectId) && obj.getSuperapp().equals(objectSuperapp))
                 .map(SuperAppObjectEntity::getChildren)
-                .flatMap(superAppObjectEntities -> superAppObjectEntities.stream().map(this.converter::toBoundary))
+                .flatMap(superAppObjectEntities -> superAppObjectEntities.stream()
+                        .map(this.converter::toBoundary))
                 .collect(Collectors.toList());
     }
 
@@ -218,7 +220,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .stream()
                 .filter(obj -> obj.getObjectId().equals(internalObjectId) && obj.getSuperapp().equals(objectSuperapp))
                 .map(SuperAppObjectEntity::getParents)
-                .flatMap(superAppObjectEntities -> superAppObjectEntities.stream().map(this.converter::toBoundary))
+                .flatMap(superAppObjectEntities -> superAppObjectEntities.stream()
+                        .map(this.converter::toBoundary))
                 .collect(Collectors.toList());
     }
 
@@ -261,7 +264,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
 
     @Override
     @Transactional
-    public List<SuperAppObjectBoundary> SearchObjectsByExactAliasContainingText(String text, String userSuperapp, String email, int size, int page)
+    public List<SuperAppObjectBoundary> SearchObjectsByAliasContaining(String text, String userSuperapp, String email, int size, int page)
     {
         UserPK userId = new UserPK(userSuperapp, email);
         this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
