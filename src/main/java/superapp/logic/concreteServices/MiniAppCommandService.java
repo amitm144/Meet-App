@@ -1,7 +1,6 @@
 package superapp.logic.concreteServices;
 
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,14 +12,12 @@ import superapp.dal.MiniAppCommandRepository;
 import superapp.dal.SuperAppObjectEntityRepository;
 import superapp.dal.UserEntityRepository;
 import superapp.data.*;
-import superapp.dal.UserEntityRepository;
 import superapp.data.IdGeneratorEntity;
-import superapp.data.UserEntity;
 import superapp.data.UserPK;
 import superapp.logic.AbstractService;
-import superapp.logic.MiniAppCommandsService;
 import superapp.util.exceptions.CannotProcessException;
 import superapp.logic.AdvancedMiniAppCommandsService;
+import superapp.util.exceptions.ForbiddenInsteadException;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.EmailChecker;
 import superapp.util.exceptions.NotFoundException;
@@ -45,11 +42,12 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     public MiniAppCommandService(MiniappCommandConverter miniAppConverter,
                                  MiniAppCommandRepository miniappRepository,
                                  IdGeneratorRepository idGenerator,
-                                 UserEntityRepository userRepository) {
+                                 UserEntityRepository userRepository,SuperAppObjectEntityRepository objectRepository) {
         this.miniAppConverter = miniAppConverter;
         this.miniappRepository = miniappRepository;
         this.idGenerator = idGenerator;
-        this.userRepository = userRepository;
+        this.userEntityRepository = userRepository;
+        this.objectRepository =objectRepository;
     }
 
     @Override
@@ -102,9 +100,9 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
         if(objectE.isEmpty())
             throw new NotFoundException("Object Not Found");
 
-        if(isValidUserCredentials(new UserPK(objectE.get().getCreatedBy().getUserId().getSuperapp(),objectE.get().getCreatedBy().getUserId().getEmail()),
-                UserRole.MINIAPP_USER,userEntityRepository))
-            throw new CannotProcessException("Only a MINIAPP_USER preform a command");
+        if(!isValidUserCredentials(new UserPK(invokedBy.getUserId().getSuperapp(),invokedBy.getUserId().getEmail()),
+                UserRole.MINIAPP_USER,this.userEntityRepository))
+            throw new ForbiddenInsteadException("Only a MINIAPP_USER able to preform a command");
 
         if(objectE.get().getActive() ==false)
             throw new CannotProcessException("Cannot preform a command on an inactive object");

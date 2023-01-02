@@ -188,9 +188,9 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
             throw new NotFoundException("Object does not exist");
         if (this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository)) {
             return this.converter.toBoundary(objectE.get());
-        } else if (this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository)){
-        if (!objectE.get().getActive())
-            throw new CannotProcessException("cannot accses to an object that is inactive");
+        } else if (this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository)){
+             if (!objectE.get().getActive())
+                throw new CannotProcessException("cannot accses to an object that is inactive");
         return this.converter.toBoundary(objectE.get());
      }
         throw new ForbiddenInsteadException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here");
