@@ -202,12 +202,12 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                                                     String userSuperapp, String email,
                                                     int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
-        PageRequest page =PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
+        PageRequest pageReq =PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
         if(this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
-            return getChildrenRepoSearch(page,internalObjectId,userSuperapp ,true);
+            return getChildrenRepoSearch(pageReq,internalObjectId,userSuperapp ,true);
 
         else if(this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
-            return getChildrenRepoSearch(page,internalObjectId,userSuperapp,false);
+            return getChildrenRepoSearch(pageReq,internalObjectId,userSuperapp,false);
 
         throw new ForbiddenInsteadException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here");
     }
@@ -298,7 +298,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         else if(this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
             return findByAliasRepoSearch(pageReq,alias,false);
 
-        throw new ForbiddenInsteadException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here"+);
+        throw new ForbiddenInsteadException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here");
     }
     private List<SuperAppObjectBoundary> findByAliasRepoSearch(PageRequest pageReq, String alias, boolean isSuperAppUser){
         return this.objectRepository.findByAlias(alias,pageReq)
@@ -319,7 +319,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         else if(this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
             return findByAliasContainingRepoSearch(pageReq,text,false);
         else
-            throw new ForbiddenInsteadException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here"+);
+            throw new ForbiddenInsteadException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here");
 
     }
     private List<SuperAppObjectBoundary> findByAliasContainingRepoSearch(PageRequest pageReq, String text, boolean isSuperAppUser){
