@@ -101,8 +101,11 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
                 this.objectRepository.findById(new SuperappObjectPK(targetObject.getObjectId().getSuperapp(), targetObject.getObjectId().getInternalObjectId()));
         if(objectE.isEmpty())
             throw new NotFoundException("Object Not Found");
-//        if(isUser(objectE.get().getCreatedBy().getUserId(), UserRole.MINIAPP_USER,userEntityRepository))
-//            throw new CannotProcessException("Only a MINIAPP_USER preform a command");
+
+        if(isValidUserCredentials(new UserPK(objectE.get().getCreatedBy().getUserId().getSuperapp(),objectE.get().getCreatedBy().getUserId().getEmail()),
+                UserRole.MINIAPP_USER,userEntityRepository))
+            throw new CannotProcessException("Only a MINIAPP_USER preform a command");
+
         if(objectE.get().getActive() ==false)
             throw new CannotProcessException("Cannot preform a command on an inactive object");
     }

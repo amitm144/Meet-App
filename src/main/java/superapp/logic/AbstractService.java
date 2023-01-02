@@ -26,7 +26,7 @@ public abstract  class AbstractService {
                                                 UserEntityRepository repository) {
         Optional<UserEntity> userE = repository.findById(userId);
         if (!(userE.isPresent() && userE.get().getRole().equals(role)))
-            throw new ForbiddenInsteadException("Error: Only users of type %s is allowed to use this method.".formatted(role));
+            return false;
         return true;
     }
 }
