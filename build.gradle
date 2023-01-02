@@ -6,7 +6,7 @@ plugins {
 
 group = 'superapp'
 version = '0.0.5'
-sourceCompatibility = '14'
+sourceCompatibility = '17'
 
 repositories {
     mavenCentral()
