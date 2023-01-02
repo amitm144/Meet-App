@@ -203,28 +203,26 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
         this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
-        SuperAppObjectId parentId = new SuperAppObjectId(objectSuperapp, internalObjectId);
-
-        return this.objectRepository
-                .findAll(PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId"))
+        return this.objectRepository.findAll(PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId"))
                 .stream()
-                .filter(obj -> obj.getParents().contains(parentId))
-                .map(this.converter::toBoundary)
+                .filter(obj -> obj.getObjectId().equals(internalObjectId) && obj.getSuperapp().equals(objectSuperapp))
+                .map(SuperAppObjectEntity::getChildren)
+                .flatMap(superAppObjectEntities -> superAppObjectEntities.stream().map(this.converter::toBoundary))
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<SuperAppObjectBoundary> getParents(String objectSuperapp, String internalObjectId,String userSuperapp, String email, int size, int page) {
+    public List<SuperAppObjectBoundary> getParents(String objectSuperapp, String internalObjectId,String userSuperapp,
+                                                   String email, int size, int page) {
         UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
         this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
-        SuperAppObjectId parentId = new SuperAppObjectId(objectSuperapp, internalObjectId);
-
-        return  this.objectRepository.findAll(PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId"))
+        return this.objectRepository.findAll(PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId"))
                 .stream()
-                .filter(obj -> obj.getParents().contains(parentId))
-                .map(this.converter::toBoundary)
+                .filter(obj -> obj.getObjectId().equals(internalObjectId) && obj.getSuperapp().equals(objectSuperapp))
+                .map(SuperAppObjectEntity::getParents)
+                .flatMap(superAppObjectEntities -> superAppObjectEntities.stream().map(this.converter::toBoundary))
                 .collect(Collectors.toList());
     }
 

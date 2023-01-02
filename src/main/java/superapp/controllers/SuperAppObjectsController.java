@@ -35,11 +35,12 @@ public class SuperAppObjectsController {
             path = {"/superapp/objects/{superapp}/{InternalObjectId}"},
             method = {RequestMethod.PUT},
             consumes = {MediaType.APPLICATION_JSON_VALUE})
-    public void updateObject(@RequestBody SuperAppObjectBoundary objectBoundary,
-                             @PathVariable String superapp,
-                             @PathVariable String InternalObjectId,
-                             @RequestParam(name = "userSuperapp", required = true,defaultValue = "") String userSuperapp,
-                             @RequestParam(name = "userEmail", required = true,defaultValue = "") String email) {
+    public void updateObject(
+            @RequestBody SuperAppObjectBoundary objectBoundary,
+            @PathVariable String superapp,
+            @PathVariable String InternalObjectId,
+            @RequestParam(name = "userSuperapp", required = true,defaultValue = "") String userSuperapp,
+            @RequestParam(name = "userEmail", required = true,defaultValue = "") String email) {
         this.objService.updateObject(superapp, InternalObjectId, objectBoundary,userSuperapp,email);
     }
 
@@ -72,11 +73,12 @@ public class SuperAppObjectsController {
             path="/superapp/objects/{superapp}/{internalObjectId}/children",
             method = {RequestMethod.PUT},
             consumes = {MediaType.APPLICATION_JSON_VALUE})
-    public void bindExistingObjects(@RequestBody SuperAppObjectIdBoundary toBind,
-                                    @PathVariable String superapp,
-                                    @PathVariable String internalObjectId,
-                                    @RequestParam(name="userSuperapp", required = true, defaultValue = "") String userSuperapp,
-                                    @RequestParam(name="userEmail", required = true, defaultValue = "") String email) {
+    public void bindExistingObjects(
+            @RequestBody SuperAppObjectIdBoundary toBind,
+            @PathVariable String superapp,
+            @PathVariable String internalObjectId,
+            @RequestParam(name="userSuperapp", required = true, defaultValue = "") String userSuperapp,
+            @RequestParam(name="userEmail", required = true, defaultValue = "") String email) {
         this.objService.bindNewChild(superapp, internalObjectId, toBind,userSuperapp,email);
     }
 
