@@ -87,10 +87,37 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     @Transactional
     public SuperAppObjectBoundary updateObject(String objectSuperapp,
                                                String internalObjectId,
-                                               SuperAppObjectBoundary update)
-    {
+                                               SuperAppObjectBoundary update) {
         throw new ForbiddenInsteadException("Method is Dperecated");
     }
+    @Override
+    @Deprecated
+    @Transactional
+    public void bindNewChild(String parentSuperapp, String parentObjectId, SuperAppObjectIdBoundary newChild) {
+        throw new NotFoundException("Method is Dperecated");
+    }
+
+    @Override
+    @Deprecated
+    @Transactional(readOnly = true)
+    public SuperAppObjectBoundary getSpecificObject(String objectSuperapp, String internalObjectId) {
+        throw new NotFoundException("Method is Dperecated");
+    }
+
+    @Override
+    @Deprecated
+    @Transactional(readOnly = true)
+    public List<SuperAppObjectBoundary> getAllObjects() {
+        throw new NotFoundException("Method is Dperecated");
+    }
+
+    @Override
+    @Deprecated
+    @Transactional
+    public void deleteAllObjects() {
+        throw new NotFoundException("Method is Dperecated");
+    }
+
 
     @Override
     @Transactional
@@ -135,13 +162,6 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     }
 
     @Override
-    @Deprecated
-    @Transactional
-    public void bindNewChild(String parentSuperapp, String parentObjectId, SuperAppObjectIdBoundary newChild) {
-        throw new NotFoundException("Method is Dperecated");
-    }
-
-    @Override
     @Transactional(readOnly = true)
     public void bindNewChild(String parentSuperapp, String parentObjectId, SuperAppObjectIdBoundary newChild,String userSuperapp, String email) {
         UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
@@ -159,14 +179,6 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
             this.objectRepository.save(child);
         } else
             throw new CannotProcessException("Failed to update parent or child object");
-    }
-
-    @Override
-    @Deprecated
-    @Transactional(readOnly = true)
-    public SuperAppObjectBoundary getSpecificObject(String objectSuperapp, String internalObjectId) {
-        //TODO need to change exception
-        throw new NotFoundException("Method is Dperecated");
     }
 
     @Override
@@ -192,7 +204,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         SuperAppObjectId parentId = new SuperAppObjectId(objectSuperapp, internalObjectId);
 
         return this.objectRepository
-                .findAll(PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "objectSuperapp", "internalObjectId"))
+                //.FindallbyChildrensContaining(parentId,PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId"))
+                .findAll(PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId"))
                 .stream()
                 .filter(obj -> obj.getParents().contains(parentId))
                 .map(this.converter::toBoundary)
@@ -207,18 +220,11 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
 
         SuperAppObjectId parentId = new SuperAppObjectId(objectSuperapp, internalObjectId);
 
-        return  this.objectRepository.findAll(PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "objectSuperapp", "internalObjectId"))
+        return  this.objectRepository.findAll(PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId"))
                 .stream()
                 .filter(obj -> obj.getParents().contains(parentId))
                 .map(this.converter::toBoundary)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    @Deprecated
-    @Transactional(readOnly = true)
-    public List<SuperAppObjectBoundary> getAllObjects() {
-        throw new NotFoundException("Method is Dperecated");
     }
 
     @Override
@@ -244,12 +250,6 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .map(this.converter::toBoundary)
                 .collect(Collectors.toList());
     }
-    @Override
-    @Deprecated
-    @Transactional
-    public void deleteAllObjects() {
-        throw new NotFoundException("Method is Dperecated");
-    }
 
     @Override
     @Transactional
@@ -262,13 +262,6 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .stream()
                 .map(this.converter::toBoundary)
                 .collect(Collectors.toList());
-    }
-    @Override
-    @Transactional
-    public void deleteAllObjects(String userSuperapp, String email) {
-        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
-        this.isValidUserCredentials(userId, ADMIN, this.userRepository);
-        this.objectRepository.deleteAll();
     }
 
     @Override
@@ -283,5 +276,13 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .stream()
                 .map(this.converter::toBoundary)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void deleteAllObjects(String userSuperapp, String email) {
+        UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, ADMIN, this.userRepository);
+        this.objectRepository.deleteAll();
     }
 }
