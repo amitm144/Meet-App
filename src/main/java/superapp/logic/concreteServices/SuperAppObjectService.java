@@ -1,7 +1,6 @@
 package superapp.logic.concreteServices;
 
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,6 @@ import superapp.data.SuperAppObjectEntity.SuperAppObjectId;
 import superapp.data.UserEntity;
 import superapp.logic.AbstractService;
 import superapp.logic.AdvancedSuperAppObjectsService;
-import superapp.util.ControllersConstants;
 import superapp.util.exceptions.CannotProcessException;
 import superapp.util.exceptions.ForbiddenInsteadException;
 import superapp.util.exceptions.InvalidInputException;
@@ -162,8 +160,10 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public void bindNewChild(String parentSuperapp, String parentObjectId, SuperAppObjectIdBoundary newChild,String userSuperapp, String email) {
+    @Transactional
+    public void bindNewChild(String parentSuperapp, String parentObjectId,
+                             SuperAppObjectIdBoundary newChild,
+                             String userSuperapp, String email) {
         UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
         this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
@@ -197,14 +197,15 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
 
     @Override
     @Transactional(readOnly = true)
-    public List<SuperAppObjectBoundary> getChildren(String objectSuperapp, String internalObjectId,String userSuperapp, String email, int size, int page) {
+    public List<SuperAppObjectBoundary> getChildren(String objectSuperapp, String internalObjectId,
+                                                    String userSuperapp, String email,
+                                                    int size, int page) {
         UserEntity.UserPK userId = new UserEntity.UserPK(userSuperapp, email);
         this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
         SuperAppObjectId parentId = new SuperAppObjectId(objectSuperapp, internalObjectId);
 
         return this.objectRepository
-                //.FindallbyChildrensContaining(parentId,PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId"))
                 .findAll(PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId"))
                 .stream()
                 .filter(obj -> obj.getParents().contains(parentId))
