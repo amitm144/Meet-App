@@ -5,6 +5,8 @@ import superapp.boundaries.object.SuperAppObjectIdBoundary;
 import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.data.SuperAppObjectEntity;
 import org.springframework.stereotype.Component;
+import superapp.data.SuperappObjectPK;
+import superapp.util.exceptions.InvalidInputException;
 
 import java.util.Map;
 
@@ -42,19 +44,23 @@ public class SuperAppObjectConverter {
         return objBoundary;
     }
 
+    public SuperappObjectPK idToEntity(SuperAppObjectIdBoundary obj) {
+        return new SuperappObjectPK(obj.getSuperapp(), obj.getInternalObjectId());
+    }
+
+    public SuperAppObjectIdBoundary idToBoundary(SuperappObjectPK obj) {
+        return new SuperAppObjectIdBoundary(obj.getSuperapp(), obj.getObjectId());
+    }
+
     public String detailsToString(Map<String, Object> objectDetails) {
         try {
             return mapper.writeValueAsString(objectDetails);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        } catch (Exception e) { throw new InvalidInputException(e.getMessage()); }
     }
 
     public Map<String, Object> detailsToMap(String details) {
         try {
             return (Map<String, Object>)this.mapper.readValue(details, Map.class);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        } catch (Exception e) { throw new InvalidInputException(e.getMessage()); }
     }
 }

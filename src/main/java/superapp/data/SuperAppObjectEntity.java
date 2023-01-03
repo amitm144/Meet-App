@@ -4,14 +4,12 @@ import superapp.boundaries.user.UserIdBoundary;
 import superapp.util.wrappers.UserIdWrapper;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Date;
-import java.util.Objects;
 import java.util.Set;
 
 @Entity
 @Table(name="Objects")
-@IdClass(SuperAppObjectEntity.SuperAppObjectId.class)
+@IdClass(SuperappObjectPK.class)
 public class SuperAppObjectEntity {
     @Id
     private String objectId;
@@ -23,12 +21,13 @@ public class SuperAppObjectEntity {
     private Date creationTimestamp;
     private String userEmail;
     private String userSuperapp;
+    @Lob
     private String objectDetails;
     @ManyToMany
-    @JoinTable(name="ObjectsRelations")
+    @JoinTable(name="objects_relations")
     private Set<SuperAppObjectEntity> parents;
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "parents")
-    private Set<SuperAppObjectEntity> childObjects;
+    private Set<SuperAppObjectEntity> children;
 
     public SuperAppObjectEntity() {}
 
@@ -107,7 +106,6 @@ public class SuperAppObjectEntity {
         this.userSuperapp = createdBy.getSuperapp();
     }
 
-    @Lob
     public String getObjectDetails() {
         return objectDetails;
     }
@@ -116,48 +114,28 @@ public class SuperAppObjectEntity {
         this.objectDetails = objectDetails;
     }
 
-    public Set<SuperAppObjectEntity> getParent() {
+    public Set<SuperAppObjectEntity> getParents() {
         return parents;
     }
 
-    public void setParent(Set<SuperAppObjectEntity> parent) {
+    public void setParents(Set<SuperAppObjectEntity> parent) {
         this.parents = parent;
     }
 
-    public Set<SuperAppObjectEntity> getChildObjects() {
-        return childObjects;
+    public boolean addParent(SuperAppObjectEntity parent) {
+        return parent != this && !this.children.contains(parent) && this.parents.add(parent);
     }
 
-    public void setChildObjects(Set<SuperAppObjectEntity> childObjects) {
-        this.childObjects = childObjects;
+    public Set<SuperAppObjectEntity> getChildren() {
+        return children;
     }
 
-    public static class SuperAppObjectId implements Serializable {
-        /* This class creates composite primary key for SuperAppObject */
-        @Column(name = "superapp")
-        private String superapp;
-        @Column(name = "objectId")
-        private String objectId;
+    public void setChildren(Set<SuperAppObjectEntity> childObjects) {
+        this.children = childObjects;
+    }
 
-        public SuperAppObjectId() {}
-
-        public SuperAppObjectId(String superapp, String objectId) {
-            this.superapp = superapp;
-            this.objectId = objectId;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            SuperAppObjectId object = (SuperAppObjectId)o;
-            return objectId.equals(object.objectId) && superapp.equals(object.superapp);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(objectId, superapp);
-        }
+    public boolean addChild(SuperAppObjectEntity child) {
+        return child != this && !this.parents.contains(child) && this.children.add(child);
     }
 
     @Override

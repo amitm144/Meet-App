@@ -12,9 +12,12 @@ import superapp.dal.IdGeneratorRepository;
 import superapp.dal.SuperAppObjectEntityRepository;
 import superapp.data.IdGeneratorEntity;
 import superapp.data.SuperAppObjectEntity;
-import superapp.data.SuperAppObjectEntity.SuperAppObjectId;
+import superapp.data.SuperappObjectPK;
 import superapp.logic.AbstractService;
 import superapp.logic.SuperAppObjectsService;
+import superapp.util.exceptions.CannotProcessException;
+import superapp.util.exceptions.InvalidInputException;
+import superapp.util.exceptions.NotFoundException;
 import superapp.util.EmailChecker;
 
 import java.util.*;
@@ -42,7 +45,7 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
         String alias = object.getAlias();
         String type = object.getType(); // TODO: check type corresponds to future object types
         if (alias == null || type == null || alias.isBlank() || type.isBlank())
-            throw new RuntimeException("Object alias and/or type must be specified");
+            throw new InvalidInputException("Object alias and/or type must be specified");
 
         UserIdBoundary createdBy = object.getCreatedBy().getUserId();
         if (createdBy == null ||
@@ -50,7 +53,7 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
                 createdBy.getSuperapp() == null ||
                 createdBy.getSuperapp().isEmpty() ||
                 !EmailChecker.isValidEmail(createdBy.getEmail()))
-            throw new RuntimeException("Invalid creating user details");
+            throw new InvalidInputException("Invalid creating user details");
 
         Boolean active = object.getActive();
         if (active == null)
@@ -74,9 +77,9 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
                                                String internalObjectId,
                                                SuperAppObjectBoundary update) {
         Optional<SuperAppObjectEntity> objectO =
-                this.objectRepository.findById(new SuperAppObjectId(objectSuperapp, internalObjectId));
+                this.objectRepository.findById(new SuperappObjectPK(objectSuperapp, internalObjectId));
         if (objectO.isEmpty())
-            throw new RuntimeException("Unknown object");
+            throw new NotFoundException("Unknown object");
 
         SuperAppObjectEntity objectE = objectO.get();
         Map<String, Object> newDetails = update.getObjectDetails();
@@ -91,14 +94,14 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
 
         if (newType != null) {
             if (newType.isBlank())
-                throw new RuntimeException("Object alias and/or type must be specified");
+                throw new InvalidInputException("Object alias and/or type must be specified");
             else
                 objectE.setType(newType);
         }
 
         if (newAlias != null) {
             if (newAlias.isBlank())
-                throw new RuntimeException("Object alias and/or type must be specified");
+                throw new InvalidInputException("Object alias and/or type must be specified");
             else
                 objectE.setAlias(newAlias);
         }
@@ -108,14 +111,59 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
     }
 
     @Override
+    @Transactional
+    public void bindNewChild(String parentSuperapp, String parentObjectId, SuperAppObjectIdBoundary newChild) {
+        SuperAppObjectEntity parent = this.objectRepository
+                .findById(new SuperappObjectPK(parentSuperapp, parentObjectId))
+                .orElseThrow(() -> new NotFoundException("Cannot find parent object"));
+        SuperAppObjectEntity child = this.objectRepository
+                .findById(this.converter.idToEntity(newChild))
+                .orElseThrow(() -> new NotFoundException("Cannot find children object"));
+
+       if (parent.addChild(child) && child.addParent(parent)) {
+           this.objectRepository.save(parent);
+           this.objectRepository.save(child);
+       } else
+           throw new CannotProcessException("Failed to update parent or child object");
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public SuperAppObjectBoundary getSpecificObject(String objectSuperapp, String internalObjectId) {
         Optional<SuperAppObjectEntity> objectE =
-                this.objectRepository.findById(new SuperAppObjectId(objectSuperapp, internalObjectId));
+                this.objectRepository.findById(new SuperappObjectPK(objectSuperapp, internalObjectId));
         if (objectE.isEmpty())
-            throw new RuntimeException("Object does not exist");
+            throw new NotFoundException("Object does not exist");
 
         return this.converter.toBoundary(objectE.get());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SuperAppObjectBoundary> getChildren(String objectSuperapp, String internalObjectId) {
+        SuperAppObjectEntity parent = this.objectRepository
+                .findById(new SuperappObjectPK(objectSuperapp, internalObjectId))
+                .orElseThrow(() -> new NotFoundException("Cannot find parent object"));
+
+        return parent
+                .getChildren()
+                .stream()
+                .map(this.converter::toBoundary)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SuperAppObjectBoundary> getParents(String objectSuperapp, String internalObjectId) {
+        SuperAppObjectEntity object = this.objectRepository
+                .findById(new SuperappObjectPK(objectSuperapp, internalObjectId))
+                .orElseThrow(() -> new NotFoundException("Cannot find requested object"));
+
+        return object
+                .getParents()
+                .stream()
+                .map(this.converter::toBoundary)
+                .collect(Collectors.toList());
     }
 
     @Override

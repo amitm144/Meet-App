@@ -55,12 +55,33 @@ public class HelperInitializer implements CommandLineRunner {
 				IntStream
 				.range(0, 2)
 				.mapToObj(i-> this.objects.createObject(new SuperAppObjectBoundary(
-						new SuperAppObjectIdBoundary(),
+						null,
 						"Group"+i,
 						"a",
 						new HashMap<String, Object>(){{ put("members", usersList); }},
 						new UserIdWrapper(usersList.get(0).getUserId()))))
 				.toList();
+
+		// Transaction object creation
+		SuperAppObjectBoundary t1 =
+				this.objects.createObject(new SuperAppObjectBoundary(
+				null,
+				"Transaction",
+				"pizza",
+				new HashMap<String, Object>(){{ put("amount", 75); }},
+				new UserIdWrapper(usersList.get(0).getUserId())));
+		SuperAppObjectBoundary t2 =
+				this.objects.createObject(new SuperAppObjectBoundary(
+				null,
+				"Transaction",
+				"snacks",
+				new HashMap<String, Object>(){{ put("amount", 34.5); }},
+				new UserIdWrapper(usersList.get(1).getUserId())));
+		// bind created transactions to group
+//		this.objects.bindNewChild(this.objects.getSuperappName(),
+//				groupList.get(0).getObjectId().getInternalObjectId(), t1.getObjectId());
+//		this.objects.bindNewChild(this.objects.getSuperappName(),
+//				groupList.get(0).getObjectId().getInternalObjectId(), t2.getObjectId());
 
 		// Commands creation
 		List<Object> commandsList =
