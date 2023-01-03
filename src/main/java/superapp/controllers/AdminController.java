@@ -1,7 +1,9 @@
 package superapp.controllers;
 
+import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.boundaries.user.UserBoundary;
 import superapp.boundaries.command.MiniAppCommandBoundary;
+import superapp.logic.UsersService;
 import superapp.logic.concreteServices.MiniAppCommandService;
 import superapp.logic.concreteServices.SuperAppObjectService;
 import superapp.logic.concreteServices.UserService;
@@ -93,4 +95,11 @@ public class AdminController {
     public void deleteMiniApp(@RequestParam(name = "userSuperapp", required = true,defaultValue = "") String userSuperapp,
                               @RequestParam(name = "userEmail", required = true,defaultValue = "") String email)
                             { this.miniappService.deleteAllCommands(userSuperapp,email); }
+    @RequestMapping(
+            path={"/superapp/miniapp/TEST"},
+            method ={RequestMethod.POST},
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public SuperAppObjectBoundary createTimestampObject(@RequestBody MiniAppCommandBoundary objectTimeTravel) {
+        return this.miniappService.updateObjectCreationTimestamp(objectTimeTravel);
+    }
 }
