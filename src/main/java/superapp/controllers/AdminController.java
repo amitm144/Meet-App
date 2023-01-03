@@ -3,7 +3,6 @@ package superapp.controllers;
 import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.boundaries.user.UserBoundary;
 import superapp.boundaries.command.MiniAppCommandBoundary;
-import superapp.logic.UsersService;
 import superapp.logic.concreteServices.MiniAppCommandService;
 import superapp.logic.concreteServices.SuperAppObjectService;
 import superapp.logic.concreteServices.UserService;
@@ -99,7 +98,7 @@ public class AdminController {
             path={"/superapp/miniapp/TEST"},
             method ={RequestMethod.POST},
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    public SuperAppObjectBoundary createTimestampObject(@RequestBody MiniAppCommandBoundary objectTimeTravel) {
+    public SuperAppObjectBoundary modifyTimestampSuperAppObject(@RequestBody MiniAppCommandBoundary objectTimeTravel) {
         return this.miniappService.updateObjectCreationTimestamp(objectTimeTravel);
     }
 }
