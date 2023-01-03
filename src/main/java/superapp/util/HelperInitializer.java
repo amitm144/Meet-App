@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import superapp.boundaries.command.MiniAppCommandBoundary;
 import superapp.boundaries.command.MiniAppCommandIdBoundary;
 import superapp.boundaries.object.SuperAppObjectBoundary;
-import superapp.boundaries.object.SuperAppObjectIdBoundary;
 import superapp.boundaries.user.UserBoundary;
 import superapp.logic.concreteServices.MiniAppCommandService;
 import superapp.logic.concreteServices.SuperAppObjectService;
