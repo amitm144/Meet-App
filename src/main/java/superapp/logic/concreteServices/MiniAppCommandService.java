@@ -257,8 +257,8 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
         IdGeneratorEntity helper = this.idGenerator.save(new IdGeneratorEntity());
         String commandId = helper.getId().toString();
         this.idGenerator.delete(helper);
-        MiniAppCommandIdBoundary miniAppCommandIdBoundary = new MiniAppCommandIdBoundary(this.superappName, commandId);
-        miniAppCommandIdBoundary.setMiniapp("TEST");
+        MiniAppCommandIdBoundary miniAppCommandIdBoundary = new MiniAppCommandIdBoundary("TEST", commandId);
+        miniAppCommandIdBoundary.setSuperapp(this.superappName);
         miniappCommandBoundary.setCommandId(miniAppCommandIdBoundary);
         miniappCommandBoundary.setInvocationTimestamp(new Date());
         return miniappCommandBoundary;
