@@ -1,5 +1,6 @@
 package superapp.logic.concreteServices;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,33 +11,38 @@ import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.SuperAppObjectConverter;
 import superapp.dal.IdGeneratorRepository;
 import superapp.dal.SuperAppObjectEntityRepository;
-import superapp.data.IdGeneratorEntity;
-import superapp.data.SuperAppObjectEntity;
-import superapp.data.SuperappObjectPK;
+import superapp.dal.UserEntityRepository;
+import superapp.data.*;
 import superapp.logic.AbstractService;
-import superapp.logic.SuperAppObjectsService;
+import superapp.logic.AdvancedSuperAppObjectsService;
 import superapp.util.exceptions.CannotProcessException;
+import superapp.util.exceptions.ForbbidenOperationException;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.exceptions.NotFoundException;
 import superapp.util.EmailChecker;
+import static superapp.data.UserRole.*;
+import static superapp.util.ControllersConstants.DEFAULT_SORTING_DIRECTION;
+import static superapp.util.ControllersConstants.DEPRECATED_EXCEPTION;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Service
-public class SuperAppObjectService extends AbstractService implements SuperAppObjectsService {
+public class SuperAppObjectService extends AbstractService implements AdvancedSuperAppObjectsService {
     private SuperAppObjectEntityRepository objectRepository;
+    private UserEntityRepository userRepository;
     private IdGeneratorRepository idGenerator;
     private SuperAppObjectConverter converter;
 
     @Autowired
     public SuperAppObjectService(SuperAppObjectConverter converter,
                                  SuperAppObjectEntityRepository objectRepository,
-                                 IdGeneratorRepository idGenerator) {
+                                 IdGeneratorRepository idGenerator,
+                                 UserEntityRepository userRepository) {
         this.converter = converter;
         this.objectRepository = objectRepository;
         this.idGenerator = idGenerator;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -72,10 +78,50 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
     }
 
     @Override
+    @Deprecated
     @Transactional
     public SuperAppObjectBoundary updateObject(String objectSuperapp,
                                                String internalObjectId,
                                                SuperAppObjectBoundary update) {
+        throw new ForbbidenOperationException(DEPRECATED_EXCEPTION);
+    }
+    @Override
+    @Deprecated
+    @Transactional
+    public void bindNewChild(String parentSuperapp, String parentObjectId, SuperAppObjectIdBoundary newChild) {
+        throw new NotFoundException(DEPRECATED_EXCEPTION);
+    }
+
+    @Override
+    @Deprecated
+    @Transactional(readOnly = true)
+    public SuperAppObjectBoundary getSpecificObject(String objectSuperapp, String internalObjectId) {
+        throw new NotFoundException(DEPRECATED_EXCEPTION);
+    }
+
+    @Override
+    @Deprecated
+    @Transactional(readOnly = true)
+    public List<SuperAppObjectBoundary> getAllObjects() {
+        throw new NotFoundException(DEPRECATED_EXCEPTION);
+    }
+
+    @Override
+    @Deprecated
+    @Transactional
+    public void deleteAllObjects() {
+        throw new NotFoundException(DEPRECATED_EXCEPTION);
+    }
+
+
+    @Override
+    @Transactional
+    public SuperAppObjectBoundary updateObject(String objectSuperapp,
+                                               String internalObjectId,
+                                               SuperAppObjectBoundary update,String userSuperapp,String email) {
+        UserPK userId = new UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
+
         Optional<SuperAppObjectEntity> objectO =
                 this.objectRepository.findById(new SuperappObjectPK(objectSuperapp, internalObjectId));
         if (objectO.isEmpty())
@@ -112,7 +158,12 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
 
     @Override
     @Transactional
-    public void bindNewChild(String parentSuperapp, String parentObjectId, SuperAppObjectIdBoundary newChild) {
+    public void bindNewChild(String parentSuperapp, String parentObjectId,
+                             SuperAppObjectIdBoundary newChild,
+                             String userSuperapp, String email) {
+        UserPK userId = new UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
+
         SuperAppObjectEntity parent = this.objectRepository
                 .findById(new SuperappObjectPK(parentSuperapp, parentObjectId))
                 .orElseThrow(() -> new NotFoundException("Cannot find parent object"));
@@ -120,16 +171,19 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
                 .findById(this.converter.idToEntity(newChild))
                 .orElseThrow(() -> new NotFoundException("Cannot find children object"));
 
-       if (parent.addChild(child) && child.addParent(parent)) {
-           this.objectRepository.save(parent);
-           this.objectRepository.save(child);
-       } else
-           throw new CannotProcessException("Failed to update parent or child object");
+        if (parent.addChild(child) && child.addParent(parent)) {
+            this.objectRepository.save(parent);
+            this.objectRepository.save(child);
+        } else
+            throw new CannotProcessException("Failed to update parent or child object");
     }
 
     @Override
     @Transactional(readOnly = true)
-    public SuperAppObjectBoundary getSpecificObject(String objectSuperapp, String internalObjectId) {
+    public SuperAppObjectBoundary getSpecificObject(String objectSuperapp, String internalObjectId, String userSuperapp, String email) {
+        UserPK userId = new UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
+
         Optional<SuperAppObjectEntity> objectE =
                 this.objectRepository.findById(new SuperappObjectPK(objectSuperapp, internalObjectId));
         if (objectE.isEmpty())
@@ -140,43 +194,93 @@ public class SuperAppObjectService extends AbstractService implements SuperAppOb
 
     @Override
     @Transactional(readOnly = true)
-    public List<SuperAppObjectBoundary> getChildren(String objectSuperapp, String internalObjectId) {
-        SuperAppObjectEntity parent = this.objectRepository
-                .findById(new SuperappObjectPK(objectSuperapp, internalObjectId))
-                .orElseThrow(() -> new NotFoundException("Cannot find parent object"));
+    public List<SuperAppObjectBoundary> getChildren(String objectSuperapp, String internalObjectId,
+                                                    String userSuperapp, String email,
+                                                    int size, int page) {
+        UserPK userId = new UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
-        return parent
-                .getChildren()
+        return this.objectRepository.findAll(PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId"))
                 .stream()
-                .map(this.converter::toBoundary)
+                .filter(obj -> obj.getObjectId().equals(internalObjectId) && obj.getSuperapp().equals(objectSuperapp))
+                .map(SuperAppObjectEntity::getChildren)
+                .flatMap(superAppObjectEntities -> superAppObjectEntities.stream()
+                        .map(this.converter::toBoundary))
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<SuperAppObjectBoundary> getParents(String objectSuperapp, String internalObjectId) {
-        SuperAppObjectEntity object = this.objectRepository
-                .findById(new SuperappObjectPK(objectSuperapp, internalObjectId))
-                .orElseThrow(() -> new NotFoundException("Cannot find requested object"));
+    public List<SuperAppObjectBoundary> getParents(String objectSuperapp, String internalObjectId,String userSuperapp,
+                                                   String email, int size, int page) {
+        UserPK userId = new UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
 
-        return object
-                .getParents()
+        return this.objectRepository.findAll(PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId"))
                 .stream()
-                .map(this.converter::toBoundary)
+                .filter(obj -> obj.getObjectId().equals(internalObjectId) && obj.getSuperapp().equals(objectSuperapp))
+                .map(SuperAppObjectEntity::getParents)
+                .flatMap(superAppObjectEntities -> superAppObjectEntities.stream()
+                        .map(this.converter::toBoundary))
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<SuperAppObjectBoundary> getAllObjects() {
-        Iterable<SuperAppObjectEntity> objects = this.objectRepository.findAll();
-        return StreamSupport
-                .stream(objects.spliterator() , false)
+    public List<SuperAppObjectBoundary> getAllObjects(String userSuperapp, String email, int size, int page) {
+        UserPK userId = new UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
+
+        return this.objectRepository.findAll(PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION,
+                        "userSuperapp", "userEmail"))
+                    .stream()
+                    .map(this.converter::toBoundary)
+                    .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SuperAppObjectBoundary> SearchObjectsByType(String type, String userSuperapp, String email, int size, int page) {
+        UserPK userId = new UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
+
+        return this.objectRepository.findByType(type, PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "objectId"))
+                .stream()
                 .map(this.converter::toBoundary)
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public void deleteAllObjects() { this.objectRepository.deleteAll(); }
+    public List<SuperAppObjectBoundary> SearchObjectsByExactAlias(String alias, String userSuperapp, String email, int size, int page) {
+        UserPK userId = new UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
+
+        return this.objectRepository
+                .findByAlias(alias, PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "objectId"))
+                .stream()
+                .map(this.converter::toBoundary)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public List<SuperAppObjectBoundary> SearchObjectsByAliasContaining(String text, String userSuperapp, String email, int size, int page)
+    {
+        UserPK userId = new UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository);
+
+        return this.objectRepository
+                .findByAliasContaining(text, PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "objectId"))
+                .stream()
+                .map(this.converter::toBoundary)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void deleteAllObjects(String userSuperapp, String email) {
+        UserPK userId = new UserPK(userSuperapp, email);
+        this.isValidUserCredentials(userId, ADMIN, this.userRepository);
+        this.objectRepository.deleteAll();
+    }
 }

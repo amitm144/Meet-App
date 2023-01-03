@@ -3,6 +3,7 @@ package superapp.controllers;
 import superapp.boundaries.user.NewUserBoundary;
 import superapp.boundaries.user.UserBoundary;
 import superapp.logic.UsersService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
