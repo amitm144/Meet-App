@@ -9,6 +9,7 @@ import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.SuperAppObjectConverter;
 import superapp.dal.SuperAppObjectEntityRepository;
 import superapp.data.SuperAppObjectEntity;
+import superapp.data.SuperappObjectPK;
 import superapp.logic.MiniAppServiceHandler;
 import superapp.logic.SplitsService;
 import superapp.util.exceptions.CannotProcessException;
@@ -48,7 +49,7 @@ public class SplitService implements SplitsService, MiniAppServiceHandler {
 	public Object runCommand(String miniapp, SuperAppObjectIdWrapper targetObject, UserIdBoundary invokedBy, String commandCase) {
 		SuperAppObjectEntity group =
 				this.objectRepository.findById(
-						new SuperAppObjectEntity.SuperAppObjectId(
+						new SuperappObjectPK(
 								targetObject.getObjectId().getSuperapp(),
 								targetObject.getObjectId().getInternalObjectId()))
 				.orElseThrow(() ->  new NotFoundException("Group not found"));
@@ -61,8 +62,8 @@ public class SplitService implements SplitsService, MiniAppServiceHandler {
 
 		switch (commandCase) {
 			case "showDebt" -> {
-				SuperAppObjectEntity.SuperAppObjectId objectId =
-						new SuperAppObjectEntity.SuperAppObjectId(group.getSuperapp(), group.getObjectId());
+				SuperappObjectPK objectId =
+						new SuperappObjectPK(group.getSuperapp(), group.getObjectId());
 				return this.showDebt(objectId, invokedBy);
 			}
 			case "showAllDebts" -> { return this.showAllDebts(group); }
@@ -75,7 +76,7 @@ public class SplitService implements SplitsService, MiniAppServiceHandler {
 	}
 
 	@Override
-	public SplitDebtBoundary showDebt(SuperAppObjectEntity.SuperAppObjectId groupId, UserIdBoundary user) {
+	public SplitDebtBoundary showDebt(SuperappObjectPK groupId, UserIdBoundary user) {
 		Optional<SuperAppObjectEntity> groupOptional = this.objectRepository.findById(groupId);
 		if (groupOptional.isEmpty())
 			return null;
@@ -111,8 +112,8 @@ public class SplitService implements SplitsService, MiniAppServiceHandler {
 				.detailsToMap(group.getObjectDetails()).get("members"))
 				.forEach(userData -> {
 					UserIdBoundary userId = new UserIdBoundary(userData.get("superapp"), userData.get("email"));
-					SuperAppObjectEntity.SuperAppObjectId objectId =
-							new SuperAppObjectEntity.SuperAppObjectId(group.getSuperapp(), group.getObjectId());
+					SuperappObjectPK objectId =
+							new SuperappObjectPK(group.getSuperapp(), group.getObjectId());
 					allDebts.add(showDebt(objectId, userId));
 				});
 		return allDebts.toArray(new SplitDebtBoundary[0]);
