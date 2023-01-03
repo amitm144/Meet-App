@@ -24,6 +24,7 @@ import static superapp.data.ObjectTypes.isValidObjectType;
 public class SplitService implements SplitsService, MiniAppServiceHandler {
 	private SuperAppObjectEntityRepository objectRepository;
 	private SuperAppObjectConverter converter;
+	private final String INVALID_AMOUNT_MESSAGE =  "Transaction must specify amount (number not less than or equal to 0)";
 
 	@Autowired
 	public SplitService(SuperAppObjectEntityRepository objectRepository) {
@@ -37,8 +38,8 @@ public class SplitService implements SplitsService, MiniAppServiceHandler {
 		if (!isValidObjectType(objectType))
 			objectType = "";
 		switch (objectType) {
-			case ("GROUP") -> this.checkGroupData(object);
-			case ("TRANSACTION") -> this.checkTransactionData(object);
+			case ("Group") -> this.checkGroupData(object);
+			case ("Transaction") -> this.checkTransactionData(object);
 			default -> throw new InvalidInputException("Unknown object type");
 		}
 	}
@@ -50,42 +51,42 @@ public class SplitService implements SplitsService, MiniAppServiceHandler {
 						new SuperAppObjectEntity.SuperAppObjectId(
 								targetObject.getObjectId().getSuperapp(),
 								targetObject.getObjectId().getInternalObjectId()))
-				.orElseThrow(() ->  new NotFoundException("group not found"));
+				.orElseThrow(() ->  new NotFoundException("Group not found"));
 
 		if (!isUserInGroup(group, invokedBy))
 			throw new InvalidInputException("Invoking user is not part of this group");
 
-		switch(commandCase) {
-			case "showDebt": {
+		if (!group.getActive())
+			throw new InvalidInputException("Cannot execute commands on an inactive group");
+
+		switch (commandCase) {
+			case "showDebt" -> {
 				SuperAppObjectEntity.SuperAppObjectId objectId =
 						new SuperAppObjectEntity.SuperAppObjectId(group.getSuperapp(), group.getObjectId());
 				return this.showDebt(objectId, invokedBy);
 			}
-			case "showAllDebts": {
-				return this.showAllDebts(group);
-			}
-			case "settleGroupDebts": {
+			case "showAllDebts" -> { return this.showAllDebts(group); }
+			case "settleGroupDebts" -> {
 				this.settleGroupDebts(group);
 				return null;
 			}
-			default:
-				throw new NotFoundException("Unknown command");
+			default -> throw new NotFoundException("Unknown command");
 		}
 	}
 
 	@Override
 	public SplitDebtBoundary showDebt(SuperAppObjectEntity.SuperAppObjectId groupId, UserIdBoundary user) {
-		Optional<SuperAppObjectEntity> groupO = this.objectRepository.findById(groupId);
-		if (groupO.isEmpty())
+		Optional<SuperAppObjectEntity> groupOptional = this.objectRepository.findById(groupId);
+		if (groupOptional.isEmpty())
 			return null;
 
-		SuperAppObjectEntity group = groupO.get();
+		SuperAppObjectEntity group = groupOptional.get();
 		Set<SuperAppObjectEntity> transactions = group.getChildren();
 		int totalMembers =
 				((List<UserIdBoundary>)this.converter.detailsToMap(group.getObjectDetails())
 				.get("members"))
 				.size();
-		if (totalMembers == 0)
+		if (totalMembers == 0) // guarding against division by zero
 			throw new CannotProcessException("Group has no members");
 
 		float totalPayments = 0, membersPayments = 0;
@@ -136,31 +137,31 @@ public class SplitService implements SplitsService, MiniAppServiceHandler {
 		UserIdBoundary creatingUser = group.getCreatedBy().getUserId();
 		Map<String, Object> objDetails = group.getObjectDetails();
 		if (objDetails == null)
-			throw new InvalidInputException("group must specify it's members");
+			throw new InvalidInputException("Group must specify it's members");
 		List<UserIdBoundary> groupMembers = (List<UserIdBoundary>)objDetails.get("members");
 
-		if (groupMembers == null || groupMembers.isEmpty() ||
+		if (groupMembers == null || groupMembers.isEmpty() || groupMembers.size() < 2 ||
 				!this.isUserInGroup(this.converter.toEntity(group), creatingUser))
-			throw new InvalidInputException("group must contain members including its creator");
+			throw new InvalidInputException("Group must contain at least two members including its creator");
 
 		SplitDebtBoundary[] debts = (SplitDebtBoundary[])this.showAllDebts(this.converter.toEntity(group));
 		if (Arrays.stream(debts).anyMatch(member -> member != null && member.getDebt() < 0))
-			throw new InvalidInputException("Cannot remove group member while any group members owe money");
+			throw new InvalidInputException("Cannot remove group members while any group member owes money");
 	}
 
 	private void checkTransactionData(SuperAppObjectBoundary transaction) {
 		Map<String, Object> objDetails = transaction.getObjectDetails();
 		if (objDetails == null)
-			throw new InvalidInputException("transaction must specify amount (not less than or equal to 0)");
+			throw new InvalidInputException(INVALID_AMOUNT_MESSAGE);
 
 		Object amountData = objDetails.get("amount");
 		if (amountData == null)
-			throw new InvalidInputException("transaction must specify amount (not less than or equal to 0)");
+			throw new InvalidInputException(INVALID_AMOUNT_MESSAGE);
 
 		float amount = doubleToFloat(amountData.toString());
 		if (amount <= 0) {
 			transaction.setActive(false);
-			throw new InvalidInputException("transaction amount must not be less than or equal to 0");
+			throw new InvalidInputException(INVALID_AMOUNT_MESSAGE);
 		}
 	}
 
@@ -168,7 +169,7 @@ public class SplitService implements SplitsService, MiniAppServiceHandler {
 		try {
 			return Double.valueOf(value).floatValue();
 		} catch (Exception e) {
-			throw new InvalidInputException("invalid amount");
+			throw new InvalidInputException(INVALID_AMOUNT_MESSAGE);
 		}
 	}
 }

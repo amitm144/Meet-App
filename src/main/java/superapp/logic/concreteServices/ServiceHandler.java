@@ -18,10 +18,10 @@ public class ServiceHandler implements MiniAppServiceHandler {
     //private LiftService liftService
 
     @Autowired
-    public ServiceHandler(SplitService splitService/*,GrabService grabService , LiftService liftService*/) {
+    public ServiceHandler(SplitService splitService /*,GrabService grabService , LiftService liftService*/) {
         this.splitService = splitService;
-        //grabService = grabService;
-        //liftService =liftService;
+//        this.grabService = grabService;
+//        this.liftService =liftService;
     }
 
     public void handleObjectByType(SuperAppObjectBoundary object) {
@@ -40,13 +40,9 @@ public class ServiceHandler implements MiniAppServiceHandler {
                              String commandCase) {
         switch (miniapp) {
             case ("Split") -> { return this.splitService.runCommand(miniapp, targetObject, invokedBy, commandCase); }
-            case ("Grab") -> { return null;
-                //this.grabService.runCommand(miniapp,targetObject,user,attributes,commandCase);
-            }
-            case ("Lift") -> { return null;
-                //this.liftService.runCommand(miniapp,targetObject,user,attributes,commandCase);
-            }
-            default -> { throw new InvalidInputException("MiniApp Not Found"); }
+            case ("Grab") -> { return null; }
+            case ("Lift") -> { return null; }
+            default -> { throw new InvalidInputException("Unknown miniapp"); }
         }
     }
 }
