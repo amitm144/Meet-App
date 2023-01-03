@@ -98,7 +98,10 @@ public class AdminController {
             path={"/superapp/miniapp/TEST"},
             method ={RequestMethod.POST},
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    public SuperAppObjectBoundary modifyTimestampSuperAppObject(@RequestBody MiniAppCommandBoundary objectTimeTravel) {
-        return this.miniappService.updateObjectCreationTimestamp(objectTimeTravel);
+    public SuperAppObjectBoundary modifyTimestampSuperAppObject(
+            @RequestParam(name = "userSuperapp", required = true,defaultValue = "") String userSuperapp,
+            @RequestParam(name = "userEmail", required = true,defaultValue = "") String userEmail,
+            @RequestBody MiniAppCommandBoundary objectTimeTravel) {
+        return this.miniappService.updateObjectCreationTimestamp(userSuperapp, userEmail, objectTimeTravel);
     }
 }

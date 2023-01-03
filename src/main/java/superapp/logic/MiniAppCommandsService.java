@@ -13,5 +13,6 @@ public interface MiniAppCommandsService {
     public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniAppName);
     @Deprecated
     public void deleteAllCommands();
-    public SuperAppObjectBoundary updateObjectCreationTimestamp(MiniAppCommandBoundary objectTimeTravel);
+    public SuperAppObjectBoundary updateObjectCreationTimestamp(String userSuperapp, String userEmail,
+                                                                MiniAppCommandBoundary objectTimeTravel);
 }
