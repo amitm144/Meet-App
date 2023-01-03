@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import superapp.boundaries.command.MiniAppCommandBoundary;
+import superapp.boundaries.command.MiniAppCommandIdBoundary;
 import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.converters.MiniappCommandConverter;
 import superapp.converters.SuperAppObjectConverter;
@@ -213,5 +214,53 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
             return null;
         }
         return updatedObjectTimeTravel;
+    }
+
+    @Override
+    @Transactional
+    public MiniAppCommandBoundary storeMiniAppCommand(String userSuperapp,
+                                                      String userEmail,
+                                                      MiniAppCommandBoundary miniappCommandBoundary) {
+        // Validate Admin user:
+        UserPK userId = new UserPK(userSuperapp, userEmail);
+        this.isValidUserCredentials(userId, ADMIN, this.userRepository);
+        // Validate correct command:
+        if(!miniappCommandBoundary.getCommand().equals("echo")){
+            throw new RuntimeException("Can't store Mini-App Command");
+        }
+
+        UserIdWrapper invokedBy = miniappCommandBoundary.getInvokedBy();
+        if (invokedBy == null ||
+                invokedBy.getUserId() == null ||
+                invokedBy.getUserId().getSuperapp() == null ||
+                invokedBy.getUserId().getEmail() == null ||
+                invokedBy.getUserId().getSuperapp().isBlank() ||
+                invokedBy.getUserId().getEmail().isBlank())
+            throw new InvalidInputException("Invoked by fields cannot be missing or empty");
+
+        if (!EmailChecker.isValidEmail(invokedBy.getUserId().getEmail()))
+            throw new InvalidInputException("Invalid invoking user email");
+
+        SuperAppObjectIdWrapper targetObject = miniappCommandBoundary.getTargetObject();
+        if (targetObject == null ||
+                targetObject.getObjectId() == null ||
+                targetObject.getObjectId().getSuperapp() == null ||
+                targetObject.getObjectId().getInternalObjectId() == null ||
+                targetObject.getObjectId().getSuperapp().isBlank() ||
+                targetObject.getObjectId().getInternalObjectId().isBlank())
+            throw new InvalidInputException("Target object fields cannot be missing or empty");
+
+        if (miniappCommandBoundary.getCommand() == null || miniappCommandBoundary.getCommand().isEmpty())
+            throw new InvalidInputException("Command attribute cannot be missing or empty");
+
+        // issue internalCommandId, tie with superapp and set invocation timestamp
+        IdGeneratorEntity helper = this.idGenerator.save(new IdGeneratorEntity());
+        String commandId = helper.getId().toString();
+        this.idGenerator.delete(helper);
+        MiniAppCommandIdBoundary miniAppCommandIdBoundary = new MiniAppCommandIdBoundary(this.superappName, commandId);
+        miniAppCommandIdBoundary.setMiniapp("TEST");
+        miniappCommandBoundary.setCommandId(miniAppCommandIdBoundary);
+        miniappCommandBoundary.setInvocationTimestamp(new Date());
+        return miniappCommandBoundary;
     }
 }

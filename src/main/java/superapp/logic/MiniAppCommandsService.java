@@ -15,4 +15,7 @@ public interface MiniAppCommandsService {
     public void deleteAllCommands();
     public SuperAppObjectBoundary updateObjectCreationTimestamp(String userSuperapp, String userEmail,
                                                                 MiniAppCommandBoundary objectTimeTravel);
+    public MiniAppCommandBoundary storeMiniAppCommand(String userSuperapp,
+                                                      String userEmail,
+                                                      MiniAppCommandBoundary miniappCommandBoundary);
 }
