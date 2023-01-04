@@ -17,7 +17,7 @@ import superapp.data.UserPK;
 import superapp.logic.AbstractService;
 import superapp.util.exceptions.CannotProcessException;
 import superapp.logic.AdvancedMiniAppCommandsService;
-import superapp.util.exceptions.ForbiddenInsteadException;
+import superapp.util.exceptions.ForbbidenOperationException;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.EmailChecker;
 import superapp.util.exceptions.NotFoundException;
@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 import static superapp.data.UserRole.ADMIN;
 import static superapp.util.ControllersConstants.DEFAULT_SORTING_DIRECTION;
+import static superapp.util.ControllersConstants.DEPRECATED_EXCEPTION;
 
 @Service
 public class MiniAppCommandService extends AbstractService implements AdvancedMiniAppCommandsService {
@@ -102,7 +103,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
 
         if(!isValidUserCredentials(new UserPK(invokedBy.getUserId().getSuperapp(),invokedBy.getUserId().getEmail()),
                 UserRole.MINIAPP_USER,this.userEntityRepository))
-            throw new ForbiddenInsteadException("Only a MINIAPP_USER able to preform a command");
+            throw new ForbbidenOperationException("Only a MINIAPP_USER able to preform a command");
 
         if(objectE.get().getActive() ==false)
             throw new CannotProcessException("Cannot preform a command on an inactive object");
@@ -111,21 +112,21 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     @Transactional(readOnly = true)
     @Deprecated
     public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniappName) {
-        throw new NotFoundException("Method is Dperecated");
+        throw new NotFoundException(DEPRECATED_EXCEPTION);
     }
 
     @Override
     @Deprecated
     @Transactional(readOnly = true)
     public List<MiniAppCommandBoundary> getAllCommands() {
-        throw new NotFoundException("Method is Dperecated");
+        throw new NotFoundException(DEPRECATED_EXCEPTION);
     }
 
     @Override
     @Deprecated
     @Transactional
     public void deleteAllCommands() {
-        throw new NotFoundException("Method is Dperecated");
+        throw new NotFoundException(DEPRECATED_EXCEPTION);
     }
 
     @Override

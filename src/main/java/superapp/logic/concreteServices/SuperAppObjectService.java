@@ -16,12 +16,14 @@ import superapp.data.*;
 import superapp.logic.AbstractService;
 import superapp.logic.AdvancedSuperAppObjectsService;
 import superapp.util.exceptions.CannotProcessException;
-import superapp.util.exceptions.ForbiddenInsteadException;
+import superapp.util.exceptions.ForbbidenOperationException;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.exceptions.NotFoundException;
 import superapp.util.EmailChecker;
+
 import static superapp.data.UserRole.*;
 import static superapp.util.ControllersConstants.DEFAULT_SORTING_DIRECTION;
+import static superapp.util.ControllersConstants.DEPRECATED_EXCEPTION;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -82,34 +84,34 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     public SuperAppObjectBoundary updateObject(String objectSuperapp,
                                                String internalObjectId,
                                                SuperAppObjectBoundary update) {
-        throw new ForbiddenInsteadException("Method is Dperecated");
+        throw new ForbbidenOperationException(DEPRECATED_EXCEPTION);
     }
     @Override
     @Deprecated
     @Transactional
     public void bindNewChild(String parentSuperapp, String parentObjectId, SuperAppObjectIdBoundary newChild) {
-        throw new NotFoundException("Method is Dperecated");
+        throw new NotFoundException(DEPRECATED_EXCEPTION);
     }
 
     @Override
     @Deprecated
     @Transactional(readOnly = true)
     public SuperAppObjectBoundary getSpecificObject(String objectSuperapp, String internalObjectId) {
-        throw new NotFoundException("Method is Dperecated");
+        throw new NotFoundException(DEPRECATED_EXCEPTION);
     }
 
     @Override
     @Deprecated
     @Transactional(readOnly = true)
     public List<SuperAppObjectBoundary> getAllObjects() {
-        throw new NotFoundException("Method is Dperecated");
+        throw new NotFoundException(DEPRECATED_EXCEPTION);
     }
 
     @Override
     @Deprecated
     @Transactional
     public void deleteAllObjects() {
-        throw new NotFoundException("Method is Dperecated");
+        throw new NotFoundException(DEPRECATED_EXCEPTION);
     }
 
 
@@ -120,7 +122,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                                                SuperAppObjectBoundary update,String userSuperapp,String email) {
         UserPK userId = new UserPK(userSuperapp, email);
         if(!this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
-            throw new ForbiddenInsteadException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here");
+            throw new ForbbidenOperationException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here");
 
         Optional<SuperAppObjectEntity> objectO =
                 this.objectRepository.findById(new SuperappObjectPK(objectSuperapp, internalObjectId));
@@ -163,7 +165,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                              String userSuperapp, String email) {
         UserPK userId = new UserPK(userSuperapp, email);
         if(!this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
-            throw new ForbiddenInsteadException("Error:SUPERAPP_USERS able to access here");
+            throw new ForbbidenOperationException("Error:SUPERAPP_USERS able to access here");
 
         SuperAppObjectEntity parent = this.objectRepository
                 .findById(new SuperappObjectPK(parentSuperapp, parentObjectId))
@@ -193,7 +195,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 throw new CannotProcessException("cannot accses to an object that is inactive");
         return this.converter.toBoundary(objectE.get());
      }
-        throw new ForbiddenInsteadException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here");
+        throw new ForbbidenOperationException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here");
     }
 
     @Override
@@ -209,7 +211,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         else if(this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
             return getChildrenRepoSearch(pageReq,internalObjectId,userSuperapp,false);
 
-        throw new ForbiddenInsteadException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here");
+        throw new ForbbidenOperationException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here");
     }
 
     @Override
@@ -225,7 +227,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         else if(this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
             return getParentRepoSearch(pageReq,internalObjectId,objectSuperapp,false);
 
-        throw new ForbiddenInsteadException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here");
+        throw new ForbbidenOperationException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here");
 
     }
     private List<SuperAppObjectBoundary> getParentRepoSearch(PageRequest pageReq, String internalObjectId, String objectSuperapp, boolean isSuperAppUser) {
@@ -258,7 +260,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         else if(this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
             return findAllObjectsRepoSearch(pageReq,false);
 
-        throw new ForbiddenInsteadException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here");
+        throw new ForbbidenOperationException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here");
     }
     private List<SuperAppObjectBoundary> findAllObjectsRepoSearch(PageRequest pageReq, boolean isSuperAppUser) {
         return this.objectRepository.findAll(pageReq)
@@ -277,7 +279,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         else if (isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
             return findAllObjectsByTypeRepoSearch(pageReq,type,false);
 
-        throw new ForbiddenInsteadException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here");
+        throw new ForbbidenOperationException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here");
     }
     private List<SuperAppObjectBoundary> findAllObjectsByTypeRepoSearch(PageRequest pageReq, String type, boolean isSuperAppUser){
         return this.objectRepository.findByType(type,pageReq)
@@ -298,7 +300,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         else if(this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
             return findByAliasRepoSearch(pageReq,alias,false);
 
-        throw new ForbiddenInsteadException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here");
+        throw new ForbbidenOperationException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here");
     }
     private List<SuperAppObjectBoundary> findByAliasRepoSearch(PageRequest pageReq, String alias, boolean isSuperAppUser){
         return this.objectRepository.findByAlias(alias,pageReq)
@@ -309,7 +311,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     }
     @Override
     @Transactional
-    public List<SuperAppObjectBoundary> SearchObjectsByExactAliasContainingText(String text, String userSuperapp, String email, int size, int page)
+    public List<SuperAppObjectBoundary> SearchObjectsByAliasContaining(String text, String userSuperapp, String email, int size, int page)
     {
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "objectId");
@@ -319,7 +321,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         else if(this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
             return findByAliasContainingRepoSearch(pageReq,text,false);
         else
-            throw new ForbiddenInsteadException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here");
+            throw new ForbbidenOperationException("Error: Only MINIAPP_USERS and SUPERAPP_USERS able to access here");
 
     }
     private List<SuperAppObjectBoundary> findByAliasContainingRepoSearch(PageRequest pageReq, String text, boolean isSuperAppUser){
@@ -338,7 +340,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         if(isValidUserCredentials(userId, ADMIN, this.userRepository))
             this.objectRepository.deleteAll();
         else
-            throw new ForbiddenInsteadException("Error: Only SUPERAPP_USERS able to access here");
+            throw new ForbbidenOperationException("Error: Only SUPERAPP_USERS able to access here");
 
     }
 }

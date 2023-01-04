@@ -141,12 +141,12 @@ public class SuperAppObjectsController {
             path="/superapp/objects/search/byAliasContaining/{text}",
             method = {RequestMethod.GET},
             produces = {MediaType.APPLICATION_JSON_VALUE})
-    public SuperAppObjectBoundary[] SearchObjectsByExactAliasContainingText(
+    public SuperAppObjectBoundary[] SearchObjectsByAliasContaining(
             @PathVariable String text,
             @RequestParam(name="userSuperapp", required = true, defaultValue = "") String userSuperapp,
             @RequestParam(name="userEmail", required = true, defaultValue = "") String email,
             @RequestParam(name = "size", required = false, defaultValue = DEFAULT_PAGE_SIZE) int size,
             @RequestParam(name="page", required = false, defaultValue = DEFAULT_PAGE) int page) {
-        return this.objService.SearchObjectsByExactAliasContainingText(text, userSuperapp, email, size, page).toArray(new SuperAppObjectBoundary[0]);
+        return this.objService.SearchObjectsByAliasContaining(text, userSuperapp, email, size, page).toArray(new SuperAppObjectBoundary[0]);
     }
 }

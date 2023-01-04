@@ -24,6 +24,7 @@ import java.util.stream.StreamSupport;
 
 import static superapp.data.UserRole.ADMIN;
 import static superapp.util.ControllersConstants.DEFAULT_SORTING_DIRECTION;
+import static superapp.util.ControllersConstants.DEPRECATED_EXCEPTION;
 
 @Service
 public class UserService extends AbstractService implements AdvancedUsersService {
@@ -119,7 +120,7 @@ public class UserService extends AbstractService implements AdvancedUsersService
     @Deprecated
     @Transactional(readOnly = true)
     public List<UserBoundary> getAllUsers() {
-        throw new InvalidInputException("Method is Dperecated");
+        throw new InvalidInputException(DEPRECATED_EXCEPTION);
     }
 
     @Override
@@ -140,7 +141,7 @@ public class UserService extends AbstractService implements AdvancedUsersService
     @Deprecated
     @Transactional
     public void deleteAllUsers() {
-        throw new InvalidInputException("Method is Dperecated");
+        throw new InvalidInputException(DEPRECATED_EXCEPTION);
     }
 
     @Override

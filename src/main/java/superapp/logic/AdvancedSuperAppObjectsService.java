@@ -31,7 +31,7 @@ public interface AdvancedSuperAppObjectsService extends SuperAppObjectsService {
     public SuperAppObjectBoundary getSpecificObject(String objectSuperapp, String internalObjectId,
                                                     String userSuperapp, String email);
 
-    public List<SuperAppObjectBoundary> SearchObjectsByExactAliasContainingText(String text, String userSuperapp,
+    public List<SuperAppObjectBoundary> SearchObjectsByAliasContaining(String text, String userSuperapp,
                                                                                 String email, int size, int page);
 
     public void deleteAllObjects(String userSuperapp, String email);
