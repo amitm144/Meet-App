@@ -25,8 +25,6 @@ public abstract  class AbstractService {
     public final boolean isValidUserCredentials(UserPK userId, UserRole role,
                                                 UserEntityRepository repository) {
         Optional<UserEntity> userE = repository.findById(userId);
-        if (!(userE.isPresent() && userE.get().getRole().equals(role)))
-            throw new ForbbidenOperationException("Error: Only users of type %s is allowed to use this method.".formatted(role));
-        return true;
+        return userE.isPresent() && userE.get().getRole().equals(role);
     }
 }

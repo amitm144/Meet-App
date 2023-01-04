@@ -23,8 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static superapp.data.UserRole.ADMIN;
-import static superapp.util.ControllersConstants.DEFAULT_SORTING_DIRECTION;
-import static superapp.util.ControllersConstants.DEPRECATED_EXCEPTION;
+import static superapp.util.Constants.*;
 
 @Service
 public class UserService extends AbstractService implements AdvancedUsersService {
@@ -121,7 +120,8 @@ public class UserService extends AbstractService implements AdvancedUsersService
     @Transactional(readOnly = true)
     public List<UserBoundary> getAllUsers(String userSuperapp, String email,int size,int page) {
         UserPK userId = new UserPK(userSuperapp, email);
-        this.isValidUserCredentials(userId, ADMIN, this.userEntityRepository);
+        if (!this.isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
+            throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
 
         Iterable<UserEntity> users = this.userEntityRepository
                 .findAll(PageRequest.of(page,size, DEFAULT_SORTING_DIRECTION,"superapp","email"));
@@ -142,7 +142,8 @@ public class UserService extends AbstractService implements AdvancedUsersService
     @Transactional
     public void deleteAllUsers(String userSuperapp, String email) {
         UserPK userId = new UserPK(userSuperapp, email);
-        this.isValidUserCredentials(userId, ADMIN, this.userEntityRepository);
+        if (!this.isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
+            throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
 
         this.userEntityRepository.deleteAll();
     }
