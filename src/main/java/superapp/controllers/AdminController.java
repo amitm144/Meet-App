@@ -1,6 +1,5 @@
 package superapp.controllers;
 
-import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.boundaries.user.UserBoundary;
 import superapp.boundaries.command.MiniAppCommandBoundary;
 import superapp.logic.concreteServices.MiniAppCommandService;
@@ -91,8 +90,8 @@ public class AdminController {
     @RequestMapping(
             path= {"/superapp/admin/miniapp"},
             method = {RequestMethod.DELETE})
-    public void deleteMiniApp(@RequestParam(name = "userSuperapp", required = true,defaultValue = "") String userSuperapp,
-                              @RequestParam(name = "userEmail", required = true,defaultValue = "") String email)
+    public void deleteMiniApp(@RequestParam(name = "userSuperapp", required = true, defaultValue = "") String userSuperapp,
+                              @RequestParam(name = "userEmail", required = true, defaultValue = "") String email)
                             { this.miniappService.deleteAllCommands(userSuperapp,email); }
 
     @RequestMapping(
@@ -100,8 +99,8 @@ public class AdminController {
             method ={RequestMethod.POST},
             produces = {MediaType.APPLICATION_JSON_VALUE})
     public Object testMiniAppCommandBoundary(
-            @RequestParam(name = "userSuperapp", required = true,defaultValue = "") String userSuperapp,
-            @RequestParam(name = "userEmail", required = true,defaultValue = "") String userEmail,
+            @RequestParam(name = "userSuperapp", required = true, defaultValue = "") String userSuperapp,
+            @RequestParam(name = "userEmail", required = true, defaultValue = "") String userEmail,
             @RequestBody MiniAppCommandBoundary miniAppCommandBoundary) {
         String commandId = miniAppCommandBoundary.getCommand();
         return switch (commandId) {

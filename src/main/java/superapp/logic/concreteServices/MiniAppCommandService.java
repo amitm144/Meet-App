@@ -17,8 +17,6 @@ import superapp.dal.UserEntityRepository;
 import superapp.data.*;
 import superapp.data.IdGeneratorEntity;
 import superapp.data.UserPK;
-import superapp.dal.SuperAppObjectEntityRepository;
-import superapp.data.*;
 import superapp.logic.AbstractService;
 import superapp.logic.AdvancedMiniAppCommandsService;
 import superapp.util.exceptions.ForbbidenOperationException;
@@ -193,7 +191,8 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
                                                                 MiniAppCommandBoundary objectTimeTravel) {
         // Validate Admin user:
         UserPK userId = new UserPK(userSuperapp, userEmail);
-        this.isValidUserCredentials(userId, ADMIN, this.userRepository);
+        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
+            throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
         // Validate correct command:
         if(!objectTimeTravel.getCommand().equals("objectTimeTravel")){
             throw new RuntimeException("Can't create Object Timestamp");
@@ -223,7 +222,8 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
                                                       MiniAppCommandBoundary miniappCommandBoundary) {
         // Validate Admin user:
         UserPK userId = new UserPK(userSuperapp, userEmail);
-        this.isValidUserCredentials(userId, ADMIN, this.userRepository);
+        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
+            throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
         // Validate correct command:
         if(!miniappCommandBoundary.getCommand().equals("echo")){
             throw new RuntimeException("Can't store Mini-App Command");
@@ -253,7 +253,6 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
         if (miniappCommandBoundary.getCommand() == null || miniappCommandBoundary.getCommand().isEmpty())
             throw new InvalidInputException("Command attribute cannot be missing or empty");
 
-        // issue internalCommandId, tie with superapp and set invocation timestamp
         IdGeneratorEntity helper = this.idGenerator.save(new IdGeneratorEntity());
         String commandId = helper.getId().toString();
         this.idGenerator.delete(helper);
