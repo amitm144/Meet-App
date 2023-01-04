@@ -8,25 +8,25 @@ import superapp.data.UserEntity;
 import superapp.data.UserPK;
 import superapp.data.UserRole;
 import superapp.logic.AbstractService;
-import superapp.util.exceptions.AlreadyExistsException;
-import superapp.util.exceptions.CannotProcessException;
-import superapp.util.exceptions.InvalidInputException;
-import superapp.util.exceptions.NotFoundException;
+import superapp.logic.AdvancedUsersService;
+import superapp.util.exceptions.*;
 import superapp.util.EmailChecker;
 import superapp.boundaries.user.UserBoundary;
-import superapp.logic.UsersService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-@Service
-public class UserService extends AbstractService implements UsersService {
+import static superapp.data.UserRole.ADMIN;
+import static superapp.util.Constants.*;
 
+@Service
+public class UserService extends AbstractService implements AdvancedUsersService {
     private UserEntityRepository userEntityRepository;
     private UserConverter converter;
 
@@ -55,12 +55,6 @@ public class UserService extends AbstractService implements UsersService {
 
         this.userEntityRepository.save(this.converter.toEntity(user));
         return user;
-    }
-
-    @Override
-    public UserBoundary createUser(NewUserBoundary newUser) {
-        return createUser(new UserBoundary(newUser.getEmail(), newUser.getRole(),
-                newUser.getUsername(), newUser.getAvatar()));
     }
 
     @Override
@@ -100,13 +94,11 @@ public class UserService extends AbstractService implements UsersService {
             else
                 user.setUsername(newUserName);
 
-
         if (newAvatar != null)
             if (newAvatar.isBlank())
                 throw new InvalidInputException("Invalid user avatar");
             else
                 user.setAvatar(newAvatar);
-
 
         if (newRole != null) {
             try {
@@ -118,9 +110,21 @@ public class UserService extends AbstractService implements UsersService {
     }
 
     @Override
+    @Deprecated
     @Transactional(readOnly = true)
     public List<UserBoundary> getAllUsers() {
-        Iterable<UserEntity> users = this.userEntityRepository.findAll();
+        throw new InvalidInputException(DEPRECATED_EXCEPTION);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserBoundary> getAllUsers(String userSuperapp, String email,int size,int page) {
+        UserPK userId = new UserPK(userSuperapp, email);
+        if (!this.isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
+            throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
+
+        Iterable<UserEntity> users = this.userEntityRepository
+                .findAll(PageRequest.of(page,size, DEFAULT_SORTING_DIRECTION,"superapp","email"));
         return StreamSupport
                 .stream(users.spliterator() , false)
                 .map(this.converter::toBoundary)
@@ -128,6 +132,19 @@ public class UserService extends AbstractService implements UsersService {
     }
 
     @Override
+    @Deprecated
     @Transactional
-    public void deleteAllUsers() { this.userEntityRepository.deleteAll(); }
+    public void deleteAllUsers() {
+        throw new InvalidInputException(DEPRECATED_EXCEPTION);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAllUsers(String userSuperapp, String email) {
+        UserPK userId = new UserPK(userSuperapp, email);
+        if (!this.isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
+            throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
+
+        this.userEntityRepository.deleteAll();
+    }
 }

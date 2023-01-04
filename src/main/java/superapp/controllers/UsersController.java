@@ -3,6 +3,7 @@ package superapp.controllers;
 import superapp.boundaries.user.NewUserBoundary;
 import superapp.boundaries.user.UserBoundary;
 import superapp.logic.UsersService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +32,8 @@ public class UsersController {
             produces = {MediaType.APPLICATION_JSON_VALUE},
             consumes = {MediaType.APPLICATION_JSON_VALUE})
     public UserBoundary createUser (@RequestBody NewUserBoundary newUser) {
-        return this.usersService.createUser(newUser);
+        return this.usersService.createUser(new UserBoundary(newUser.getEmail(), newUser.getRole(),
+                newUser.getUsername(), newUser.getAvatar()));
     }
 
     @RequestMapping(

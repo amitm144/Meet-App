@@ -106,7 +106,6 @@ public class SuperAppObjectEntity {
         this.userSuperapp = createdBy.getSuperapp();
     }
 
-    @Lob
     public String getObjectDetails() {
         return objectDetails;
     }

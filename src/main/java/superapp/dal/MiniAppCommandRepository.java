@@ -1,12 +1,14 @@
 package superapp.dal;
 
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import superapp.data.MiniAppCommandEntity;
 
+import java.util.List;
+
 @Repository
-public interface MiniAppCommandRepository extends CrudRepository<MiniAppCommandEntity, String> {
-    @Query(value ="SELECT * FROM MINI_APP_COMMAND WHERE MINIAPP = ?1", nativeQuery=true)
-    Iterable<MiniAppCommandEntity> findAllByMiniapp(String miniapp);
+public interface MiniAppCommandRepository extends PagingAndSortingRepository<MiniAppCommandEntity, String> {
+    List<MiniAppCommandEntity> findAllByMiniapp(@Param("miniapp") String miniapp, Pageable page);
 }
