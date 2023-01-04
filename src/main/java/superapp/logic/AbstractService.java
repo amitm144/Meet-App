@@ -25,8 +25,6 @@ public abstract  class AbstractService {
     public final boolean isValidUserCredentials(UserPK userId, UserRole role,
                                                 UserEntityRepository repository) {
         Optional<UserEntity> userE = repository.findById(userId);
-        if (!(userE.isPresent() && userE.get().getRole().equals(role)))
-            return false;
-        return true;
+        return userE.isPresent() && userE.get().getRole().equals(role);
     }
 }

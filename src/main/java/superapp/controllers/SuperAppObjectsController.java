@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import static superapp.util.ControllersConstants.DEFAULT_PAGE;
-import static superapp.util.ControllersConstants.DEFAULT_PAGE_SIZE;
+import static superapp.util.Constants.DEFAULT_PAGE;
+import static superapp.util.Constants.DEFAULT_PAGE_SIZE;
 
 @RestController
 public class SuperAppObjectsController {

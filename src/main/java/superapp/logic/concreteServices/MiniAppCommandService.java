@@ -15,7 +15,6 @@ import superapp.data.*;
 import superapp.data.IdGeneratorEntity;
 import superapp.data.UserPK;
 import superapp.logic.AbstractService;
-import superapp.util.exceptions.CannotProcessException;
 import superapp.logic.AdvancedMiniAppCommandsService;
 import superapp.util.exceptions.ForbbidenOperationException;
 import superapp.util.exceptions.InvalidInputException;
@@ -28,22 +27,22 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static superapp.data.UserRole.ADMIN;
-import static superapp.util.ControllersConstants.DEFAULT_SORTING_DIRECTION;
-import static superapp.util.ControllersConstants.DEPRECATED_EXCEPTION;
+import static superapp.util.Constants.*;
 
 @Service
 public class MiniAppCommandService extends AbstractService implements AdvancedMiniAppCommandsService {
     private MiniappCommandConverter miniAppConverter;
     private MiniAppCommandRepository miniappRepository;
-    private UserEntityRepository userRepository;
     private IdGeneratorRepository idGenerator;
     private SuperAppObjectEntityRepository objectRepository;
     private UserEntityRepository userEntityRepository;
+    
     @Autowired
     public MiniAppCommandService(MiniappCommandConverter miniAppConverter,
                                  MiniAppCommandRepository miniappRepository,
                                  IdGeneratorRepository idGenerator,
-                                 UserEntityRepository userRepository,SuperAppObjectEntityRepository objectRepository) {
+                                 UserEntityRepository userRepository,
+                                 SuperAppObjectEntityRepository objectRepository) {
         this.miniAppConverter = miniAppConverter;
         this.miniappRepository = miniappRepository;
         this.idGenerator = idGenerator;
@@ -54,7 +53,9 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     @Override
     @Transactional
     public Object invokeCommand(MiniAppCommandBoundary command) {
-        checkInvokedCommand(command);
+        checkInvokedCommand(command); // will throw an exception if invalid command
+
+        // issue internalCommandId, tie with superapp and set invocation timestamp
         IdGeneratorEntity helper = this.idGenerator.save(new IdGeneratorEntity());
         String commandId = helper.getId().toString();
         this.idGenerator.delete(helper);
@@ -70,6 +71,66 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
         */
         return command;
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    @Deprecated
+    public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniappName) {
+        throw new NotFoundException(DEPRECATED_EXCEPTION);
+    }
+
+    @Override
+    @Deprecated
+    @Transactional(readOnly = true)
+    public List<MiniAppCommandBoundary> getAllCommands() {
+        throw new NotFoundException(DEPRECATED_EXCEPTION);
+    }
+
+    @Override
+    @Deprecated
+    @Transactional
+    public void deleteAllCommands() {
+        throw new NotFoundException(DEPRECATED_EXCEPTION);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MiniAppCommandBoundary> getAllCommands(String userSuperapp, String email,int size,int page) {
+        UserPK userId = new UserPK(userSuperapp, email);
+        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
+            throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
+
+        return this.miniappRepository
+                .findAll(PageRequest.of(page,size, DEFAULT_SORTING_DIRECTION,"miniapp", "internalCommandId"))
+                .stream()
+                .map(this.miniAppConverter::toBoundary)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniappName ,String userSuperapp, String email,int size,int page) {
+        UserPK userId = new UserPK(userSuperapp, email);
+        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
+            throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
+
+        return this.miniappRepository.findAllByMiniapp(miniappName,
+                        PageRequest.of(page,size, DEFAULT_SORTING_DIRECTION,"miniapp","internalCommandId"))
+                .stream()
+                .map(this.miniAppConverter::toBoundary)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void deleteAllCommands(String userSuperapp, String email)
+    {
+        UserPK userId = new UserPK(userSuperapp, email);
+        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
+            throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
+        this.miniappRepository.deleteAll();
+    }
+
     private void checkInvokedCommand(MiniAppCommandBoundary command){
         UserIdWrapper invokedBy = command.getInvokedBy();
         if (invokedBy == null ||
@@ -97,70 +158,18 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
 
         // issue internalCommandId, tie with superapp and set invocation timestamp
         Optional<SuperAppObjectEntity> objectE =
-                this.objectRepository.findById(new SuperappObjectPK(targetObject.getObjectId().getSuperapp(), targetObject.getObjectId().getInternalObjectId()));
+                this.objectRepository.findById(new SuperappObjectPK(
+                        targetObject.getObjectId().getSuperapp(),
+                        targetObject.getObjectId().getInternalObjectId()));
+
         if(objectE.isEmpty())
             throw new NotFoundException("Object Not Found");
 
-        if(!isValidUserCredentials(new UserPK(invokedBy.getUserId().getSuperapp(),invokedBy.getUserId().getEmail()),
+        if(!isValidUserCredentials(new UserPK(invokedBy.getUserId().getSuperapp(), invokedBy.getUserId().getEmail()),
                 UserRole.MINIAPP_USER,this.userEntityRepository))
-            throw new ForbbidenOperationException("Only a MINIAPP_USER able to preform a command");
+            throw new ForbbidenOperationException(MINIAPP_USER_ONLY_EXCEPTION);
 
-        if(objectE.get().getActive() ==false)
-            throw new CannotProcessException("Cannot preform a command on an inactive object");
-    }
-    @Override
-    @Transactional(readOnly = true)
-    @Deprecated
-    public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniappName) {
-        throw new NotFoundException(DEPRECATED_EXCEPTION);
-    }
-
-    @Override
-    @Deprecated
-    @Transactional(readOnly = true)
-    public List<MiniAppCommandBoundary> getAllCommands() {
-        throw new NotFoundException(DEPRECATED_EXCEPTION);
-    }
-
-    @Override
-    @Deprecated
-    @Transactional
-    public void deleteAllCommands() {
-        throw new NotFoundException(DEPRECATED_EXCEPTION);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<MiniAppCommandBoundary> getAllCommands(String userSuperapp, String email,int size,int page) {
-        UserPK userId = new UserPK(userSuperapp, email);
-        this.isValidUserCredentials(userId, ADMIN, this.userRepository);
-
-        return this.miniappRepository
-                .findAll(PageRequest.of(page,size, DEFAULT_SORTING_DIRECTION,"miniapp","internalCommandId"))
-                .stream()
-                .map(this.miniAppConverter::toBoundary)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniappName ,String userSuperapp, String email,int size,int page) {
-        UserPK userId = new UserPK(userSuperapp, email);
-        this.isValidUserCredentials(userId, ADMIN, this.userRepository);
-
-        return this.miniappRepository.findAllByMiniapp(miniappName,
-                        PageRequest.of(page,size, DEFAULT_SORTING_DIRECTION,"miniapp","internalCommandId"))
-                .stream()
-                .map(this.miniAppConverter::toBoundary)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional
-    public void deleteAllCommands(String userSuperapp, String email)
-    {
-        UserPK userId = new UserPK(userSuperapp, email);
-        this.isValidUserCredentials(userId, ADMIN, this.userRepository);
-        this.miniappRepository.deleteAll();
+        if(!objectE.get().getActive())
+            throw new ForbbidenOperationException("Cannot preform actions on an inactive object");
     }
 }
