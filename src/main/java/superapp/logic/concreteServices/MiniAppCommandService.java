@@ -259,6 +259,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
         miniAppCommandIdBoundary.setSuperapp(this.superappName);
         miniappCommandBoundary.setCommandId(miniAppCommandIdBoundary);
         miniappCommandBoundary.setInvocationTimestamp(new Date());
+        this.miniappRepository.save(this.miniAppConverter.toEntity(miniappCommandBoundary));
         return miniappCommandBoundary;
     }
 }
