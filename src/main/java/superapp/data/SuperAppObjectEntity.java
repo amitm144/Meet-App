@@ -21,6 +21,7 @@ public class SuperAppObjectEntity {
     private Date creationTimestamp;
     private String userEmail;
     private String userSuperapp;
+    @Lob
     private String objectDetails;
     @ManyToMany
     @JoinTable(name="objects_relations")
@@ -105,7 +106,6 @@ public class SuperAppObjectEntity {
         this.userSuperapp = createdBy.getSuperapp();
     }
 
-    @Lob
     public String getObjectDetails() {
         return objectDetails;
     }
