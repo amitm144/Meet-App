@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.data.SuperAppObjectEntity;
-import superapp.logic.ServicesFactory;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
 

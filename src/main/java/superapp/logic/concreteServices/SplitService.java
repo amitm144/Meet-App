@@ -9,7 +9,6 @@ import superapp.converters.SuperAppObjectConverter;
 import superapp.dal.SuperAppObjectEntityRepository;
 import superapp.dal.UserEntityRepository;
 import superapp.data.SuperAppObjectEntity;
-import superapp.logic.ServicesFactory;
 import superapp.logic.SplitsService;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.exceptions.NotFoundException;
