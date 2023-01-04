@@ -41,7 +41,6 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     private IdGeneratorRepository idGenerator;
     private SuperAppObjectEntityRepository objectRepository;
     private UserEntityRepository userEntityRepository;
-
     private SuperAppObjectEntityRepository superAppObjectEntityRepository;
 
     @Autowired
