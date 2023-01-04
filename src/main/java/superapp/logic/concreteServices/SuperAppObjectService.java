@@ -27,29 +27,34 @@ import static superapp.util.Constants.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static superapp.data.ObjectTypes.isValidObjectType;
+
 @Service
 public class SuperAppObjectService extends AbstractService implements AdvancedSuperAppObjectsService {
     private SuperAppObjectEntityRepository objectRepository;
     private UserEntityRepository userRepository;
     private IdGeneratorRepository idGenerator;
+    private ServiceHandler serviceHandler;
     private SuperAppObjectConverter converter;
 
     @Autowired
     public SuperAppObjectService(SuperAppObjectConverter converter,
+                                 UserEntityRepository userRepository,
                                  SuperAppObjectEntityRepository objectRepository,
                                  IdGeneratorRepository idGenerator,
-                                 UserEntityRepository userRepository) {
+                                 ServiceHandler serviceHandler) {
         this.converter = converter;
         this.objectRepository = objectRepository;
         this.idGenerator = idGenerator;
         this.userRepository = userRepository;
+        this.serviceHandler = serviceHandler;
     }
 
     @Override
     @Transactional
     public SuperAppObjectBoundary createObject(SuperAppObjectBoundary object) {
         String alias = object.getAlias();
-        String type = object.getType(); // TODO: check type corresponds to future object types
+        String type = object.getType();
         if (alias == null || type == null || alias.isBlank() || type.isBlank())
             throw new InvalidInputException("Object alias and/or type must be specified");
 
@@ -77,7 +82,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         object.setObjectId(new SuperAppObjectIdBoundary(this.superappName, objectId));
         object.setActive(active);
         object.setCreationTimestamp(new Date());
-
+        // handleObjectByType will handle any unknown object type by 400 - Bad request.
+        serviceHandler.handleObjectByType(object);
         this.objectRepository.save(converter.toEntity(object));
         return object;
     }
@@ -90,32 +96,33 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                                                SuperAppObjectBoundary update) {
         throw new ForbbidenOperationException(DEPRECATED_EXCEPTION);
     }
+
     @Override
     @Deprecated
     @Transactional
     public void bindNewChild(String parentSuperapp, String parentObjectId, SuperAppObjectIdBoundary newChild) {
-        throw new NotFoundException(DEPRECATED_EXCEPTION);
+        throw new ForbbidenOperationException(DEPRECATED_EXCEPTION);
     }
 
     @Override
     @Deprecated
     @Transactional(readOnly = true)
     public SuperAppObjectBoundary getSpecificObject(String objectSuperapp, String internalObjectId) {
-        throw new NotFoundException(DEPRECATED_EXCEPTION);
+        throw new ForbbidenOperationException(DEPRECATED_EXCEPTION);
     }
 
     @Override
     @Deprecated
     @Transactional(readOnly = true)
     public List<SuperAppObjectBoundary> getAllObjects() {
-        throw new NotFoundException(DEPRECATED_EXCEPTION);
+        throw new ForbbidenOperationException(DEPRECATED_EXCEPTION);
     }
 
     @Override
     @Deprecated
     @Transactional
     public void deleteAllObjects() {
-        throw new NotFoundException(DEPRECATED_EXCEPTION);
+        throw new ForbbidenOperationException(DEPRECATED_EXCEPTION);
     }
 
 
@@ -135,7 +142,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         SuperAppObjectEntity objectE = objectO.get();
         Map<String, Object> newDetails = update.getObjectDetails();
         Boolean newActive = update.getActive();
-        String newType = update.getType(); // TODO: check type corresponds to future object types
+        String newType = update.getType();
         String newAlias = update.getAlias();
 
         if (newDetails != null)
@@ -146,6 +153,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         if (newType != null) {
             if (newType.isBlank())
                 throw new InvalidInputException("Object alias and/or type must be specified");
+            else if (!isValidObjectType(newType))
+                throw new InvalidInputException("Unknown object type");
             else
                 objectE.setType(newType);
         }
@@ -156,9 +165,14 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
             else
                 objectE.setAlias(newAlias);
         }
-
-        objectE = this.objectRepository.save(objectE);
-        return this.converter.toBoundary(objectE);
+        SuperAppObjectBoundary result = this.converter.toBoundary(objectE);
+        /*
+            handleObjectByType will handle any unknown object type by 400 - Bad request.
+            if object details after update doesn't fit into miniapp restrictions, an exception will be thrown as well
+        */
+        serviceHandler.handleObjectByType(result);
+        this.objectRepository.save(objectE);
+        return result;
     }
 
     @Override
@@ -224,8 +238,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
 
     @Override
     @Transactional(readOnly = true)
-    public List<SuperAppObjectBoundary> getParents(String objectSuperapp, String internalObjectId,String userSuperapp,
-                                                   String email, int size, int page) {
+    public List<SuperAppObjectBoundary> getParents(String objectSuperapp, String internalObjectId,
+                                                   String userSuperapp, String email, int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
@@ -241,7 +255,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
 
     @Override
     @Transactional(readOnly = true)
-    public List<SuperAppObjectBoundary> getAllObjects(String userSuperapp, String email, int size, int page) {
+    public List<SuperAppObjectBoundary> getAllObjects(String userSuperapp, String email,
+                                                      int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "userEmail");
 
@@ -255,7 +270,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     }
 
     @Override
-    public List<SuperAppObjectBoundary> SearchObjectsByType(String type, String userSuperapp, String email, int size, int page) {
+    public List<SuperAppObjectBoundary> SearchObjectsByType(String type, String userSuperapp,
+                                                            String email, int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
@@ -270,7 +286,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
 
     @Override
     @Transactional
-    public List<SuperAppObjectBoundary> SearchObjectsByExactAlias(String alias, String userSuperapp, String email, int size, int page) {
+    public List<SuperAppObjectBoundary> SearchObjectsByExactAlias(String alias, String userSuperapp,
+                                                                  String email, int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
@@ -285,8 +302,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
 
     @Override
     @Transactional
-    public List<SuperAppObjectBoundary> SearchObjectsByAliasContaining(String text, String userSuperapp, String email, int size, int page)
-    {
+    public List<SuperAppObjectBoundary> SearchObjectsByAliasContaining(String text, String userSuperapp,
+                                                                       String email, int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
@@ -326,7 +343,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .collect(Collectors.toList());
     }
 
-    private List<SuperAppObjectBoundary> findByAliasContainingRepoSearch(PageRequest pageReq, String text, boolean isSuperAppUser){
+    private List<SuperAppObjectBoundary> findByAliasContainingRepoSearch(PageRequest pageReq, String text,
+                                                                         boolean isSuperAppUser){
         return this.objectRepository
                 .findByAliasContaining(text, pageReq)
                 .stream()
@@ -335,7 +353,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .collect(Collectors.toList());
     }
 
-    private List<SuperAppObjectBoundary> getParentRepoSearch(PageRequest pageReq, String internalObjectId, String objectSuperapp, boolean isSuperAppUser) {
+    private List<SuperAppObjectBoundary> getParentRepoSearch(PageRequest pageReq, String internalObjectId,
+                                                             String objectSuperapp, boolean isSuperAppUser) {
         List<SuperAppObjectEntity> objectList =
                 this.objectRepository
                 .findAll(pageReq)
@@ -354,7 +373,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .collect(Collectors.toList());
     }
 
-    private List<SuperAppObjectBoundary> getChildrenRepoSearch(PageRequest pageReq, String internalObjectId, String objectSuperapp, boolean isSuperAppUser) {
+    private List<SuperAppObjectBoundary> getChildrenRepoSearch(PageRequest pageReq, String internalObjectId,
+                                                               String objectSuperapp, boolean isSuperAppUser) {
         List<SuperAppObjectEntity> objectList =
                 this.objectRepository
                 .findAll(pageReq)
@@ -373,7 +393,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .collect(Collectors.toList());
     }
 
-    private List<SuperAppObjectBoundary> findAllObjectsByTypeRepoSearch(PageRequest pageReq, String type, boolean isSuperAppUser){
+    private List<SuperAppObjectBoundary> findAllObjectsByTypeRepoSearch(PageRequest pageReq, String type,
+                                                                        boolean isSuperAppUser) {
         return this.objectRepository.findByType(type, pageReq)
                 .stream()
                 .map(this.converter::toBoundary)

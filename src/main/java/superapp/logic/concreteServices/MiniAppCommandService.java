@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import superapp.boundaries.command.MiniAppCommandBoundary;
+import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.MiniappCommandConverter;
 import superapp.dal.IdGeneratorRepository;
 import superapp.dal.MiniAppCommandRepository;
@@ -36,11 +37,12 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     private IdGeneratorRepository idGenerator;
     private SuperAppObjectEntityRepository objectRepository;
     private UserEntityRepository userEntityRepository;
-    
+    private ServiceHandler serviceHandler;
+
     @Autowired
     public MiniAppCommandService(MiniappCommandConverter miniAppConverter,
                                  MiniAppCommandRepository miniappRepository,
-                                 IdGeneratorRepository idGenerator,
+                                 IdGeneratorRepository idGenerator, ServiceHandler service,
                                  UserEntityRepository userRepository,
                                  SuperAppObjectEntityRepository objectRepository) {
         this.miniAppConverter = miniAppConverter;
@@ -48,6 +50,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
         this.idGenerator = idGenerator;
         this.userEntityRepository = userRepository;
         this.objectRepository =objectRepository;
+        this.serviceHandler = service;
     }
 
     @Override
@@ -62,14 +65,14 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
         command.getCommandId().setInternalCommandId(commandId);
         command.setInvocationTimestamp(new Date());
         command.getCommandId().setSuperapp(this.superappName);
+
         this.miniappRepository.save(this.miniAppConverter.toEntity(command));
-        /*
-            TODO:
-             add check for known miniapp
-             if known - point to miniapp service
-             otherwise throw error (command is already been saved)
-        */
-        return command;
+
+        SuperAppObjectIdWrapper targetObject = command.getTargetObject();
+        UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
+        // run command will handle any unknown miniapp by 400 - Bad request.
+        return this.serviceHandler.runCommand(command.getCommandId().getMiniapp(), targetObject,
+                invokedBy, command.getCommand());
     }
 
     @Override

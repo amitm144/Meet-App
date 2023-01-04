@@ -7,7 +7,6 @@ import superapp.dal.UserEntityRepository;
 import superapp.data.UserEntity;
 import superapp.data.UserPK;
 import superapp.data.UserRole;
-import superapp.util.exceptions.ForbbidenOperationException;
 
 import java.util.Optional;
 
@@ -27,4 +26,5 @@ public abstract  class AbstractService {
         Optional<UserEntity> userE = repository.findById(userId);
         return userE.isPresent() && userE.get().getRole().equals(role);
     }
+
 }
