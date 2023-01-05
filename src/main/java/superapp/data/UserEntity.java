@@ -1,9 +1,14 @@
 package superapp.data;
 
+import javax.persistence.*;
 
+@Entity
+@Table(name="Users")
+@IdClass(UserPK.class)
 public class UserEntity {
-
+    @Id
     private String superapp;
+    @Id
     private String email;
     private String username;
     private UserRole role;
