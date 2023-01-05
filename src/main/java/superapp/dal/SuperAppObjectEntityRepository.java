@@ -14,4 +14,5 @@ public interface SuperAppObjectEntityRepository extends PagingAndSortingReposito
     public Page<SuperAppObjectEntity> findByType(@Param("type") String type, PageRequest page);
     public Page<SuperAppObjectEntity> findByAlias(@Param("alias") String alias, PageRequest page);
     public Page<SuperAppObjectEntity> findByAliasContaining(@Param("text") String text, PageRequest page);
+    public Page<SuperAppObjectEntity> findAllByCreationTimestamp(@Param("creationEnum") String creationEnum, PageRequest page);
 }

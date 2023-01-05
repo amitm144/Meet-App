@@ -380,4 +380,23 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .filter(object -> object.getActive()|| isSuperAppUser)// if MiniappUser get only active
                 .collect(Collectors.toList());
     }
+
+    public List<SuperAppObjectBoundary> getObjectsByCreationTimestamp(String creationEnum, String userSuperapp,
+                                                                         String email, int size, int page) {
+        UserPK userId = new UserPK(userSuperapp, email);
+        if (isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
+        {
+
+            return this.objectRepository
+                    .findAllByCreationTimestamp(
+                            creationEnum,
+                            PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "currentTimestamp", "objectId"))
+                    .stream()
+                    .map(this.converter::toBoundary)
+                    .toList();
+        }
+
+
+            return null;
+    }
 }

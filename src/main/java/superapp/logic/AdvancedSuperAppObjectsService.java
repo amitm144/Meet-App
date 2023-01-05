@@ -33,6 +33,8 @@ public interface AdvancedSuperAppObjectsService extends SuperAppObjectsService {
 
     public List<SuperAppObjectBoundary> SearchObjectsByAliasContaining(String text, String userSuperapp,
                                                                                 String email, int size, int page);
+    public List<SuperAppObjectBoundary> getObjectsByCreationTimestamp(String creationEnum, String userSuperapp,
+                                                                         String email, int size, int page);
 
     public void deleteAllObjects(String userSuperapp, String email);
     }
