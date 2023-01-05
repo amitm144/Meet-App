@@ -31,4 +31,22 @@ public class MiniAppObjectsController {
         command.setCommandId(cId); // user command is being sent without commandId
         return this.miniAppCommandService.invokeCommand(command);
     }
+
+    @RequestMapping(
+            path={"/superapp/miniapp/TEST"},
+            method ={RequestMethod.POST},
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public Object testMiniAppCommandBoundary(
+            @RequestParam(name = "userSuperapp", required = true, defaultValue = "") String userSuperapp,
+            @RequestParam(name = "userEmail", required = true, defaultValue = "") String userEmail,
+            @RequestBody MiniAppCommandBoundary miniAppCommandBoundary) {
+        String commandId = miniAppCommandBoundary.getCommand();
+        return switch (commandId) {
+            case "objectTimeTravel" ->
+                    this.miniAppCommandService.updateObjectCreationTimestamp(userSuperapp, userEmail, miniAppCommandBoundary);
+            case "echo" ->
+                    this.miniAppCommandService.storeMiniAppCommand(userSuperapp, userEmail, miniAppCommandBoundary);
+            default -> null;
+        };
+    }
 }

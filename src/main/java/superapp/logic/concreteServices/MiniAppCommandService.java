@@ -41,7 +41,6 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     private IdGeneratorRepository idGenerator;
     private SuperAppObjectEntityRepository objectRepository;
     private UserEntityRepository userEntityRepository;
-    private SuperAppObjectEntityRepository superAppObjectEntityRepository;
 
     @Autowired
     public MiniAppCommandService(MiniappCommandConverter miniAppConverter,
@@ -49,12 +48,10 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
                                  MiniAppCommandRepository miniappRepository,
                                  IdGeneratorRepository idGenerator,
                                  UserEntityRepository userRepository,
-                                 SuperAppObjectEntityRepository superAppObjectEntityRepository,
                                  SuperAppObjectEntityRepository objectRepository) {
         this.miniAppConverter = miniAppConverter;
         this.superAppObjectConverter = superAppObjectConverter;
         this.miniappRepository = miniappRepository;
-        this.superAppObjectEntityRepository = superAppObjectEntityRepository;
         this.idGenerator = idGenerator;
         this.userEntityRepository = userRepository;
         this.objectRepository =objectRepository;
@@ -141,6 +138,70 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
         this.miniappRepository.deleteAll();
     }
 
+    @Override
+    @Transactional
+    public SuperAppObjectBoundary updateObjectCreationTimestamp(String userSuperapp,
+                                                                String userEmail,
+                                                                MiniAppCommandBoundary objectTimeTravel) {
+        // Validate Admin user:
+        UserPK userId = new UserPK(userSuperapp, userEmail);
+        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
+            throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
+        // Validate correct command:
+        if(!objectTimeTravel.getCommand().equals("objectTimeTravel")) {
+            throw new InvalidInputException("Missing new CreationTimestamp");
+        }
+        // Find object in db and update:
+        String internalObjectId = objectTimeTravel.getTargetObject().getObjectId().getInternalObjectId();
+        Optional<SuperAppObjectEntity> objectE = this.objectRepository.findById(
+                new SuperappObjectPK(userSuperapp,internalObjectId));
+        if (objectE.isEmpty())
+            throw new NotFoundException("Unknown object");
+
+        SuperAppObjectBoundary updatedObjectTimeTravel = this.superAppObjectConverter.toBoundary(objectE.get());
+        if(!updatedObjectTimeTravel.getActive())
+            throw new ForbbidenOperationException("Cannot execute time travel on inactive object");
+
+        try {
+            String d = objectTimeTravel.getCommandAttributes().get("creationTimestamp").toString();
+            SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
+            updatedObjectTimeTravel.setCreationTimestamp(ft.parse(d));
+        } catch (Exception e) {
+            throw new InvalidInputException("Can't update creation timestamp - invalid Date");
+        }
+        this.objectRepository.save(this.superAppObjectConverter.toEntity(updatedObjectTimeTravel));
+        return updatedObjectTimeTravel;
+    }
+
+    @Override
+    @Transactional
+    public MiniAppCommandBoundary storeMiniAppCommand(String userSuperapp,
+                                                      String userEmail,
+                                                      MiniAppCommandBoundary miniappCommandBoundary) {
+        // Validate requesting user is admin
+        UserPK userId = new UserPK(userSuperapp, userEmail);
+        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
+            throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
+        // Validate correct command:
+        if (!miniappCommandBoundary.getCommand().equals("echo"))
+            throw new RuntimeException("Can't store MiniAppCommand");
+
+        // Validate invoking user is admin and valid command boundary:
+        checkInvokedCommand(miniappCommandBoundary, ADMIN);
+        // store as new command
+        IdGeneratorEntity helper = this.idGenerator.save(new IdGeneratorEntity());
+        String commandId = helper.getId().toString();
+        this.idGenerator.delete(helper);
+
+        MiniAppCommandIdBoundary miniAppCommandIdBoundary = new MiniAppCommandIdBoundary("TEST", commandId);
+        miniAppCommandIdBoundary.setSuperapp(this.superappName);
+        miniappCommandBoundary.setCommandId(miniAppCommandIdBoundary);
+        miniappCommandBoundary.setInvocationTimestamp(new Date());
+        this.miniappRepository.save(this.miniAppConverter.toEntity(miniappCommandBoundary));
+
+        return miniappCommandBoundary;
+    }
+
     private void checkInvokedCommand(MiniAppCommandBoundary command,UserRole userRole){
         UserIdWrapper invokedBy = command.getInvokedBy();
         if (invokedBy == null ||
@@ -177,65 +238,9 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
 
         if(!isValidUserCredentials(new UserPK(invokedBy.getUserId().getSuperapp(), invokedBy.getUserId().getEmail()),
                 userRole,this.userEntityRepository))
-            throw new ForbbidenOperationException("Operation allowed for {%s} only".formatted(userRole));
+            throw new ForbbidenOperationException("Operation allowed for %s only".formatted(userRole));
 
         if(!objectE.get().getActive())
             throw new ForbbidenOperationException("Cannot preform actions on an inactive object");
-    }
-
-    @Override
-    @Transactional
-    public SuperAppObjectBoundary updateObjectCreationTimestamp(String userSuperapp,
-                                                                String userEmail,
-                                                                MiniAppCommandBoundary objectTimeTravel) {
-        // Validate Admin user:
-        UserPK userId = new UserPK(userSuperapp, userEmail);
-        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
-            throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
-        // Validate correct command:
-        if(!objectTimeTravel.getCommand().equals("objectTimeTravel")){
-            throw new RuntimeException("Can't create Object Timestamp");
-        }
-        // Find object in db and update:
-        String internalObjectId = objectTimeTravel.getTargetObject().getObjectId().getInternalObjectId();
-        Optional<SuperAppObjectEntity> objectE = this.superAppObjectEntityRepository.findById(
-                new SuperappObjectPK(userSuperapp,internalObjectId));
-        if (objectE.isEmpty())
-            throw new NotFoundException("Unknown object");
-        SuperAppObjectBoundary updatedObjectTimeTravel = this.superAppObjectConverter.toBoundary(objectE.get());
-        try {
-            String d = objectTimeTravel.getCommandAttributes().get("creationTimestamp").toString();
-            SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
-            updatedObjectTimeTravel.setCreationTimestamp(ft.parse(d));
-        }catch (Exception e) {
-            System.out.println("Can't update creation timestamp - invalid Date");
-            return null;
-        }
-        return updatedObjectTimeTravel;
-    }
-
-    @Override
-    @Transactional
-    public MiniAppCommandBoundary storeMiniAppCommand(String userSuperapp,
-                                                      String userEmail,
-                                                      MiniAppCommandBoundary miniappCommandBoundary) {
-        // Validate Admin user:
-        UserPK userId = new UserPK(userSuperapp, userEmail);
-        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
-            throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
-        // Validate correct command:
-        if(!miniappCommandBoundary.getCommand().equals("echo")){
-            throw new RuntimeException("Can't store Mini-App Command");
-        }
-        checkInvokedCommand(miniappCommandBoundary, ADMIN);
-        IdGeneratorEntity helper = this.idGenerator.save(new IdGeneratorEntity());
-        String commandId = helper.getId().toString();
-        this.idGenerator.delete(helper);
-        MiniAppCommandIdBoundary miniAppCommandIdBoundary = new MiniAppCommandIdBoundary("TEST", commandId);
-        miniAppCommandIdBoundary.setSuperapp(this.superappName);
-        miniappCommandBoundary.setCommandId(miniAppCommandIdBoundary);
-        miniappCommandBoundary.setInvocationTimestamp(new Date());
-        this.miniappRepository.save(this.miniAppConverter.toEntity(miniappCommandBoundary));
-        return miniappCommandBoundary;
     }
 }
