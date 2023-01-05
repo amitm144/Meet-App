@@ -1,22 +1,17 @@
 package superapp.boundaries.grab;
 
-import superapp.boundaries.object.SuperAppObjectIdBoundary;
 import superapp.data.GrabCuisines;
 
 public class GrabPollBoundary {
-    private SuperAppObjectIdBoundary groupId;
     private GrabCuisines selectedCuisine;
+    private String url;
 
     public GrabPollBoundary() {}
 
-    public GrabPollBoundary(SuperAppObjectIdBoundary groupId, GrabCuisines selectedCuisine) {
-        this.groupId = groupId;
+    public GrabPollBoundary(GrabCuisines selectedCuisine, String url) {
         this.selectedCuisine = selectedCuisine;
+        this.url = url;
     }
-
-    public SuperAppObjectIdBoundary getGroupId() { return groupId; }
-
-    public void setGroupId(SuperAppObjectIdBoundary groupId) { this.groupId = groupId; }
 
     public GrabCuisines getSelectedCuisine() {
         return selectedCuisine;
@@ -26,11 +21,19 @@ public class GrabPollBoundary {
         this.selectedCuisine = selectedCuisine;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     @Override
     public String toString() {
-        return "SelectedCuisineBoundary{" +
-                "groupId=" + groupId +
-                ", selectedCuisine=" + selectedCuisine +
+        return "GrabPollBoundary{" +
+                "selectedCuisine=" + selectedCuisine +
+                ", url='" + url + '\'' +
                 '}';
     }
 }

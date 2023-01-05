@@ -190,6 +190,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .findById(this.converter.idToEntity(newChild))
                 .orElseThrow(() -> new NotFoundException("Cannot find children object"));
 
+        if (child.getAlias().equals(ObjectTypes.GrabPoll.toString()) && child.getParents().size() > 0)
+            throw new ForbbidenOperationException("Grab poll can only be bound to one group");
         if (parent.addChild(child) && child.addParent(parent)) {
             this.objectRepository.save(parent);
             this.objectRepository.save(child);

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import superapp.boundaries.command.MiniAppCommandBoundary;
 import superapp.boundaries.object.SuperAppObjectBoundary;
+import superapp.boundaries.object.SuperAppObjectIdBoundary;
 import superapp.boundaries.split.SplitDebtBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.SuperAppObjectConverter;
@@ -48,22 +49,16 @@ public class SplitService implements SplitsService, MiniAppServiceHandler {
 
 	@Override
 	public Object runCommand(MiniAppCommandBoundary command) {
-		SuperAppObjectIdWrapper targetObject = command.getTargetObject();
-		SuperappObjectPK targetObjectKey = new SuperappObjectPK(targetObject.getObjectId().getSuperapp(),
-				targetObject.getObjectId().getInternalObjectId());
-
-		SuperAppObjectEntity group =
-				this.objectRepository.findById(targetObjectKey)
+		SuperappObjectPK targetObjectKey = this.converter.idToEntity(command.getTargetObject().getObjectId());
+		SuperAppObjectEntity group = this.objectRepository.findById(targetObjectKey)
 				.orElseThrow(() ->  new NotFoundException("Group not found"));
 		UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
-		String commandCase = command.getCommand();
-
 		if (!isUserInGroup(group, invokedBy))
 			throw new InvalidInputException("Invoking user is not part of this group");
-
 		if (!group.getActive())
 			throw new InvalidInputException("Cannot execute commands on an inactive group");
 
+		String commandCase = command.getCommand();
 		switch (commandCase) {
 			case "showDebt" -> {
 				SuperappObjectPK objectId =
