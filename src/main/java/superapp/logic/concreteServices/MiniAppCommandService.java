@@ -63,7 +63,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     @Override
     @Transactional
     public Object invokeCommand(MiniAppCommandBoundary command) {
-        checkInvokedCommand(command); // will throw an exception if invalid command
+        checkInvokedCommand(command, UserRole.MINIAPP_USER); // will throw an exception if invalid command
 
         // issue internalCommandId, tie with superapp and set invocation timestamp
         IdGeneratorEntity helper = this.idGenerator.save(new IdGeneratorEntity());
@@ -141,7 +141,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
         this.miniappRepository.deleteAll();
     }
 
-    private void checkInvokedCommand(MiniAppCommandBoundary command){
+    private void checkInvokedCommand(MiniAppCommandBoundary command,UserRole userRole){
         UserIdWrapper invokedBy = command.getInvokedBy();
         if (invokedBy == null ||
                 invokedBy.getUserId() == null ||
@@ -176,8 +176,8 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
             throw new NotFoundException("Object Not Found");
 
         if(!isValidUserCredentials(new UserPK(invokedBy.getUserId().getSuperapp(), invokedBy.getUserId().getEmail()),
-                UserRole.MINIAPP_USER,this.userEntityRepository))
-            throw new ForbbidenOperationException(MINIAPP_USER_ONLY_EXCEPTION);
+                userRole,this.userEntityRepository))
+            throw new ForbbidenOperationException("Operation allowed for {%s} only".formatted(userRole));
 
         if(!objectE.get().getActive())
             throw new ForbbidenOperationException("Cannot preform actions on an inactive object");
@@ -227,31 +227,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
         if(!miniappCommandBoundary.getCommand().equals("echo")){
             throw new RuntimeException("Can't store Mini-App Command");
         }
-
-        UserIdWrapper invokedBy = miniappCommandBoundary.getInvokedBy();
-        if (invokedBy == null ||
-                invokedBy.getUserId() == null ||
-                invokedBy.getUserId().getSuperapp() == null ||
-                invokedBy.getUserId().getEmail() == null ||
-                invokedBy.getUserId().getSuperapp().isBlank() ||
-                invokedBy.getUserId().getEmail().isBlank())
-            throw new InvalidInputException("Invoked by fields cannot be missing or empty");
-
-        if (!EmailChecker.isValidEmail(invokedBy.getUserId().getEmail()))
-            throw new InvalidInputException("Invalid invoking user email");
-
-        SuperAppObjectIdWrapper targetObject = miniappCommandBoundary.getTargetObject();
-        if (targetObject == null ||
-                targetObject.getObjectId() == null ||
-                targetObject.getObjectId().getSuperapp() == null ||
-                targetObject.getObjectId().getInternalObjectId() == null ||
-                targetObject.getObjectId().getSuperapp().isBlank() ||
-                targetObject.getObjectId().getInternalObjectId().isBlank())
-            throw new InvalidInputException("Target object fields cannot be missing or empty");
-
-        if (miniappCommandBoundary.getCommand() == null || miniappCommandBoundary.getCommand().isEmpty())
-            throw new InvalidInputException("Command attribute cannot be missing or empty");
-
+        checkInvokedCommand(miniappCommandBoundary, ADMIN);
         IdGeneratorEntity helper = this.idGenerator.save(new IdGeneratorEntity());
         String commandId = helper.getId().toString();
         this.idGenerator.delete(helper);
