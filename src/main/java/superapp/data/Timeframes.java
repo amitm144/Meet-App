@@ -14,6 +14,17 @@ public enum Timeframes
     public int getMinute() {
         return minute;
     }
+
+    public static boolean isValidTimeframes(String creationEnum) {
+        if (creationEnum == null)
+            return false;
+        try {
+            UserRole.valueOf(creationEnum);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
 }
 
 

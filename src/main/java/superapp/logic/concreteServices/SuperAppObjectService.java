@@ -21,6 +21,7 @@ import superapp.util.exceptions.InvalidInputException;
 import superapp.util.exceptions.NotFoundException;
 import superapp.util.EmailChecker;
 
+import static superapp.data.Timeframes.*;
 import static superapp.data.UserRole.*;
 import static superapp.util.Constants.*;
 
@@ -384,19 +385,20 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     public List<SuperAppObjectBoundary> getObjectsByCreationTimestamp(String creationEnum, String userSuperapp,
                                                                          String email, int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
-        if (isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
-        {
+            if(isValidTimeframes(creationEnum))
+                throw new InvalidInputException("");
 
-            return this.objectRepository
-                    .findAllByCreationTimestamp(
-                            creationEnum,
-                            PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "currentTimestamp", "objectId"))
-                    .stream()
-                    .map(this.converter::toBoundary)
-                    .toList();
-        }
+            if (isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository)) {
 
-
-            return null;
+                return this.objectRepository
+                        .findAllByCreationTimestamp(
+                                creationEnum,
+                                PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION,
+                                        "currentTimestamp", "objectId"))
+                        .stream()
+                        .map(this.converter::toBoundary)
+                        .toList();
+            }
+        return null;
     }
 }
