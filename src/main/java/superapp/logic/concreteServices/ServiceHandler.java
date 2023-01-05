@@ -3,6 +3,7 @@ package superapp.logic.concreteServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import superapp.boundaries.command.MiniAppCommandBoundary;
 import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.logic.MiniAppServiceHandler;
@@ -34,12 +35,12 @@ public class ServiceHandler implements MiniAppServiceHandler {
     }
 
     @Override
-    public Object runCommand(String miniapp, SuperAppObjectIdWrapper targetObject,
-                             UserIdBoundary invokedBy, String commandCase) {
+    public Object runCommand(MiniAppCommandBoundary command) {
+        String miniapp = command.getCommandId().getMiniapp();
         switch (miniapp) {
-            case ("Split") -> { return this.splitService.runCommand(miniapp, targetObject, invokedBy, commandCase); }
+            case ("Split") -> { return this.splitService.runCommand(command); }
             case ("Grab") -> {
-                return this.grabService.runCommand(miniapp, targetObject, invokedBy, commandCase);
+                return this.grabService.runCommand(command);
             }
             case ("Lift") -> { return null; }
             default -> { throw new InvalidInputException("Unknown miniapp"); }

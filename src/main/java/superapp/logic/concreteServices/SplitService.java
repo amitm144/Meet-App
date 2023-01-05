@@ -3,6 +3,7 @@ package superapp.logic.concreteServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import superapp.boundaries.command.MiniAppCommandBoundary;
 import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.boundaries.split.SplitDebtBoundary;
 import superapp.boundaries.user.UserIdBoundary;
@@ -46,13 +47,16 @@ public class SplitService implements SplitsService, MiniAppServiceHandler {
 	}
 
 	@Override
-	public Object runCommand(String miniapp, SuperAppObjectIdWrapper targetObject, UserIdBoundary invokedBy, String commandCase) {
+	public Object runCommand(MiniAppCommandBoundary command) {
+		SuperAppObjectIdWrapper targetObject = command.getTargetObject();
+		SuperappObjectPK targetObjectKey = new SuperappObjectPK(targetObject.getObjectId().getSuperapp(),
+				targetObject.getObjectId().getInternalObjectId());
+
 		SuperAppObjectEntity group =
-				this.objectRepository.findById(
-						new SuperappObjectPK(
-								targetObject.getObjectId().getSuperapp(),
-								targetObject.getObjectId().getInternalObjectId()))
+				this.objectRepository.findById(targetObjectKey)
 				.orElseThrow(() ->  new NotFoundException("Group not found"));
+		UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
+		String commandCase = command.getCommand();
 
 		if (!isUserInGroup(group, invokedBy))
 			throw new InvalidInputException("Invoking user is not part of this group");

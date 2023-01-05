@@ -71,8 +71,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
         SuperAppObjectIdWrapper targetObject = command.getTargetObject();
         UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
         // run command will handle any unknown miniapp by 400 - Bad request.
-        return this.serviceHandler.runCommand(command.getCommandId().getMiniapp(), targetObject,
-                invokedBy, command.getCommand());
+        return this.serviceHandler.runCommand(command);
     }
 
     @Override
