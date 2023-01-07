@@ -1,10 +1,18 @@
 package superapp.util.GeoLocationAPI;
 
-public class Cordinate {
+import com.fasterxml.jackson.databind.ObjectMapper;
+import superapp.util.exceptions.InvalidInputException;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+public class Coordinate {
     private Double latitude;
     private Double longitude;
 
-    public Cordinate(Double latitude, Double longitude) {
+    public Coordinate(Double latitude, Double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
     }
