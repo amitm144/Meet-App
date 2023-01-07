@@ -55,8 +55,6 @@ public class MapBoxConverter {
             ArrayList<LinkedHashMap> fileredSteps = filterSteps(steps);
 
             rv.put("steps",fileredSteps);
-            Map<String, Object> waypoints = (Map<String, Object>) ((ArrayList)responseToMap.get("waypoints")).get(0);
-
              return rv;
     }
 
