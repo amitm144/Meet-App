@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import superapp.util.exceptions.InvalidInputException;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class MapBoxConverter {
         private ObjectMapper jackson;

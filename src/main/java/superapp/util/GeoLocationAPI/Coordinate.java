@@ -1,13 +1,5 @@
 package superapp.util.GeoLocationAPI;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import superapp.util.exceptions.InvalidInputException;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 public class Coordinate {
     private Double latitude;
     private Double longitude;
