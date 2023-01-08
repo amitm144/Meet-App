@@ -2,6 +2,7 @@ package superapp.util.GeoLocationAPI;
 
 import org.springframework.web.client.RestTemplate;
 import superapp.util.exceptions.ForbbidenOperationException;
+import superapp.util.exceptions.ThridPartyAPIException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,7 +20,7 @@ public class LiftGeoLocationHandler extends MapBox{
     }
     private Map<String,Object> getDirectionByCordinates(LiftLanguage language, ArrayList<Coordinate> coordinates){
         if(coordinates.size() <2 || coordinates.size() >25)
-            throw new ForbbidenOperationException("Please Provide 2 to 25 coordinates ");
+            throw new ThridPartyAPIException("Please Provide 2 to 25 coordinates ");
         RestTemplate restTemplate = new RestTemplate();
         String coordinatesConverted = mapBoxConverter.coordinatesToString(coordinates);
         String url = this.directionURL +coordinatesConverted+"?language="+language+"&steps=true&access_token="
@@ -27,7 +28,8 @@ public class LiftGeoLocationHandler extends MapBox{
 
         String response = restTemplate.getForObject(url, String.class);
         Map<String, Object> responseToMap =mapBoxConverter.detailsToMap(response);
-        //todo check if res is OK (200)
+        if(responseToMap.get("code") != "Ok")
+            throw new ThridPartyAPIException("MapBoxAPI failed to provide directions! Check again your input.");
        return mapBoxConverter.filterMapBoxRequestToLiftMiniapp(responseToMap);
 
     }
@@ -46,6 +48,8 @@ public class LiftGeoLocationHandler extends MapBox{
         Map<String, Object> responseToMap =mapBoxConverter.detailsToMap(response);
         //todo check if res is OK (200)
         ArrayList< LinkedHashMap> features = (ArrayList< LinkedHashMap>)responseToMap.get("features");
+        if(features.size() ==0)
+            throw new ThridPartyAPIException("MapBoxAPI failed to provide directions please check again your address ");
         ArrayList<Double> center = (ArrayList<Double>) features.get(0).get("center");
         return new Coordinate(center.get(0), center.get(1));
     }

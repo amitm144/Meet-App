@@ -1,7 +1,7 @@
 package superapp.util.GeoLocationAPI;
 
 import org.springframework.web.client.RestTemplate;
-import superapp.util.exceptions.NotFoundException;
+import superapp.util.exceptions.ThridPartyAPIException;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -14,25 +14,33 @@ public class GrabGeoLocationHandler extends MapBox{
         this.CuasieURL = super.getBase_URL() + "geocoding/v5/mapbox.places/";
         this.mapBoxConverter = mapBoxConverter;
     }
-    public ArrayList<Map<String, Object>> getResturantbyCuasie(GrabCuasine cuasie, int limit, int radius){
+    public ArrayList<Map<String, Object>> getResturantbyCuasie(GrabCuasine cuisine, int limit, int radius){
         RestTemplate restTemplate = new RestTemplate();
-        String url = this.CuasieURL+cuasie+".json?proximity=" + super.getAfekaCollageCordiantes() +"&limit="+limit+"&radius="+radius+"&access_token="
+        String url = this.CuasieURL+EnumToStringCheck(cuisine)+".json?country=IL&proximity=" + super.getAfekaCollageCordiantes() +"&limit="+limit+"&radius="+radius+"&access_token="
                 +super.getAPI_KEY();
 
         String response = restTemplate.getForObject(url, String.class);
         Map<String, Object> responseToMap =mapBoxConverter.detailsToMap(response);
-        return extractResturantFromMap(responseToMap);
+        ArrayList<LinkedHashMap> restaurants = (ArrayList<LinkedHashMap>) responseToMap.get("features");
+
+        if(restaurants.size() ==0)
+            throw new ThridPartyAPIException("cuisine Not Found");
+
+        return extractResturantFromMap(restaurants);
 
     }
 
 
-private ArrayList<Map<String, Object>> extractResturantFromMap(Map<String, Object> response){
-    ArrayList<LinkedHashMap> resturants = (ArrayList<LinkedHashMap>) response.get("features");
-    if(resturants.size() ==0)
-        throw new NotFoundException("Cuasie Not Found");
+private ArrayList<Map<String, Object>> extractResturantFromMap(ArrayList<LinkedHashMap> restaurants){
     ArrayList<Map<String, Object>> rv = new ArrayList<Map<String, Object>>();
-    resturants.forEach(restaurant -> rv.add(mapBoxConverter.mapToResturantDetails(restaurant)));
+    restaurants.forEach(restaurant -> rv.add(mapBoxConverter.mapToResturantDetails(restaurant)));
     return rv;
+}
+
+private String EnumToStringCheck(GrabCuasine cuisine){
+        if (cuisine.toString().contains("_"))
+            return cuisine.toString().replace("_", " ");
+        return cuisine.toString();
 }
 
 

@@ -2,13 +2,11 @@ package superapp;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import superapp.util.GeoLocationAPI.Coordinate;
-import superapp.util.GeoLocationAPI.LiftGeoLocationHandler;
-import superapp.util.GeoLocationAPI.LiftLanguage;
-import superapp.util.GeoLocationAPI.MapBoxConverter;
+import superapp.util.GeoLocationAPI.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 @SpringBootApplication
@@ -24,11 +22,17 @@ public class Application {
 		defaultProperties.setProperty("spring.config.name", "application-${spring.profiles.active}");
 		application.setDefaultProperties(defaultProperties);
 		application.run(args);
-		LiftGeoLocationHandler check = new LiftGeoLocationHandler(new MapBoxConverter());
-		ArrayList<String> arr = new ArrayList<>();
-		arr.add("Afeka Collage");
-		arr.add("Sarona Market");
-		HashMap<String,Object> rv = (HashMap<String, Object>) check.getDirectionsByAddress(LiftLanguage.EN,arr);
+		MapBoxConverter mapBoxConverter = new MapBoxConverter();
+		GrabGeoLocationHandler grab = new GrabGeoLocationHandler(mapBoxConverter);
+		ArrayList<Map<String, Object>> rv;
+		rv = grab.getResturantbyCuasie(GrabCuasine.HUMMUS, 1, 1);
+
+//		LiftGeoLocationHandler check = new LiftGeoLocationHandler(new MapBoxConverter());
+//		ArrayList<String> arr = new ArrayList<>();
+//		arr.add("New York");
+//		arr.add("Sarona Market");
+//		rv = (HashMap<String, Object>) check.getDirectionsByAddress(LiftLanguage.EN, arr);
+		rv.clear();
 
 	}
 }
