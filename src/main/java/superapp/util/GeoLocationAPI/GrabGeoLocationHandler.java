@@ -6,7 +6,7 @@ import superapp.util.exceptions.ThridPartyAPIException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
-public class GrabGeoLocationHandler extends MapBox{
+public class GrabGeoLocationHandler extends MapBox implements  GrabGeoLocaionHandlers{
     private String CuasieURL;
     private MapBoxConverter mapBoxConverter;
     public GrabGeoLocationHandler(MapBoxConverter mapBoxConverter) {
@@ -14,6 +14,7 @@ public class GrabGeoLocationHandler extends MapBox{
         this.CuasieURL = super.getBase_URL() + "geocoding/v5/mapbox.places/";
         this.mapBoxConverter = mapBoxConverter;
     }
+    @Override
     public ArrayList<Map<String, Object>> getResturantbyCuasie(GrabCuasine cuisine, int limit, int radius){
         RestTemplate restTemplate = new RestTemplate();
         String url = this.CuasieURL+EnumToStringCheck(cuisine)+".json?country=IL&proximity=" + super.getAfekaCollageCordiantes() +"&limit="+limit+"&radius="+radius+"&access_token="

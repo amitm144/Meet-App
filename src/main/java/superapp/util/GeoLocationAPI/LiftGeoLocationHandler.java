@@ -6,7 +6,7 @@ import superapp.util.exceptions.ThridPartyAPIException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
-public class LiftGeoLocationHandler extends MapBox{
+public class LiftGeoLocationHandler extends MapBox implements LiftGeoLocationHandlers{
     private String directionURL;
     private String searchPlacesURL;
     private MapBoxConverter mapBoxConverter;
@@ -31,7 +31,7 @@ public class LiftGeoLocationHandler extends MapBox{
        return mapBoxConverter.filterMapBoxRequestToLiftMiniapp(responseToMap);
 
     }
-
+@Override
     public Map<String,Object> getDirectionsByAddress(LiftLanguage language,ArrayList<String> addresses) {
         ArrayList<Coordinate> coordinates = new ArrayList<Coordinate>();
         addresses.forEach(address -> coordinates.add(addressToCoordianets(address)));
