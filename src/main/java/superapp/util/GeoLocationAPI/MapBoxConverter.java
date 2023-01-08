@@ -52,21 +52,26 @@ public class MapBoxConverter {
 
             Map<String, Object> legs = (Map<String, Object>) ((ArrayList)routes.get("legs")).get(0);
             ArrayList<LinkedHashMap> steps = (ArrayList<LinkedHashMap>) legs.get("steps");
-            ArrayList<LinkedHashMap> fileredSteps = filterSteps(steps);
+            List<Map<String, Object>> fileredSteps = filterSteps(steps);
 
             rv.put("steps",fileredSteps);
              return rv;
     }
 
-    private ArrayList<LinkedHashMap> filterSteps(ArrayList<LinkedHashMap> steps) {
-        ArrayList<String> filtered_keys = new ArrayList<String>();
-
-        filtered_keys.addAll(List.of(new String[]{"name", "duration", "distance"}));
-        ArrayList<LinkedHashMap> rv = (ArrayList<LinkedHashMap>) steps
-                    .stream()
-                    .filter(step -> !(((String)step.get("name"))).isEmpty())
-                    .collect(Collectors.toList());
-       return  rv.stream().filter(map -> map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,Map.Entry::getValue))
-        ).toList();
+    private List<Map<String, Object>> filterSteps(ArrayList<LinkedHashMap> steps) {
+        List<Map<String, Object>> rv = new ArrayList<>();
+        steps
+            .stream()
+            .forEach(step -> {
+                HashMap<String, Object> m = new HashMap<>();
+                for (String key : new String[]{"name", "duration", "distance"})
+                    m.put(key, step.get(key));
+                HashMap<String, Object> maneuver = new HashMap<>();
+                for (String key : new String[]{"type", "instruction"})
+                    maneuver.put(key, ((LinkedHashMap)step.get("maneuver")).get(key));
+                m.put("maneuver", maneuver);
+                rv.add(m);
+                });
+        return rv;
     }
 }
