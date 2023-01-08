@@ -22,17 +22,5 @@ public class Application {
 		defaultProperties.setProperty("spring.config.name", "application-${spring.profiles.active}");
 		application.setDefaultProperties(defaultProperties);
 		application.run(args);
-		MapBoxConverter mapBoxConverter = new MapBoxConverter();
-		GrabGeoLocationHandler grab = new GrabGeoLocationHandler(mapBoxConverter);
-		ArrayList<Map<String, Object>> rv;
-		rv = grab.getResturantbyCuasie(GrabCuasine.HUMMUS, 1, 1);
-
-//		LiftGeoLocationHandler check = new LiftGeoLocationHandler(new MapBoxConverter());
-//		ArrayList<String> arr = new ArrayList<>();
-//		arr.add("New York");
-//		arr.add("Sarona Market");
-//		rv = (HashMap<String, Object>) check.getDirectionsByAddress(LiftLanguage.EN, arr);
-		rv.clear();
-
 	}
 }
