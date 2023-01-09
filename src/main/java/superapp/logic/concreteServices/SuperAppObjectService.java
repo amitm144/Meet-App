@@ -21,13 +21,12 @@ import superapp.util.exceptions.InvalidInputException;
 import superapp.util.exceptions.NotFoundException;
 import superapp.util.EmailChecker;
 
+import static superapp.data.ObjectTypes.*;
 import static superapp.data.UserRole.*;
 import static superapp.util.Constants.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static superapp.data.ObjectTypes.isValidObjectType;
 
 @Service
 public class SuperAppObjectService extends AbstractService implements AdvancedSuperAppObjectsService {
@@ -81,9 +80,15 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         object.setObjectId(new SuperAppObjectIdBoundary(this.superappName, objectId));
         object.setActive(active);
         object.setCreationTimestamp(new Date());
-        // handleObjectByType will handle any unknown object type by 400 - Bad request.
-        serviceHandler.handleObjectByType(object);
-        this.objectRepository.save(converter.toEntity(object));
+        try {
+            // handleObjectByType will handle any unknown object type by 400 - Bad request.
+            serviceHandler.handleObjectByType(object);
+        } catch (InvalidInputException e) {
+            object.setActive(false);
+            throw new InvalidInputException(e.getMessage());
+        } finally {
+            this.objectRepository.save(converter.toEntity(object));
+        }
         return object;
     }
 
@@ -189,6 +194,11 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .findById(this.converter.idToEntity(newChild))
                 .orElseThrow(() -> new NotFoundException("Cannot find children object"));
 
+        /*
+            if child is transaction ->
+            check to see if parent is group and invoking user in parent group
+        */
+        this.isValidTransaction(parent, child, userId);
         if (parent.addChild(child) && child.addParent(parent)) {
             this.objectRepository.save(parent);
             this.objectRepository.save(child);
@@ -392,5 +402,22 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .map(this.converter::toBoundary)
                 .filter(object -> object.getActive()|| isSuperAppUser)// if MiniappUser get only active
                 .collect(Collectors.toList());
+    }
+
+    private void isValidTransaction(SuperAppObjectEntity parent, SuperAppObjectEntity child, UserPK userId) {
+        if (!child.getType().equals(Transaction.name()))
+            return;
+
+        if (!parent.getType().equals(Group.name()))
+            throw new InvalidInputException("Transactions can only be bound to groups");
+
+        List<UserPK> groupMembers =
+            ((List<LinkedHashMap<String, String>>)(this.converter.detailsToMap(parent.getObjectDetails()))
+                    .get("members"))
+                    .stream()
+                    .map(user -> new UserPK(user.get("superapp"), user.get("email")))
+                    .collect(Collectors.toList());
+        if (!groupMembers.contains(userId))
+            throw new CannotProcessException("Transactions can only be bound by users in the group");
     }
 }

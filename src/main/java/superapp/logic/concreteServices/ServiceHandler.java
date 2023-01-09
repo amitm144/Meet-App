@@ -29,7 +29,8 @@ public class ServiceHandler implements MiniAppServiceHandler {
         if (!isValidObjectType(objectType))
             objectType = "";
         switch (objectType) {
-            case ("TRANSACTION"), ("GROUP") -> this.splitService.handleObjectByType(object);
+            case ("Transaction"), ("Group") -> this.splitService.handleObjectByType(object);
+            default -> throw new InvalidInputException("Unknown object type");
         }
     }
 
