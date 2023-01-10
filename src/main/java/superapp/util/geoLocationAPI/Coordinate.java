@@ -1,4 +1,4 @@
-package superapp.util.GeoLocationAPI;
+package superapp.util.geoLocationAPI;
 
 public class Coordinate {
     private Double latitude;

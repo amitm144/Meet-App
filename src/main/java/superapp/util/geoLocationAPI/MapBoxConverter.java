@@ -1,4 +1,4 @@
-package superapp.util.GeoLocationAPI;
+package superapp.util.geoLocationAPI;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import superapp.util.exceptions.InvalidInputException;
@@ -16,7 +16,7 @@ public class MapBoxConverter {
                 return (Map<String, Object>)this.jackson.readValue(details, Map.class);
             } catch (Exception e) { throw new InvalidInputException(e.getMessage()); }
         }
-        public HashMap<String, Object> mapToResturantDetails(LinkedHashMap resturant) {
+        public HashMap<String, Object> mapToRestaurantDetails(LinkedHashMap resturant) {
             HashMap<String,Object> rv = new HashMap<String,Object>();
             String name = (String) resturant.get("text");
             rv.put("name",name);
@@ -43,7 +43,7 @@ public class MapBoxConverter {
             return rv.substring(0,rv.length()-2);
     }
 
-    public HashMap<String, Object> filterMapBoxRequestToLiftMiniapp(Map<String, Object> responseToMap) {
+    public HashMap<String, Object> filterMapBoxRequestToDirections(Map<String, Object> responseToMap) {
             HashMap<String,Object> rv = new HashMap<String,Object>();
             Map<String, Object> routes = (Map<String, Object>) ((ArrayList)responseToMap.get("routes")).get(0);
             rv.put("duration",routes.get("duration"));
