@@ -10,7 +10,8 @@ import superapp.converters.SuperAppObjectConverter;
 import superapp.dal.SuperAppObjectEntityRepository;
 import superapp.data.SuperAppObjectEntity;
 import superapp.data.SuperappObjectPK;
-import superapp.logic.MiniAppServiceHandler;
+import superapp.data.UserPK;
+import superapp.logic.MiniAppServices;
 import superapp.logic.SplitsService;
 import superapp.util.exceptions.CannotProcessException;
 import superapp.util.exceptions.InvalidInputException;
@@ -18,11 +19,12 @@ import superapp.util.exceptions.NotFoundException;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
-import static superapp.data.ObjectTypes.isValidObjectType;
+import static superapp.data.ObjectTypes.*;
 
-@Service
-public class SplitService implements SplitsService, MiniAppServiceHandler {
+@Service("Split")
+public class SplitService implements SplitsService, MiniAppServices {
 	private SuperAppObjectEntityRepository objectRepository;
 	private SuperAppObjectConverter converter;
 	private final String INVALID_AMOUNT_MESSAGE =  "Transaction must specify amount (number not less than or equal to 0)";
@@ -73,6 +75,24 @@ public class SplitService implements SplitsService, MiniAppServiceHandler {
 			}
 			default -> throw new NotFoundException("Unknown command");
 		}
+	}
+
+	@Override
+	public void checkValidBinding(SuperAppObjectEntity parent, SuperAppObjectEntity child, UserPK userId) {
+		if (!child.getType().equals(Transaction.name()))
+			throw new CannotProcessException("Unknown bind request (Split)");
+
+		if (!parent.getType().equals(Group.name()))
+			throw new InvalidInputException("Transactions can only be bound to groups");
+
+		List<UserPK> groupMembers =
+				((List<LinkedHashMap<String, String>>)(this.converter.detailsToMap(parent.getObjectDetails()))
+						.get("members"))
+						.stream()
+						.map(user -> new UserPK(user.get("superapp"), user.get("email")))
+						.collect(Collectors.toList());
+		if (!groupMembers.contains(userId))
+			throw new CannotProcessException("Transactions can only be bound by users in the group");
 	}
 
 	@Override

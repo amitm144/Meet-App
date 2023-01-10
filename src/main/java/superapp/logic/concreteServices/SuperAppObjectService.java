@@ -1,5 +1,6 @@
 package superapp.logic.concreteServices;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import superapp.dal.UserEntityRepository;
 import superapp.data.*;
 import superapp.logic.AbstractService;
 import superapp.logic.AdvancedSuperAppObjectsService;
+import superapp.logic.MiniAppServices;
 import superapp.util.exceptions.CannotProcessException;
 import superapp.util.exceptions.ForbbidenOperationException;
 import superapp.util.exceptions.InvalidInputException;
@@ -30,22 +32,22 @@ import java.util.stream.Collectors;
 
 @Service
 public class SuperAppObjectService extends AbstractService implements AdvancedSuperAppObjectsService {
+    private ApplicationContext context;
+    private MiniAppServices miniAppService;
+    private SuperAppObjectConverter converter;
+    private IdGeneratorRepository idGenerator;
     private SuperAppObjectEntityRepository objectRepository;
     private UserEntityRepository userRepository;
-    private IdGeneratorRepository idGenerator;
-    private ServiceHandler serviceHandler;
-    private SuperAppObjectConverter converter;
 
     @Autowired
     public SuperAppObjectService(SuperAppObjectConverter converter, UserEntityRepository userRepository,
-                                 SuperAppObjectEntityRepository objectRepository,
-                                 IdGeneratorRepository idGenerator,
-                                 ServiceHandler serviceHandler) {
+                                 SuperAppObjectEntityRepository objectRepository, IdGeneratorRepository idGenerator,
+                                 ApplicationContext context) {
         this.converter = converter;
         this.objectRepository = objectRepository;
         this.idGenerator = idGenerator;
         this.userRepository = userRepository;
-        this.serviceHandler = serviceHandler;
+        this.context = context;
     }
 
     @Override
@@ -81,8 +83,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         object.setActive(active);
         object.setCreationTimestamp(new Date());
         try {
-            // handleObjectByType will handle any unknown object type by 400 - Bad request.
-            serviceHandler.handleObjectByType(object);
+            this.handleObject(object); // will handle any unknown object type by 400 - Bad request.
         } catch (InvalidInputException e) {
             object.setActive(false);
             throw new InvalidInputException(e.getMessage());
@@ -171,10 +172,10 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         }
         SuperAppObjectBoundary result = this.converter.toBoundary(objectE);
         /*
-            handleObjectByType will handle any unknown object type by 400 - Bad request.
+            handleObject will handle any unknown object type by 400 - Bad request.
             if object details after update doesn't fit into miniapp restrictions, an exception will be thrown as well
         */
-        serviceHandler.handleObjectByType(result);
+        this.handleObject(result);
         this.objectRepository.save(objectE);
         return result;
     }
@@ -198,7 +199,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
             if child is transaction ->
             check to see if parent is group and invoking user in parent group
         */
-        this.isValidTransaction(parent, child, userId);
+        this.handleObjectBinding(parent, child, userId);
         if (parent.addChild(child) && child.addParent(parent)) {
             this.objectRepository.save(parent);
             this.objectRepository.save(child);
@@ -320,7 +321,27 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
             return findByAliasContainingRepoSearch(pageReq, text,false);
 
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
+    }
 
+    private void handleObject(SuperAppObjectBoundary object) {
+        String objectType = object.getType();
+        if (!isValidObjectType(objectType))
+            objectType = "";
+        switch (objectType) {
+            case ("Transaction"), ("Group") -> {
+                this.miniAppService = this.context.getBean("Split", SplitService.class);
+                miniAppService.handleObjectByType(object);
+            }
+            default -> throw new InvalidInputException("Unknown object type");
+        }
+    }
+
+    private void handleObjectBinding(SuperAppObjectEntity parent, SuperAppObjectEntity child, UserPK userId) {
+        if (child.getType().equals(Transaction.name()) && parent.getType().equals(Group.name())) {
+            this.miniAppService = this.context.getBean("Split", SplitService.class);
+        }
+
+        this.miniAppService.checkValidBinding(parent, child, userId);
     }
 
     @Override
@@ -402,22 +423,5 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .map(this.converter::toBoundary)
                 .filter(object -> object.getActive()|| isSuperAppUser)// if MiniappUser get only active
                 .collect(Collectors.toList());
-    }
-
-    private void isValidTransaction(SuperAppObjectEntity parent, SuperAppObjectEntity child, UserPK userId) {
-        if (!child.getType().equals(Transaction.name()))
-            return;
-
-        if (!parent.getType().equals(Group.name()))
-            throw new InvalidInputException("Transactions can only be bound to groups");
-
-        List<UserPK> groupMembers =
-            ((List<LinkedHashMap<String, String>>)(this.converter.detailsToMap(parent.getObjectDetails()))
-                    .get("members"))
-                    .stream()
-                    .map(user -> new UserPK(user.get("superapp"), user.get("email")))
-                    .collect(Collectors.toList());
-        if (!groupMembers.contains(userId))
-            throw new CannotProcessException("Transactions can only be bound by users in the group");
     }
 }
