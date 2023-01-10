@@ -85,13 +85,7 @@ public class SplitService implements SplitsService, MiniAppServices {
 		if (!parent.getType().equals(Group.name()))
 			throw new InvalidInputException("Transactions can only be bound to groups");
 
-		List<UserPK> groupMembers =
-				((List<LinkedHashMap<String, String>>)(this.converter.detailsToMap(parent.getObjectDetails()))
-						.get("members"))
-						.stream()
-						.map(user -> new UserPK(user.get("superapp"), user.get("email")))
-						.collect(Collectors.toList());
-		if (!groupMembers.contains(userId))
+		if (!isUserInGroup(parent, new UserIdBoundary(userId.getSuperapp(), userId.getEmail())))
 			throw new CannotProcessException("Transactions can only be bound by users in the group");
 	}
 
