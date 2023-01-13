@@ -90,7 +90,7 @@ public class AdminController {
     @RequestMapping(
             path= {"/superapp/admin/miniapp"},
             method = {RequestMethod.DELETE})
-    public void deleteMiniApp(@RequestParam(name = "userSuperapp", required = true,defaultValue = "") String userSuperapp,
-                              @RequestParam(name = "userEmail", required = true,defaultValue = "") String email)
+    public void deleteMiniApp(@RequestParam(name = "userSuperapp", required = true, defaultValue = "") String userSuperapp,
+                              @RequestParam(name = "userEmail", required = true, defaultValue = "") String email)
                             { this.miniappService.deleteAllCommands(userSuperapp,email); }
 }
