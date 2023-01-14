@@ -50,17 +50,20 @@ public class SplitService implements SplitsService, MiniAppServices {
 	}
 
 	@Override
-	public Object runCommand(MiniAppCommandBoundary command) {
-		SuperappObjectPK targetObjectKey = this.converter.idToEntity(command.getTargetObject().getObjectId());
-		SuperAppObjectEntity group = this.objectRepository.findById(targetObjectKey)
-				.orElseThrow(() ->  new NotFoundException("Group not found"));
-		UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
+	public Object runCommand(String miniapp, SuperAppObjectIdWrapper targetObject,
+							 UserIdBoundary invokedBy, String commandCase) {
+		SuperAppObjectEntity group =
+				this.objectRepository.findById(
+						new SuperappObjectPK(
+							targetObject.getObjectId().getSuperapp(),
+							targetObject.getObjectId().getInternalObjectId()
+				))
+				.orElseThrow(() -> new NotFoundException("Group not found"));
 		if (!isUserInGroup(group, invokedBy))
 			throw new InvalidInputException("Invoking user is not part of this group");
 		if (!group.getActive())
-			throw new InvalidInputException("Cannot execute commands on an inactive group");
+			throw new InvalidInputException("Cannot execute commands on inactive group");
 
-		String commandCase = command.getCommand();
 		switch (commandCase) {
 			case "showDebt" -> {
 				SuperappObjectPK objectId =

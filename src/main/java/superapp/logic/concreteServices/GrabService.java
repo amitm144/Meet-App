@@ -3,30 +3,25 @@ package superapp.logic.concreteServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import superapp.boundaries.command.MiniAppCommandBoundary;
 import superapp.boundaries.grab.GrabPollBoundary;
 import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.SuperAppObjectConverter;
 import superapp.dal.SuperAppObjectEntityRepository;
-import superapp.data.GrabCuisines;
-import superapp.data.ObjectTypes;
-import superapp.data.SuperAppObjectEntity;
-import superapp.data.SuperappObjectPK;
+import superapp.data.*;
 import superapp.logic.GrabsService;
-import superapp.logic.MiniAppServiceHandler;
+import superapp.logic.MiniAppServices;
 import superapp.util.exceptions.ForbbidenOperationException;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.exceptions.NotFoundException;
+import superapp.util.wrappers.SuperAppObjectIdWrapper;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.util.*;
 
-import static superapp.data.ObjectTypes.GrabPoll;
-import static superapp.data.ObjectTypes.isValidObjectType;
+import static superapp.data.ObjectTypes.*;
 
-@Service
-public class GrabService implements GrabsService, MiniAppServiceHandler {
+@Service("Grab")
+public class GrabService implements GrabsService, MiniAppServices {
 	private SuperAppObjectEntityRepository objectRepository;
 	private SuperAppObjectConverter converter;
 
@@ -50,12 +45,13 @@ public class GrabService implements GrabsService, MiniAppServiceHandler {
 	}
 
 	@Override
-	public Object runCommand(MiniAppCommandBoundary command) {
-		SuperappObjectPK targetObjectKey = this.converter.idToEntity(command.getTargetObject().getObjectId());
+	public Object runCommand(String miniapp, SuperAppObjectIdWrapper targetObject,
+							 UserIdBoundary invokedBy, String commandCase) {
+		SuperappObjectPK targetObjectKey = this.converter.idToEntity(targetObject.getObjectId());
 		SuperAppObjectEntity poll = this.objectRepository.findById(targetObjectKey)
-				.orElseThrow(() ->  new NotFoundException("group not found"));
-		UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
-		SuperAppObjectEntity group = poll.getParents()
+				.orElseThrow(() ->  new NotFoundException("Group not found"));
+		SuperAppObjectEntity group =
+				poll.getParents()
 				.stream()
 				.findFirst() // grab poll can only be bound to one parent
 				.orElseThrow(() ->  new NotFoundException("Grab poll is not bound to any group"));
@@ -65,13 +61,22 @@ public class GrabService implements GrabsService, MiniAppServiceHandler {
 		if (!(group.getActive() && !poll.getActive()))
 			throw new InvalidInputException("Cannot execute commands on an inactive group or poll");
 
-		String commandCase = command.getCommand();
 		switch(commandCase) {
-			case "addVote": { this.addVote(poll, (GrabCuisines[])command.getCommandAttributes().get("cuisines")); }
+			case "addVote": {
+				this.addVote(poll, (GrabCuisines[])this.converter.detailsToMap(poll.getObjectDetails()).get("cuisines"));
+			}
 			case "selectRandomly": { return this.selectRandomly(poll); }
 			case "selectByMajority": { return this.selectByMajority(poll); }
 			default: throw new NotFoundException("Unknown command");
 		}
+	}
+
+	@Override
+	public void checkValidBinding(SuperAppObjectEntity parent, SuperAppObjectEntity child, UserPK userId) {
+		if (!parent.getType().equals(ObjectTypes.Group.name()))
+			throw new InvalidInputException("Cannot bind poll to non-group objects");
+		if(child.getParents().size() > 0)
+			throw new ForbbidenOperationException("Grab poll can only be bound to one group");
 	}
 
 	@Override

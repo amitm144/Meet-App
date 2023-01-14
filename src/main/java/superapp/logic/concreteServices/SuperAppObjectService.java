@@ -195,7 +195,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .findById(this.converter.idToEntity(newChild))
                 .orElseThrow(() -> new NotFoundException("Cannot find children object"));
 
-        this.handleObjectBinding(parent, child, userId); // handle child appropriately if is miniapp object that has limitation
+        this.handleObjectBinding(parent, child, userId); // handle child appropriately if is miniapp object that has limitations
         if (parent.addChild(child) && child.addParent(parent)) {
             this.objectRepository.save(parent);
             this.objectRepository.save(child);
@@ -331,18 +331,24 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 this.miniAppService = this.context.getBean("Split", SplitService.class);
                 miniAppService.handleObjectByType(object);
             }
+            case ("Poll") -> {
+                this.miniAppService = this.context.getBean("Grab", GrabService.class);
+                miniAppService.handleObjectByType(object);
+            }
             default -> throw new InvalidInputException("Unknown object type");
         }
     }
 
     private void handleObjectBinding(SuperAppObjectEntity parent, SuperAppObjectEntity child, UserPK userId) {
-        if (child.getType().equals(Transaction.name()) && parent.getType().equals(Group.name())) {
+        this.miniAppService = null; // this is done for the code to realize if the bounded objects has any limitations
+        if (child.getType().equals(Transaction.name()) && parent.getType().equals(ObjectTypes.Group.name()))
             this.miniAppService = this.context.getBean("Split", SplitService.class);
-        }
-        if (child.getAlias().equals(ObjectTypes.GrabPoll.toString()) && child.getParents().size() > 0)
-            throw new ForbbidenOperationException("Grab poll can only be bound to one group"); // TODO: handle in grab
 
-        this.miniAppService.checkValidBinding(parent, child, userId);
+        else if (child.getAlias().equals(ObjectTypes.GrabPoll.toString()))
+            this.miniAppService = this.context.getBean("Grab", GrabService.class);
+
+        if (this.miniAppService != null)
+            this.miniAppService.checkValidBinding(parent, child, userId);
     }
 
     @Override
