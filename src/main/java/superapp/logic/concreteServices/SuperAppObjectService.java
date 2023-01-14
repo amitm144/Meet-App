@@ -1,5 +1,7 @@
 package superapp.logic.concreteServices;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +41,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     private IdGeneratorRepository idGenerator;
     private SuperAppObjectEntityRepository objectRepository;
     private UserEntityRepository userRepository;
+    private Log logger = LogFactory.getLog(MiniAppCommandService.class);
 
     @Autowired
     public SuperAppObjectService(SuperAppObjectConverter converter, UserEntityRepository userRepository,
@@ -56,20 +59,25 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     public SuperAppObjectBoundary createObject(SuperAppObjectBoundary object) {
         String alias = object.getAlias();
         String type = object.getType();
-        if (alias == null || type == null || alias.isBlank() || type.isBlank())
+        if (alias == null || type == null || alias.isBlank() || type.isBlank()) {
+            this.logger.debug("in createObject func - Object alias and/or type must be specified");
             throw new InvalidInputException("Object alias and/or type must be specified");
-
+        }
         UserIdBoundary createdBy = object.getCreatedBy().getUserId();
         if (createdBy == null ||
                 createdBy.getEmail() == null ||
                 createdBy.getSuperapp() == null ||
                 createdBy.getSuperapp().isEmpty() ||
-                !EmailChecker.isValidEmail(createdBy.getEmail()))
+                !EmailChecker.isValidEmail(createdBy.getEmail())) {
+            this.logger.debug("in createObject func - Invalid creating user details");
             throw new InvalidInputException("Invalid creating user details");
+        }
 
         if (!this.isValidUserCredentials(new UserPK(createdBy.getSuperapp(),createdBy.getEmail()),
-                SUPERAPP_USER, this.userRepository))
+                SUPERAPP_USER, this.userRepository)) {
+            this.logger.debug("in createObject func - %s".formatted(SUPERAPP_USER_ONLY_EXCEPTION));
             throw new ForbbidenOperationException(SUPERAPP_USER_ONLY_EXCEPTION);
+        }
 
 
         Boolean active = object.getActive();
@@ -87,10 +95,12 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
             this.handleObject(object); // will handle any unknown object type by 400 - Bad request.
         } catch (InvalidInputException e) {
             object.setActive(false);
+            this.logger.error("in createObject func - %s".formatted(e.getMessage()));
             throw new InvalidInputException(e.getMessage());
         } finally {
             this.objectRepository.save(converter.toEntity(object));
         }
+        this.logger.info("Created object successfully");
         return object;
     }
 
@@ -100,6 +110,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     public SuperAppObjectBoundary updateObject(String objectSuperapp,
                                                String internalObjectId,
                                                SuperAppObjectBoundary update) {
+        this.logger.debug("in updateObject func, - %s".formatted(DEPRECATED_EXCEPTION));
         throw new ForbbidenOperationException(DEPRECATED_EXCEPTION);
     }
 
@@ -107,6 +118,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     @Deprecated
     @Transactional
     public void bindNewChild(String parentSuperapp, String parentObjectId, SuperAppObjectIdBoundary newChild) {
+        this.logger.debug("in bindNewChild func, - %s".formatted(DEPRECATED_EXCEPTION));
         throw new ForbbidenOperationException(DEPRECATED_EXCEPTION);
     }
 
@@ -114,6 +126,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     @Deprecated
     @Transactional(readOnly = true)
     public SuperAppObjectBoundary getSpecificObject(String objectSuperapp, String internalObjectId) {
+        this.logger.debug("in getSpecificObject func, - %s".formatted(DEPRECATED_EXCEPTION));
         throw new ForbbidenOperationException(DEPRECATED_EXCEPTION);
     }
 
@@ -121,6 +134,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     @Deprecated
     @Transactional(readOnly = true)
     public List<SuperAppObjectBoundary> getAllObjects() {
+        this.logger.debug("in getAllObjects func, - %s".formatted(DEPRECATED_EXCEPTION));
         throw new ForbbidenOperationException(DEPRECATED_EXCEPTION);
     }
 
@@ -128,6 +142,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     @Deprecated
     @Transactional
     public void deleteAllObjects() {
+        this.logger.debug("in deleteAllObjects func, - %s".formatted(DEPRECATED_EXCEPTION));
         throw new ForbbidenOperationException(DEPRECATED_EXCEPTION);
     }
 
@@ -136,14 +151,17 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     public SuperAppObjectBoundary updateObject(String objectSuperapp, String internalObjectId,
                                                SuperAppObjectBoundary update, String userSuperapp, String email) {
         UserPK userId = new UserPK(userSuperapp, email);
-        if(!this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
+        if(!this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository)) {
+            this.logger.debug("in updateObject func, - %s".formatted(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION));
             throw new ForbbidenOperationException(SUPERAPP_USER_ONLY_EXCEPTION);
+        }
 
         Optional<SuperAppObjectEntity> objectO =
                 this.objectRepository.findById(new SuperappObjectPK(objectSuperapp, internalObjectId));
-        if (objectO.isEmpty())
+        if (objectO.isEmpty()) {
+            this.logger.debug("in updateObject func, Unknown Object");
             throw new NotFoundException("Unknown object");
-
+        }
         SuperAppObjectEntity objectE = objectO.get();
         Map<String, Object> newDetails = update.getObjectDetails();
         Boolean newActive = update.getActive();
@@ -156,17 +174,23 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
             objectE.setActive(newActive);
 
         if (newType != null) {
-            if (newType.isBlank())
+            if (newType.isBlank()) {
+                this.logger.debug("in updateObject func, Object alias and/or type must be specified");
                 throw new InvalidInputException("Object alias and/or type must be specified");
-            else if (!isValidObjectType(newType))
+            }
+            else if (!isValidObjectType(newType)) {
+                this.logger.debug("in updateObject func, Unknown Object type");
                 throw new InvalidInputException("Unknown object type");
+            }
             else
                 objectE.setType(newType);
         }
 
         if (newAlias != null) {
-            if (newAlias.isBlank())
+            if (newAlias.isBlank()) {
+                this.logger.debug("in updateObject func, Object alias and/or type must be specified");
                 throw new InvalidInputException("Object alias and/or type must be specified");
+            }
             else
                 objectE.setAlias(newAlias);
         }
@@ -177,6 +201,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         */
         this.handleObject(result);
         this.objectRepository.save(objectE);
+        this.logger.info("Updated super app object successfully");
         return result;
     }
 
@@ -185,22 +210,33 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     public void bindNewChild(String parentSuperapp, String parentObjectId,
                              SuperAppObjectIdBoundary newChild, String userSuperapp, String email) {
         UserPK userId = new UserPK(userSuperapp, email);
-        if(!this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
+        if(!this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository)) {
+            this.logger.debug("in bindNewChild func, %s".formatted(SUPERAPP_USER_ONLY_EXCEPTION));
             throw new ForbbidenOperationException(SUPERAPP_USER_ONLY_EXCEPTION);
+        }
 
         SuperAppObjectEntity parent = this.objectRepository
                 .findById(new SuperappObjectPK(parentSuperapp, parentObjectId))
-                .orElseThrow(() -> new NotFoundException("Cannot find parent object"));
+                .orElseThrow(() -> {
+                    this.logger.debug("in bindNewChild func, Cannot find parent object");
+                    return new NotFoundException("Cannot find parent object");
+                });
         SuperAppObjectEntity child = this.objectRepository
                 .findById(this.converter.idToEntity(newChild))
-                .orElseThrow(() -> new NotFoundException("Cannot find children object"));
+                .orElseThrow(() -> {
+                    this.logger.debug("in bindNewChild func, Cannot find children object");
+                    return new NotFoundException("Cannot find children object");
+                });
 
         this.handleObjectBinding(parent, child, userId); // handle child appropriately if is miniapp object that has limitations
         if (parent.addChild(child) && child.addParent(parent)) {
             this.objectRepository.save(parent);
             this.objectRepository.save(child);
-        } else
+            this.logger.info("Bind new Child successfully");
+        } else {
+            this.logger.error("in bindNewChild func, Failed to update parent or child object");
             throw new CannotProcessException("Failed to update parent or child object");
+        }
     }
 
     @Override
@@ -210,18 +246,21 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         UserPK userId = new UserPK(userSuperapp, email);
         Optional<SuperAppObjectEntity> objectE = this.objectRepository.findById(new SuperappObjectPK(objectSuperapp, internalObjectId));
 
-        if (objectE.isEmpty())
+        if (objectE.isEmpty()) {
+            this.logger.debug("in getSpecificObject func, Object does not exist");
             throw new NotFoundException("Object does not exist");
-
+        }
         if (this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
             return this.converter.toBoundary(objectE.get());
 
         else if (this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository)) {
-             if (!objectE.get().getActive())
-                throw new NotFoundException("Requested inactive object");
-
+             if (!objectE.get().getActive()) {
+                 this.logger.debug("in getSpecificObject func, Requested inactive object");
+                 throw new NotFoundException("Requested inactive object");
+             }
              return this.converter.toBoundary(objectE.get());
      }
+        this.logger.debug("in getSpecificObject func, %s".formatted(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION));
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
     }
 
@@ -252,7 +291,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                     .map(this.converter::toBoundary)
                     .collect(Collectors.toList());
         }
-
+        this.logger.debug("in getChildren func, %s".formatted(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION));
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
     }
 
@@ -280,7 +319,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                     .stream()
                     .map(this.converter::toBoundary)
                     .collect(Collectors.toList());
-
+        this.logger.debug("in getParents func, %s".formatted(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION));
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
     }
 
@@ -302,7 +341,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                     .stream()
                     .map(this.converter::toBoundary)
                     .collect(Collectors.toList());
-
+        this.logger.debug("in getAllObjects func, %s".formatted(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION));
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
     }
 
@@ -323,7 +362,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                     .stream()
                     .map(this.converter::toBoundary)
                     .collect(Collectors.toList());
-
+        this.logger.debug("in SearchObjectByTYpe func, %s".formatted(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION));
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
     }
 
@@ -345,7 +384,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                     .stream()
                     .map(this.converter::toBoundary)
                     .collect(Collectors.toList());
-
+        this.logger.debug("in SearchObjectsByExactAlias func, %s".formatted(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION));
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
     }
 
@@ -369,7 +408,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                     .stream()
                     .map(this.converter::toBoundary)
                     .collect(Collectors.toList());
-
+        this.logger.debug("in SearchObjectsByAliasContaining func, %s".formatted(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION));
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
     }
 
@@ -409,7 +448,10 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
             case ("Drive") -> {
                 this.miniAppService = this.context.getBean("Lift", LiftService.class);
             }
-            default -> throw new InvalidInputException("Unknown object type");
+            default -> {
+                this.logger.debug("in handleObject func, Unknwon Object type");
+                throw new InvalidInputException("Unknown object type");
+            }
         }
         miniAppService.handleObjectByType(object);
     }
@@ -436,9 +478,13 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     @Transactional
     public void deleteAllObjects(String userSuperapp, String email) {
         UserPK userId = new UserPK(userSuperapp, email);
-        if (isValidUserCredentials(userId, ADMIN, this.userRepository))
+        if (isValidUserCredentials(userId, ADMIN, this.userRepository)) {
             this.objectRepository.deleteAll();
-        else
+            this.logger.info("Deleted all super app objects successfully");
+        }
+        else {
+            this.logger.debug("in deleteAllObjects func, %s".formatted(SUPERAPP_USER_ONLY_EXCEPTION));
             throw new ForbbidenOperationException(SUPERAPP_USER_ONLY_EXCEPTION);
+        }
     }
 }
