@@ -49,7 +49,7 @@ public class GrabService implements GrabsService, MiniAppServices {
 							 UserIdBoundary invokedBy, String commandCase) {
 		SuperappObjectPK targetObjectKey = this.converter.idToEntity(targetObject.getObjectId());
 		SuperAppObjectEntity poll = this.objectRepository.findById(targetObjectKey)
-				.orElseThrow(() ->  new NotFoundException("Group not found"));
+				.orElseThrow(() ->  new NotFoundException("Grab poll not found"));
 		SuperAppObjectEntity group =
 				poll.getParents()
 				.stream()
