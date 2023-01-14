@@ -59,6 +59,7 @@ public class UserService extends AbstractService implements AdvancedUsersService
             throw new AlreadyExistsException("User already exists");
         }
         this.userEntityRepository.save(this.converter.toEntity(user));
+        this.logger.info("User Created successfully.");
         return user;
     }
 
