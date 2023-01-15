@@ -50,8 +50,14 @@ public class SplitService implements SplitsService, MiniAppServices {
 	}
 
 	@Override
-	public Object runCommand(String miniapp, SuperAppObjectIdWrapper targetObject,
-							 UserIdBoundary invokedBy, String commandCase) {
+	public Object runCommand(MiniAppCommandBoundary command) {
+
+		SuperAppObjectIdWrapper targetObject = command.getTargetObject();
+		UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
+		String commandCase = command.getCommand();
+		Map<String ,Object> commandAttribute = command.getCommandAttributes();
+
+
 		SuperAppObjectEntity group =
 				this.objectRepository.findById(
 						new SuperappObjectPK(

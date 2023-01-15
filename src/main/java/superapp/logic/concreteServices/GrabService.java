@@ -3,6 +3,7 @@ package superapp.logic.concreteServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import superapp.boundaries.command.MiniAppCommandBoundary;
 import superapp.boundaries.grab.GrabPollBoundary;
 import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.boundaries.user.UserIdBoundary;
@@ -17,6 +18,7 @@ import superapp.util.exceptions.NotFoundException;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static superapp.data.ObjectTypes.*;
 
@@ -45,8 +47,13 @@ public class GrabService implements GrabsService, MiniAppServices {
 	}
 
 	@Override
-	public Object runCommand(String miniapp, SuperAppObjectIdWrapper targetObject,
-							 UserIdBoundary invokedBy, String commandCase) {
+	public Object runCommand(MiniAppCommandBoundary command) {
+
+		SuperAppObjectIdWrapper targetObject = command.getTargetObject();
+		UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
+		String commandCase = command.getCommand();
+		Map<String ,Object> commandAttribute = command.getCommandAttributes();
+
 		SuperappObjectPK targetObjectKey = this.converter.idToEntity(targetObject.getObjectId());
 		SuperAppObjectEntity poll = this.objectRepository.findById(targetObjectKey)
 				.orElseThrow(() ->  new NotFoundException("Grab poll not found"));
@@ -58,12 +65,23 @@ public class GrabService implements GrabsService, MiniAppServices {
 
 		if (!isUserInGroup(group, invokedBy))
 			throw new InvalidInputException("Invoking user is not part of this group");
-		if (!(group.getActive() && !poll.getActive()))
+		if (!(group.getActive() && poll.getActive()))
 			throw new InvalidInputException("Cannot execute commands on an inactive group or poll");
 
 		switch(commandCase) {
 			case "addVote": {
-				this.addVote(poll, (GrabCuisines[])this.converter.detailsToMap(poll.getObjectDetails()).get("cuisines"));
+				List<String> cuisinesStr = (List<String>)commandAttribute.get("cuisines");
+				List<GrabCuisines> cuisines = new ArrayList<GrabCuisines>();
+				cuisinesStr.stream().map(i -> cuisines.add(GrabCuisines.valueOf(i))).toList();
+				Map<GrabCuisines, Integer> votes = this.addVote(poll, cuisines);
+
+				Map<String,Object> rv = new HashMap<String,Object>();
+				rv.put("votes",votes);
+				poll.setObjectDetails(this.converter.detailsToString(rv));
+				this.objectRepository.save(poll);
+
+
+				return votes;
 			}
 			case "selectRandomly": { return this.selectRandomly(poll); }
 			case "selectByMajority": { return this.selectByMajority(poll); }
@@ -80,13 +98,15 @@ public class GrabService implements GrabsService, MiniAppServices {
 	}
 
 	@Override
-	public void addVote(SuperAppObjectEntity poll, GrabCuisines[] votes) {
-		Map<GrabCuisines, Integer> existingVotes =
-				(Map<GrabCuisines, Integer>)this.converter.detailsToMap(poll.getObjectDetails()).get("votes");
+	public Map<GrabCuisines, Integer>  addVote(SuperAppObjectEntity poll, List<GrabCuisines> votes) {
+		Map<GrabCuisines, Integer> existingVotes = getVotesFromPoll(poll) ;
 		for (GrabCuisines vote: votes) {
-			int oldValue = existingVotes.getOrDefault(vote, 0);
-			existingVotes.replace(vote, oldValue + 1);
+			if (existingVotes.containsKey(vote))
+				existingVotes.replace(vote , existingVotes.get(vote) + 1 );
+			else
+				existingVotes.put(vote , 1);
 		}
+		return existingVotes;
 	}
 
 	@Override
@@ -97,25 +117,46 @@ public class GrabService implements GrabsService, MiniAppServices {
 		return disableAndSave(poll);
 	}
 
+//	@Override
+//	public SuperAppObjectBoundary selectByMajority(SuperAppObjectEntity poll) {
+//		Map<String, Object> pollDetails = this.converter.detailsToMap(poll.getObjectDetails());
+//		GrabCuisines selected = null;
+//		int totalVotes = 0;
+//		for (Map.Entry<String, Object> entry : pollDetails.entrySet()) {
+//			GrabCuisines cuisines = GrabCuisines.valueOf(entry.getKey());
+//			Integer votes = (Integer)entry.getValue();
+//			if (votes > totalVotes)
+//				selected = cuisines;
+//		}
+//		addSelectionToPoll(poll, new GrabPollBoundary(selected, ""));
+//		return disableAndSave(poll);
+//	}
+
+
 	@Override
 	public SuperAppObjectBoundary selectByMajority(SuperAppObjectEntity poll) {
-		Map<String, Object> pollDetails = this.converter.detailsToMap(poll.getObjectDetails());
-		GrabCuisines selected = null;
-		int totalVotes = 0;
-		for (Map.Entry<String, Object> entry : pollDetails.entrySet()) {
-			GrabCuisines cuisines = GrabCuisines.valueOf(entry.getKey());
-			Integer votes = (Integer)entry.getValue();
-			if (votes > totalVotes)
-				selected = cuisines;
-		}
-		addSelectionToPoll(poll, new GrabPollBoundary(selected, ""));
+		Map<GrabCuisines, Integer> totalVotes =getVotesFromPoll(poll) ;
+
+		Comparator<GrabCuisines> valueComparator = (k1, k2) -> {
+			Integer v1 = totalVotes.get(k1);
+			Integer v2 = totalVotes.get(k2);
+			return v2.compareTo(v1);
+		};
+
+		Map<GrabCuisines, Integer> totalVotesSorted = new TreeMap<>(valueComparator);
+		totalVotesSorted.putAll(totalVotes);
+		GrabCuisines selected = totalVotesSorted.entrySet().iterator().next().getKey();
+
+		poll = addSelectionToPoll(poll, new GrabPollBoundary(selected, "", totalVotesSorted)); //todo add sorted map
 		return disableAndSave(poll);
 	}
 
-	private void addSelectionToPoll(SuperAppObjectEntity poll, GrabPollBoundary selection) {
-		Map<String, Object> pollDetails = this.converter.detailsToMap(poll.getObjectDetails());
-		pollDetails.put("selection", selection);
-		poll.setObjectDetails(this.converter.detailsToString(pollDetails));
+
+	private SuperAppObjectEntity addSelectionToPoll(SuperAppObjectEntity poll, GrabPollBoundary selection) {
+		Map<String,Object> pollSelection= new HashMap<String,Object>();
+		pollSelection.put("selection",selection);
+		poll.setObjectDetails(this.converter.detailsToString(pollSelection));
+		return poll ;
 	}
 
 	private SuperAppObjectBoundary disableAndSave(SuperAppObjectEntity poll) {
@@ -128,7 +169,7 @@ public class GrabService implements GrabsService, MiniAppServices {
 		if (!poll.getActive())
 			throw new ForbbidenOperationException("Cannot operate on inactive poll");
 		GrabPollBoundary selection = (GrabPollBoundary)poll.getObjectDetails().get("selection");
-		if (selection == null) {
+		if (selection != null) {
 			disableAndSave(this.converter.toEntity(poll));
 			throw new ForbbidenOperationException("Cannot operate on a poll that have ended");
 		}
@@ -143,4 +184,14 @@ public class GrabService implements GrabsService, MiniAppServices {
 				.detailsToMap(group.getObjectDetails()).get("members"))
 				.contains(linkedMap);
 	}
+
+	private Map<GrabCuisines, Integer> getVotesFromPoll(SuperAppObjectEntity poll) {
+		Map<GrabCuisines, Integer> existingVotes = new HashMap<GrabCuisines, Integer>();
+		Map<String, Integer> existingVotesStr = (Map<String, Integer>) this.converter.detailsToMap(poll.getObjectDetails()).get("votes");
+		existingVotesStr.forEach((i, j) -> existingVotes.put(GrabCuisines.valueOf(i), j));
+
+		return existingVotes;
+	}
+
+
 }
