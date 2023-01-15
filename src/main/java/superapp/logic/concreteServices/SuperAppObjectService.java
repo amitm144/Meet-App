@@ -211,13 +211,20 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                                                     String userSuperapp, String email,
                                                     int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
-        PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
+        SuperappObjectPK objectId = new SuperappObjectPK(objectSuperapp,internalObjectId);
+        PageRequest pageReq;
 
         if (this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
-            return getChildrenRepoSearch(pageReq, internalObjectId, userSuperapp ,true);
+            pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
-        else if (this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
-            return getChildrenRepoSearch(pageReq,internalObjectId,userSuperapp,false);
+        else if (this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository)) {
+            pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId", "active");
+            return this.objectRepository.findAllByParentsContainsAndActiveIsTrue(objectId ,pageReq)
+                    .stream()
+                    .map(this.converter::toBoundary)
+                    .collect(Collectors.toList());
+        }
+
 
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
     }

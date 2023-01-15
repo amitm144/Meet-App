@@ -1,7 +1,6 @@
 package superapp.dal;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -15,4 +14,6 @@ public interface SuperAppObjectEntityRepository extends PagingAndSortingReposito
     public Page<SuperAppObjectEntity> findByType(@Param("type") String type, Pageable page);
     public Page<SuperAppObjectEntity> findByAlias(@Param("alias") String alias, Pageable page);
     public Page<SuperAppObjectEntity> findByAliasContaining(@Param("text") String text, Pageable page);
+    public Page<SuperAppObjectEntity> findAllByParentsContainsAndActiveIsTrue(@Param("objectId") SuperappObjectPK objectId, Pageable page);
+
 }
