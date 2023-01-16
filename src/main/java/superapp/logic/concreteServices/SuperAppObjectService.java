@@ -326,12 +326,13 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         String objectType = object.getType();
         if (!isValidObjectType(objectType))
             objectType = "";
+
         switch (objectType) {
             case ("Transaction"), ("Group") -> {
                 this.miniAppService = this.context.getBean("Split", SplitService.class);
                 miniAppService.handleObjectByType(object);
             }
-            case ("Poll") -> {
+            case ("GrabPoll") -> {
                 this.miniAppService = this.context.getBean("Grab", GrabService.class);
                 miniAppService.handleObjectByType(object);
             }
