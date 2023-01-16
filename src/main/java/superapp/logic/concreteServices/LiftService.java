@@ -68,16 +68,16 @@ public class LiftService implements LiftsService, MiniAppServices {
 
         String commandCase = command.getCommand();
         switch (commandCase) {
-            case "StartDrive" -> { return null; }
+            case "StartDrive" -> { return this.startDrive(drive); }
             case "LiftRequest" -> {
-                checkRequestData(command);
+                this.checkRequestData(command);
                 this.addNewRequest(command);
-                return null;
             }
-            case "ApproveLiftRequest" -> { return null; }
-            case "RejectLiftRequests" -> { return null; }
+            case "ApproveLiftRequest" -> { this.approveLiftRequest(drive, invokedBy); }
+            case "RejectLiftRequests" -> { this.rejectLiftRequest(drive, invokedBy); }
             default -> throw new NotFoundException(UNKNOWN_COMMAND_EXCEPTION);
         }
+        return null;
     }
 
     @Override
@@ -89,18 +89,38 @@ public class LiftService implements LiftsService, MiniAppServices {
     }
 
     @Override
-    public Object startDrive(SuperappObjectPK drive) {
+    public Object startDrive(SuperAppObjectEntity drive) {
         return null;
     }
 
     @Override
-    public void approveLiftRequest(SuperappObjectPK drive, UserIdBoundary requestingUser) {
+    public void approveLiftRequest(SuperAppObjectEntity drive, UserIdBoundary requestingUser) {
+        if (!isUserRequestingPassenger(drive, requestingUser))
+            throw new InputMismatchException("User has never requested to join this lift");
+        Map<String, Object> objectDetails = this.converter.detailsToMap(drive.getObjectDetails());
+        List<UserIdBoundary> requestedList = (List<UserIdBoundary>)objectDetails.get("requestingPassengers");
+        List<UserIdBoundary> registeredList = (List<UserIdBoundary>)objectDetails
+                .getOrDefault("registeredPassengers", new ArrayList<>());
 
+        requestedList.remove(requestingUser);
+        registeredList.add(requestingUser);
+        objectDetails.replace("requestingPassengers", requestedList);
+        objectDetails.replace("registeredPassengers", registeredList);
+        drive.setObjectDetails(this.converter.detailsToString(objectDetails));
+        this.objectRepository.save(drive);
     }
 
     @Override
-    public void rejectLiftRequest(SuperappObjectPK drive, UserIdBoundary requestingUser) {
+    public void rejectLiftRequest(SuperAppObjectEntity drive, UserIdBoundary requestingUser) {
+        if (!isUserRequestingPassenger(drive, requestingUser))
+            throw new InputMismatchException("User has never requested to join this lift");
+        Map<String, Object> objectDetails = this.converter.detailsToMap(drive.getObjectDetails());
+        List<UserIdBoundary> requestedList = (List<UserIdBoundary>)objectDetails.get("requestingPassengers");
 
+        requestedList.remove(requestingUser);
+        objectDetails.replace("requestingPassengers", requestedList);
+        drive.setObjectDetails(this.converter.detailsToString(objectDetails));
+        this.objectRepository.save(drive);
     }
 
     private void addNewRequest(MiniAppCommandBoundary request) {
