@@ -1,7 +1,6 @@
 package superapp.data;
 
 public enum GrabCuisines {
-
 	AFRICAN,
 	AMERICAN,
 	ARABIC,
@@ -57,8 +56,4 @@ public enum GrabCuisines {
 	VIETNAMESE,
 	WAFFLES,
 	WINGS
-
 }
-
-
-

@@ -55,7 +55,7 @@ public class SplitService implements SplitsService, MiniAppServices {
 		UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
 		SuperAppObjectEntity group =
 				this.objectRepository.findById(targetObjectKey)
-				.orElseThrow(() -> new NotFoundException("Group not found"));
+					.orElseThrow(() -> new NotFoundException("Group not found"));
 		if (!isUserInGroup(group, invokedBy))
 			throw new InvalidInputException("Invoking user is not part of this group");
 		if (!group.getActive())
