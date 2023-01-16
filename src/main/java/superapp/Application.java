@@ -13,7 +13,7 @@ public class Application {
 
 		String activeProfile = System.getenv("ACTIVE_PROFILE");
 		if (activeProfile == null || activeProfile.isBlank())
-			activeProfile = "test";
+			activeProfile = "staging";
 		defaultProperties.setProperty("spring.profiles.active", activeProfile);
 		defaultProperties.setProperty("spring.config.name", "application-${spring.profiles.active}");
 		application.setDefaultProperties(defaultProperties);

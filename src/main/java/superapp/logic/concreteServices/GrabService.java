@@ -15,6 +15,8 @@ import superapp.logic.MiniAppServices;
 import superapp.util.exceptions.ForbbidenOperationException;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.exceptions.NotFoundException;
+import superapp.util.geoLocationAPI.MapBoxConverter;
+import superapp.util.geoLocationAPI.RestaurantGeoLocationHandler;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
 
 import java.util.*;
@@ -26,15 +28,19 @@ import static superapp.data.ObjectTypes.*;
 public class GrabService implements GrabsService, MiniAppServices {
 	private SuperAppObjectEntityRepository objectRepository;
 	private SuperAppObjectConverter converter;
+	private RestaurantGeoLocationHandler generateRestaurant ;
+
 
 	private final Random RANDOM = new Random();
 	private final List<GrabCuisines> CUISINES = List.of(GrabCuisines.values());
 	private final int CUISINES_SIZE = CUISINES.size();
 
+
 	@Autowired
 	public GrabService(SuperAppObjectEntityRepository objectRepository) {
 		this.objectRepository = objectRepository;
 		this.converter = new SuperAppObjectConverter();
+		this.generateRestaurant = new RestaurantGeoLocationHandler(new MapBoxConverter());
 	}
 
 	@Override
@@ -112,7 +118,10 @@ public class GrabService implements GrabsService, MiniAppServices {
 	@Override
 	public Object selectRandomly(SuperAppObjectEntity poll) {
 		GrabCuisines chosenCuisine = CUISINES.get(RANDOM.nextInt(CUISINES_SIZE));
-		GrabPollBoundary selection =  new GrabPollBoundary(chosenCuisine, "");
+
+		ArrayList<Map<String, Object>> suggestedRestaurants = generateRestaurant.getRestaurantByCuisine(chosenCuisine.name(),5,5);
+
+		GrabPollBoundary selection =  new GrabPollBoundary(chosenCuisine, suggestedRestaurants);
 		addSelectionToPoll(poll, selection);
 		return disableAndSave(poll);
 	}
@@ -145,9 +154,12 @@ public class GrabService implements GrabsService, MiniAppServices {
 
 		Map<GrabCuisines, Integer> totalVotesSorted = new TreeMap<>(valueComparator);
 		totalVotesSorted.putAll(totalVotes);
-		GrabCuisines selected = totalVotesSorted.entrySet().iterator().next().getKey();
+		GrabCuisines chosenCuisine = totalVotesSorted.entrySet().iterator().next().getKey();
 
-		poll = addSelectionToPoll(poll, new GrabPollBoundary(selected, "", totalVotesSorted)); //todo add sorted map
+		ArrayList<Map<String, Object>> suggestedRestaurants = generateRestaurant.getRestaurantByCuisine(chosenCuisine.name(),5,5);
+
+
+		poll = addSelectionToPoll(poll, new GrabPollBoundary(chosenCuisine,suggestedRestaurants)); //todo add sorted map
 		return disableAndSave(poll);
 	}
 
