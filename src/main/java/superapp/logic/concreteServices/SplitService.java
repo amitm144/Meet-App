@@ -24,6 +24,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static superapp.data.ObjectTypes.*;
+import static superapp.util.Constants.*;
 
 @Service("Split")
 public class SplitService implements SplitsService, MiniAppServices {
@@ -45,7 +46,7 @@ public class SplitService implements SplitsService, MiniAppServices {
 		switch (objectType) {
 			case ("Group") -> this.checkGroupData(object);
 			case ("Transaction") -> this.checkTransactionData(object);
-			default -> throw new InvalidInputException("Unknown object type");
+			default -> throw new InvalidInputException(UNKNOWN_OBJECT_EXCEPTION);
 		}
 	}
 
@@ -55,11 +56,11 @@ public class SplitService implements SplitsService, MiniAppServices {
 		UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
 		SuperAppObjectEntity group =
 				this.objectRepository.findById(targetObjectKey)
-					.orElseThrow(() -> new NotFoundException("Group not found"));
+					.orElseThrow(() -> new NotFoundException(VALUE_NOT_FOUND_EXCEPTION.formatted("Group")));
 		if (!isUserInGroup(group, invokedBy))
-			throw new InvalidInputException("Invoking user is not part of this group");
+			throw new InvalidInputException(USER_NOT_IN_GROUP_EXCEPTION);
 		if (!group.getActive())
-			throw new InvalidInputException("Cannot execute commands on inactive group");
+			throw new InvalidInputException(EXECUTE_ON_INACTIVE_EXCEPTION.formatted("group"));
 
 		String commandCase = command.getCommand();
 		switch (commandCase) {
@@ -73,7 +74,7 @@ public class SplitService implements SplitsService, MiniAppServices {
 				this.settleGroupDebts(group);
 				return null;
 			}
-			default -> throw new NotFoundException("Unknown command");
+			default -> throw new NotFoundException(UNKNOWN_COMMAND_EXCEPTION);
 		}
 	}
 

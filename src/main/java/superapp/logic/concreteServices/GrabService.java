@@ -22,6 +22,7 @@ import superapp.util.geoLocationAPI.RestaurantGeoLocationHandler;
 import java.util.*;
 
 import static superapp.data.ObjectTypes.*;
+import static superapp.util.Constants.*;
 
 @Service("Grab")
 public class GrabService implements GrabsService, MiniAppServices {
@@ -46,7 +47,7 @@ public class GrabService implements GrabsService, MiniAppServices {
 	public void handleObjectByType(SuperAppObjectBoundary object) {
 		String objectType = object.getType();
 		if (!isValidObjectType(objectType) || ObjectTypes.valueOf(objectType) != GrabPoll)
-			throw new InvalidInputException("Unknown object type");
+			throw new InvalidInputException(UNKNOWN_OBJECT_EXCEPTION);
 
 		this.checkPollData(object);
 	}
@@ -56,17 +57,17 @@ public class GrabService implements GrabsService, MiniAppServices {
 		SuperappObjectPK targetObjectKey = this.converter.idToEntity(command.getTargetObject().getObjectId());
 		UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
 		SuperAppObjectEntity poll = this.objectRepository.findById(targetObjectKey)
-				.orElseThrow(() ->  new NotFoundException("Grab poll not found"));
+				.orElseThrow(() ->  new NotFoundException(VALUE_NOT_FOUND_EXCEPTION.formatted("Grab poll")));
 		SuperAppObjectEntity group =
 				poll.getParents()
 				.stream()
 				.findFirst() // grab poll can only be bound to one parent
-				.orElseThrow(() ->  new NotFoundException("Grab poll is not bound to any group"));
+				.orElseThrow(() ->  new NotFoundException(OBJECT_NOT_BOUND_EXCEPTION.formatted("Grab poll")));
 
 		if (!isUserInGroup(group, invokedBy))
-			throw new InvalidInputException("Invoking user is not part of this group");
+			throw new InvalidInputException(USER_NOT_IN_GROUP_EXCEPTION);
 		if (!(group.getActive() && poll.getActive()))
-			throw new InvalidInputException("Cannot execute commands on an inactive group or poll");
+			throw new InvalidInputException(EXECUTE_ON_INACTIVE_EXCEPTION.formatted("group or poll"));
 
 		String commandCase = command.getCommand();
 		switch (commandCase) {
@@ -82,7 +83,7 @@ public class GrabService implements GrabsService, MiniAppServices {
 			}
 			case "selectRandomly" -> { return this.selectRandomly(poll); }
 			case "selectByMajority" -> { return this.selectByMajority(poll); }
-			default -> throw new NotFoundException("Unknown command");
+			default -> throw new NotFoundException(UNKNOWN_COMMAND_EXCEPTION);
 		}
 	}
 
@@ -90,14 +91,15 @@ public class GrabService implements GrabsService, MiniAppServices {
 	public void checkValidBinding(SuperAppObjectEntity parent, SuperAppObjectEntity child, UserPK userId) {
 		if (!parent.getType().equals(ObjectTypes.Group.name()))
 			throw new InvalidInputException("Cannot bind poll to non-group objects");
-		if(child.getParents().size() > 0)
+		if (child.getParents().size() > 0)
 			throw new ForbbidenOperationException("Grab poll can only be bound to one group");
 	}
 
 	@Override
 	public void addVote(SuperAppObjectEntity poll, List<GrabCuisines> votes) {
 		Map<String, Integer> existingVotes =
-				(Map<String, Integer>)this.converter.detailsToMap(poll.getObjectDetails()).get("votes");
+				(Map<String, Integer>)this.converter.detailsToMap(poll.getObjectDetails())
+						.get("votes");
 		if (existingVotes == null)
 			existingVotes = new HashMap<>();
 
@@ -179,7 +181,8 @@ public class GrabService implements GrabsService, MiniAppServices {
 	private void checkIsValidVote(MiniAppCommandBoundary command) {
 		try {
 			List<GrabCuisines> cuisines =
-					((List<String>)command.getCommandAttributes().get("cuisines"))
+					((List<String>)command.getCommandAttributes()
+							.get("cuisines"))
 							.stream()
 							.map(GrabCuisines::valueOf)
 							.toList();
