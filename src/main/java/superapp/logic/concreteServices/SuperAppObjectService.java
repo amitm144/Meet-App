@@ -195,11 +195,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .findById(this.converter.idToEntity(newChild))
                 .orElseThrow(() -> new NotFoundException("Cannot find children object"));
 
-        /*
-            if child is transaction ->
-            check to see if parent is group and invoking user in parent group
-        */
-        this.handleObjectBinding(parent, child, userId);
+        this.handleObjectBinding(parent, child, userId); // handle child appropriately if is miniapp object that has limitations
         if (parent.addChild(child) && child.addParent(parent)) {
             this.objectRepository.save(parent);
             this.objectRepository.save(child);
@@ -248,8 +244,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
 
     @Override
     @Transactional(readOnly = true)
-    public List<SuperAppObjectBoundary> getParents(String objectSuperapp, String internalObjectId,String userSuperapp,
-                                                   String email, int size, int page) {
+    public List<SuperAppObjectBoundary> getParents(String objectSuperapp, String internalObjectId,
+                                                   String userSuperapp, String email, int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
@@ -265,7 +261,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
 
     @Override
     @Transactional(readOnly = true)
-    public List<SuperAppObjectBoundary> getAllObjects(String userSuperapp, String email, int size, int page) {
+    public List<SuperAppObjectBoundary> getAllObjects(String userSuperapp, String email,
+                                                      int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "userEmail");
 
@@ -279,7 +276,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     }
 
     @Override
-    public List<SuperAppObjectBoundary> SearchObjectsByType(String type, String userSuperapp, String email, int size, int page) {
+    public List<SuperAppObjectBoundary> SearchObjectsByType(String type, String userSuperapp,
+                                                            String email, int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
@@ -294,7 +292,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
 
     @Override
     @Transactional
-    public List<SuperAppObjectBoundary> SearchObjectsByExactAlias(String alias, String userSuperapp, String email, int size, int page) {
+    public List<SuperAppObjectBoundary> SearchObjectsByExactAlias(String alias, String userSuperapp,
+                                                                  String email, int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
@@ -309,8 +308,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
 
     @Override
     @Transactional
-    public List<SuperAppObjectBoundary> SearchObjectsByAliasContaining(String text, String userSuperapp, String email, int size, int page)
-    {
+    public List<SuperAppObjectBoundary> SearchObjectsByAliasContaining(String text, String userSuperapp,
+                                                                       String email, int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
@@ -327,9 +326,14 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         String objectType = object.getType();
         if (!isValidObjectType(objectType))
             objectType = "";
+
         switch (objectType) {
             case ("Transaction"), ("Group") -> {
                 this.miniAppService = this.context.getBean("Split", SplitService.class);
+                miniAppService.handleObjectByType(object);
+            }
+            case ("GrabPoll") -> {
+                this.miniAppService = this.context.getBean("Grab", GrabService.class);
                 miniAppService.handleObjectByType(object);
             }
             default -> throw new InvalidInputException("Unknown object type");
@@ -337,11 +341,15 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     }
 
     private void handleObjectBinding(SuperAppObjectEntity parent, SuperAppObjectEntity child, UserPK userId) {
-        if (child.getType().equals(Transaction.name()) && parent.getType().equals(Group.name())) {
+        this.miniAppService = null; // this is done for the code to realize if the bounded objects has any limitations
+        if (child.getType().equals(Transaction.name()) && parent.getType().equals(ObjectTypes.Group.name()))
             this.miniAppService = this.context.getBean("Split", SplitService.class);
-        }
 
-        this.miniAppService.checkValidBinding(parent, child, userId);
+        else if (child.getAlias().equals(ObjectTypes.GrabPoll.toString()))
+            this.miniAppService = this.context.getBean("Grab", GrabService.class);
+
+        if (this.miniAppService != null)
+            this.miniAppService.checkValidBinding(parent, child, userId);
     }
 
     @Override
@@ -370,7 +378,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .collect(Collectors.toList());
     }
 
-    private List<SuperAppObjectBoundary> findByAliasContainingRepoSearch(PageRequest pageReq, String text, boolean isSuperAppUser){
+    private List<SuperAppObjectBoundary> findByAliasContainingRepoSearch(PageRequest pageReq, String text,
+                                                                         boolean isSuperAppUser){
         return this.objectRepository
                 .findByAliasContaining(text, pageReq)
                 .stream()
@@ -379,7 +388,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .collect(Collectors.toList());
     }
 
-    private List<SuperAppObjectBoundary> getParentRepoSearch(PageRequest pageReq, String internalObjectId, String objectSuperapp, boolean isSuperAppUser) {
+    private List<SuperAppObjectBoundary> getParentRepoSearch(PageRequest pageReq, String internalObjectId,
+                                                             String objectSuperapp, boolean isSuperAppUser) {
         List<SuperAppObjectEntity> objectList =
                 this.objectRepository
                 .findAll(pageReq)
@@ -398,7 +408,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .collect(Collectors.toList());
     }
 
-    private List<SuperAppObjectBoundary> getChildrenRepoSearch(PageRequest pageReq, String internalObjectId, String objectSuperapp, boolean isSuperAppUser) {
+    private List<SuperAppObjectBoundary> getChildrenRepoSearch(PageRequest pageReq, String internalObjectId,
+                                                               String objectSuperapp, boolean isSuperAppUser) {
         List<SuperAppObjectEntity> objectList =
                 this.objectRepository
                 .findAll(pageReq)
@@ -417,7 +428,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .collect(Collectors.toList());
     }
 
-    private List<SuperAppObjectBoundary> findAllObjectsByTypeRepoSearch(PageRequest pageReq, String type, boolean isSuperAppUser){
+    private List<SuperAppObjectBoundary> findAllObjectsByTypeRepoSearch(PageRequest pageReq, String type,
+                                                                        boolean isSuperAppUser) {
         return this.objectRepository.findByType(type, pageReq)
                 .stream()
                 .map(this.converter::toBoundary)

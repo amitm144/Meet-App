@@ -3,7 +3,9 @@ package superapp.logic.concreteServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import superapp.boundaries.command.MiniAppCommandBoundary;
 import superapp.boundaries.object.SuperAppObjectBoundary;
+import superapp.boundaries.object.SuperAppObjectIdBoundary;
 import superapp.boundaries.split.SplitDebtBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.SuperAppObjectConverter;
@@ -48,20 +50,18 @@ public class SplitService implements SplitsService, MiniAppServices {
 	}
 
 	@Override
-	public Object runCommand(String miniapp, SuperAppObjectIdWrapper targetObject, UserIdBoundary invokedBy, String commandCase) {
+	public Object runCommand(MiniAppCommandBoundary command) {
+		SuperappObjectPK targetObjectKey = this.converter.idToEntity(command.getTargetObject().getObjectId());
+		UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
 		SuperAppObjectEntity group =
-				this.objectRepository.findById(
-						new SuperappObjectPK(
-								targetObject.getObjectId().getSuperapp(),
-								targetObject.getObjectId().getInternalObjectId()))
-				.orElseThrow(() ->  new NotFoundException("Group not found"));
-
+				this.objectRepository.findById(targetObjectKey)
+					.orElseThrow(() -> new NotFoundException("Group not found"));
 		if (!isUserInGroup(group, invokedBy))
 			throw new InvalidInputException("Invoking user is not part of this group");
-
 		if (!group.getActive())
-			throw new InvalidInputException("Cannot execute commands on an inactive group");
+			throw new InvalidInputException("Cannot execute commands on inactive group");
 
+		String commandCase = command.getCommand();
 		switch (commandCase) {
 			case "showDebt" -> {
 				SuperappObjectPK objectId =
@@ -143,9 +143,11 @@ public class SplitService implements SplitsService, MiniAppServices {
 		linkedMap.put("superapp", userId.getSuperapp());
 		linkedMap.put("email", userId.getEmail());
 
-		return ((List<LinkedHashMap<String, String>>)this.converter
-				.detailsToMap(group.getObjectDetails()).get("members"))
-				.contains(linkedMap);
+		List<LinkedHashMap<String, String>> members = (List<LinkedHashMap<String, String>>)this.converter
+				.detailsToMap(group.getObjectDetails())
+				.get("members");
+
+		return (members != null && members.contains(linkedMap));
 	}
 
 	private void checkGroupData(SuperAppObjectBoundary group) {

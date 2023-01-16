@@ -202,15 +202,16 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     }
 
     private Object handleCommand(MiniAppCommandBoundary command) {
-        SuperAppObjectIdWrapper targetObject = command.getTargetObject();
-        UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
         String miniapp = command.getCommandId().getMiniapp();
         switch (miniapp) {
             case ("Split") -> {
                 this.miniAppService = this.context.getBean("Split", SplitService.class);
-                return this.miniAppService.runCommand(miniapp, targetObject, invokedBy, command.getCommand());
+                return this.miniAppService.runCommand(command);
             }
-            case ("Grab") -> { return null; }
+            case ("Grab") -> {
+                this.miniAppService = this.context.getBean("Grab", GrabService.class);
+                return this.miniAppService.runCommand(command);
+            }
             case ("Lift") -> { return null; }
             default -> { throw new InvalidInputException("Unknown miniapp"); }
         }
