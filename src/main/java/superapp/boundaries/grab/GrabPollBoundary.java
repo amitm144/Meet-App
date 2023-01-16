@@ -2,16 +2,16 @@ package superapp.boundaries.grab;
 
 import superapp.data.GrabCuisines;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class GrabPollBoundary {
     private GrabCuisines selectedCuisine;
-    private ArrayList<Map<String, Object>> suggestedRestaurants;
+    private List<Map<String, Object>> suggestedRestaurants;
 
     public GrabPollBoundary() {}
 
-    public GrabPollBoundary(GrabCuisines selectedCuisine, ArrayList<Map<String, Object>> suggestedRestaurants) {
+    public GrabPollBoundary(GrabCuisines selectedCuisine, List<Map<String, Object>> suggestedRestaurants) {
         this.selectedCuisine = selectedCuisine;
         this.suggestedRestaurants = suggestedRestaurants;
     }
@@ -24,11 +24,11 @@ public class GrabPollBoundary {
         this.selectedCuisine = selectedCuisine;
     }
 
-    public ArrayList<Map<String, Object>> getSuggestedRestaurants() {
+    public List<Map<String, Object>> getSuggestedRestaurants() {
         return suggestedRestaurants;
     }
 
-    public void setSuggestedRestaurants(ArrayList<Map<String, Object>> suggestedRestaurants) {
+    public void setSuggestedRestaurants(List<Map<String, Object>> suggestedRestaurants) {
         this.suggestedRestaurants = suggestedRestaurants;
     }
 
@@ -36,7 +36,7 @@ public class GrabPollBoundary {
     public String toString() {
         return "GrabPollBoundary{" +
                 "selectedCuisine=" + selectedCuisine +
-                ", Suggested Restaurants='" + suggestedRestaurants + '\'' +
+                ", SuggestedRestaurants='" + suggestedRestaurants + '\'' +
 
         '}';
     }
