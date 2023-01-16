@@ -26,5 +26,4 @@ public abstract  class AbstractService {
         Optional<UserEntity> userE = repository.findById(userId);
         return userE.isPresent() && userE.get().getRole().equals(role);
     }
-
 }

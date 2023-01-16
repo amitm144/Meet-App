@@ -51,25 +51,17 @@ public class SplitService implements SplitsService, MiniAppServices {
 
 	@Override
 	public Object runCommand(MiniAppCommandBoundary command) {
-
-		SuperAppObjectIdWrapper targetObject = command.getTargetObject();
+		SuperappObjectPK targetObjectKey = this.converter.idToEntity(command.getTargetObject().getObjectId());
 		UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
-		String commandCase = command.getCommand();
-		Map<String ,Object> commandAttribute = command.getCommandAttributes();
-
-
 		SuperAppObjectEntity group =
-				this.objectRepository.findById(
-						new SuperappObjectPK(
-							targetObject.getObjectId().getSuperapp(),
-							targetObject.getObjectId().getInternalObjectId()
-				))
-				.orElseThrow(() -> new NotFoundException("Group not found"));
+				this.objectRepository.findById(targetObjectKey)
+					.orElseThrow(() -> new NotFoundException("Group not found"));
 		if (!isUserInGroup(group, invokedBy))
 			throw new InvalidInputException("Invoking user is not part of this group");
 		if (!group.getActive())
 			throw new InvalidInputException("Cannot execute commands on inactive group");
 
+		String commandCase = command.getCommand();
 		switch (commandCase) {
 			case "showDebt" -> {
 				SuperappObjectPK objectId =
@@ -151,9 +143,11 @@ public class SplitService implements SplitsService, MiniAppServices {
 		linkedMap.put("superapp", userId.getSuperapp());
 		linkedMap.put("email", userId.getEmail());
 
-		return ((List<LinkedHashMap<String, String>>)this.converter
-				.detailsToMap(group.getObjectDetails()).get("members"))
-				.contains(linkedMap);
+		List<LinkedHashMap<String, String>> members = (List<LinkedHashMap<String, String>>)this.converter
+				.detailsToMap(group.getObjectDetails())
+				.get("members");
+
+		return (members != null && members.contains(linkedMap));
 	}
 
 	private void checkGroupData(SuperAppObjectBoundary group) {

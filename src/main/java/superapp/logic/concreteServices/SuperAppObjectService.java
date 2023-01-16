@@ -324,7 +324,6 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
 
     private void handleObject(SuperAppObjectBoundary object) {
         String objectType = object.getType();
-        System.err.println(objectType);
         if (!isValidObjectType(objectType))
             objectType = "";
 

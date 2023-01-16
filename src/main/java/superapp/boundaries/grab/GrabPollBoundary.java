@@ -7,8 +7,6 @@ import java.util.Map;
 
 public class GrabPollBoundary {
     private GrabCuisines selectedCuisine;
-
-    private Map<GrabCuisines,Integer> cuisinesVotes;
     private ArrayList<Map<String, Object>> suggestedRestaurants;
 
     public GrabPollBoundary() {}
@@ -17,12 +15,6 @@ public class GrabPollBoundary {
         this.selectedCuisine = selectedCuisine;
         this.suggestedRestaurants = suggestedRestaurants;
     }
-//
-//    public GrabPollBoundary(GrabCuisines selectedCuisine, String url , ArrayList<Map<String, Object>> suggestedRestaurants) {
-//        this.selectedCuisine = selectedCuisine;
-//        this.suggestedRestaurants = suggestedRestaurants;
-//        this.cuisinesVotes = cuisinesVotes;
-//    }
 
     public GrabCuisines getSelectedCuisine() {
         return selectedCuisine;
@@ -45,7 +37,7 @@ public class GrabPollBoundary {
         return "GrabPollBoundary{" +
                 "selectedCuisine=" + selectedCuisine +
                 ", Suggested Restaurants='" + suggestedRestaurants + '\'' +
-                (cuisinesVotes!=null ? "votes: " + cuisinesVotes :"")+
+
         '}';
     }
 }

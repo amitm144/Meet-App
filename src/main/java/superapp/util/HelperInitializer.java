@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.IntStream;
 
-//@Component
+@Component
 @Profile("staging")
 public class HelperInitializer implements CommandLineRunner {
 	private MiniAppCommandService commands;
