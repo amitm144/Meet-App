@@ -330,14 +330,16 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         switch (objectType) {
             case ("Transaction"), ("Group") -> {
                 this.miniAppService = this.context.getBean("Split", SplitService.class);
-                miniAppService.handleObjectByType(object);
             }
             case ("GrabPoll") -> {
                 this.miniAppService = this.context.getBean("Grab", GrabService.class);
-                miniAppService.handleObjectByType(object);
+            }
+            case ("Drive") -> {
+                this.miniAppService = this.context.getBean("Lift", LiftService.class);
             }
             default -> throw new InvalidInputException("Unknown object type");
         }
+        miniAppService.handleObjectByType(object);
     }
 
     private void handleObjectBinding(SuperAppObjectEntity parent, SuperAppObjectEntity child, UserPK userId) {
