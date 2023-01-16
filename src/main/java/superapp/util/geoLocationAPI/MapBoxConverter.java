@@ -14,8 +14,10 @@ public class MapBoxConverter {
         public Map<String, Object> detailsToMap(String details) {
             try {
                 return (Map<String, Object>)this.jackson.readValue(details, Map.class);
-            } catch (Exception e) { throw new InvalidInputException(e.getMessage()); }
+            }
+            catch (Exception e) { throw new InvalidInputException(e.getMessage()); }
         }
+
         public HashMap<String, Object> mapToRestaurantDetails(LinkedHashMap resturant) {
             HashMap<String,Object> rv = new HashMap<String,Object>();
             String name = (String) resturant.get("text");
@@ -38,8 +40,10 @@ public class MapBoxConverter {
         }
 
         public String coordinatesToString(List<Coordinate> coordinates) {
-            StringBuffer rv=new StringBuffer();
-            coordinates.forEach(coordinate -> rv.append(coordinate.getLatitude()+","+coordinate.getLongitude()+";"));
+            StringBuffer rv = new StringBuffer();
+            coordinates.forEach(coordinate ->
+                    rv.append(coordinate.getLatitude()+","+coordinate.getLongitude()+";"));
+
             return rv.substring(0,rv.length()-2);
     }
 
@@ -65,6 +69,7 @@ public class MapBoxConverter {
                 HashMap<String, Object> m = new HashMap<>();
                 for (String key : new String[]{"name", "duration", "distance"})
                     m.put(key, step.get(key));
+
                 HashMap<String, Object> maneuver = new HashMap<>();
                 for (String key : new String[]{"type", "instruction"})
                     maneuver.put(key, ((LinkedHashMap)step.get("maneuver")).get(key));
