@@ -14,7 +14,7 @@ public class UsersController {
     private UsersService usersService;
 
     @Autowired
-    public void setMessageService(UsersService usersService) {
+    public void setUsersService(UsersService usersService) {
         this.usersService = usersService;
     }
 
