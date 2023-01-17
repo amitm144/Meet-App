@@ -135,7 +135,7 @@ public class LiftService implements LiftsService, MiniAppServices {
             this.objectRepository.save(drive);
             return this.objectConverter.toBoundary(drive);
         } catch (HttpClientErrorException e) {
-            throw new ForbbidenOperationException("Missing API key");
+            throw new ForbbidenOperationException(e.getMessage());
         }
     }
 
