@@ -8,6 +8,7 @@ import superapp.boundaries.grab.GrabPollBoundary;
 import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.SuperAppObjectConverter;
+import superapp.converters.UserConverter;
 import superapp.dal.SuperAppObjectEntityRepository;
 import superapp.data.*;
 import superapp.logic.GrabsService;
@@ -27,7 +28,8 @@ import static superapp.util.Constants.*;
 @Service("Grab")
 public class GrabService implements GrabsService, MiniAppServices {
 	private SuperAppObjectEntityRepository objectRepository;
-	private SuperAppObjectConverter converter;
+	private SuperAppObjectConverter objectConverter;
+	private UserConverter userConverter;
 	private RestaurantGeoLocationHandler restaurantHandler;
 
 	private final Random RANDOM = new Random();
@@ -37,9 +39,12 @@ public class GrabService implements GrabsService, MiniAppServices {
 	private final int DEFAULT_LIMIT = 5;
 
 	@Autowired
-	public GrabService(SuperAppObjectEntityRepository objectRepository) {
+	public GrabService(SuperAppObjectEntityRepository objectRepository,
+					   SuperAppObjectConverter objectConverter,
+					   UserConverter userConverter) {
 		this.objectRepository = objectRepository;
-		this.converter = new SuperAppObjectConverter();
+		this.objectConverter = objectConverter;
+		this.userConverter = userConverter;
 		this.restaurantHandler = new RestaurantGeoLocationHandler(new MapBoxConverter());
 	}
 
@@ -54,7 +59,7 @@ public class GrabService implements GrabsService, MiniAppServices {
 
 	@Override
 	public Object runCommand(MiniAppCommandBoundary command) {
-		SuperappObjectPK targetObjectKey = this.converter.idToEntity(command.getTargetObject().getObjectId());
+		SuperappObjectPK targetObjectKey = this.objectConverter.idToEntity(command.getTargetObject().getObjectId());
 		UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
 		SuperAppObjectEntity poll = this.objectRepository.findById(targetObjectKey)
 				.orElseThrow(() ->  new NotFoundException(VALUE_NOT_FOUND_EXCEPTION.formatted("Grab poll")));
@@ -98,7 +103,8 @@ public class GrabService implements GrabsService, MiniAppServices {
 	@Override
 	public void addVote(SuperAppObjectEntity poll, List<GrabCuisines> votes) {
 		Map<String, Integer> existingVotes =
-				(Map<String, Integer>)this.converter.detailsToMap(poll.getObjectDetails())
+				(Map<String, Integer>)this.objectConverter
+						.detailsToMap(poll.getObjectDetails())
 						.get("votes");
 		if (existingVotes == null)
 			existingVotes = new HashMap<>();
@@ -113,7 +119,7 @@ public class GrabService implements GrabsService, MiniAppServices {
 
 		Map<String, Object> newVotes = new HashMap<>();
 		newVotes.put("votes", existingVotes);
-		poll.setObjectDetails(this.converter.detailsToString(newVotes));
+		poll.setObjectDetails(this.objectConverter.detailsToString(newVotes));
 		this.objectRepository.save(poll);
 	}
 
@@ -131,8 +137,9 @@ public class GrabService implements GrabsService, MiniAppServices {
 	@Override
 	public SuperAppObjectBoundary selectByMajority(SuperAppObjectEntity poll) {
 		Map<String, Object> pollDetails =
-				(Map<String, Object>) this.converter.detailsToMap(poll.getObjectDetails())
-					.get("votes");
+				(Map<String, Object>)this.objectConverter
+						.detailsToMap(poll.getObjectDetails())
+						.get("votes");
 		if (pollDetails == null)
 			throw new CannotProcessException("No votes registered");
 
@@ -154,17 +161,17 @@ public class GrabService implements GrabsService, MiniAppServices {
 	}
 
 	private void addSelectionToPoll(SuperAppObjectEntity poll, GrabPollBoundary selection) {
-		Map<String, Object> pollDetails = this.converter.detailsToMap(poll.getObjectDetails());
+		Map<String, Object> pollDetails = this.objectConverter.detailsToMap(poll.getObjectDetails());
 		if (pollDetails == null)
 			pollDetails = new HashMap<>();
 		pollDetails.put("selection", selection);
-		poll.setObjectDetails(this.converter.detailsToString(pollDetails));
+		poll.setObjectDetails(this.objectConverter.detailsToString(pollDetails));
 	}
 
 	private SuperAppObjectBoundary disableAndSave(SuperAppObjectEntity poll) {
 		poll.setActive(false);
 		this.objectRepository.save(poll);
-		return this.converter.toBoundary(poll);
+		return this.objectConverter.toBoundary(poll);
 	}
 
 	private void checkPollData(SuperAppObjectBoundary poll) {
@@ -173,7 +180,7 @@ public class GrabService implements GrabsService, MiniAppServices {
 
 		GrabPollBoundary selection = (GrabPollBoundary)poll.getObjectDetails().get("selection");
 		if (selection != null) {
-			disableAndSave(this.converter.toEntity(poll));
+			disableAndSave(this.objectConverter.toEntity(poll));
 			throw new ForbbidenOperationException("Cannot operate on a poll that have ended");
 		}
 	}
@@ -201,15 +208,11 @@ public class GrabService implements GrabsService, MiniAppServices {
 	}
 
 	private boolean isUserInGroup(SuperAppObjectEntity group, UserIdBoundary userId) {
-		LinkedHashMap<String, String> linkedMap = new LinkedHashMap<>();
-		linkedMap.put("superapp", userId.getSuperapp());
-		linkedMap.put("email", userId.getEmail());
+		List<UserIdBoundary> members = this.userConverter.mapListToBoundaryList(
+				(List<Map<String, String>>)this.objectConverter
+						.detailsToMap(group.getObjectDetails())
+						.get("members"));
 
-		List<LinkedHashMap<String, String>> members =
-				(List<LinkedHashMap<String, String>>) this.converter
-				.detailsToMap(group.getObjectDetails())
-				.get("members");
-
-		return (members != null && members.contains(linkedMap));
+		return (members != null && members.contains(userId));
 	}
 }

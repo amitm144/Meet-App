@@ -5,10 +5,10 @@ import org.springframework.stereotype.Service;
 
 import superapp.boundaries.command.MiniAppCommandBoundary;
 import superapp.boundaries.object.SuperAppObjectBoundary;
-import superapp.boundaries.object.SuperAppObjectIdBoundary;
 import superapp.boundaries.split.SplitDebtBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.SuperAppObjectConverter;
+import superapp.converters.UserConverter;
 import superapp.dal.SuperAppObjectEntityRepository;
 import superapp.data.SuperAppObjectEntity;
 import superapp.data.SuperappObjectPK;
@@ -18,10 +18,8 @@ import superapp.logic.SplitsService;
 import superapp.util.exceptions.CannotProcessException;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.exceptions.NotFoundException;
-import superapp.util.wrappers.SuperAppObjectIdWrapper;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static superapp.data.ObjectTypes.*;
 import static superapp.util.Constants.*;
@@ -29,13 +27,17 @@ import static superapp.util.Constants.*;
 @Service("Split")
 public class SplitService implements SplitsService, MiniAppServices {
 	private SuperAppObjectEntityRepository objectRepository;
-	private SuperAppObjectConverter converter;
+	private SuperAppObjectConverter objectConverter;
+	private UserConverter userConverter;
 	private final String INVALID_AMOUNT_MESSAGE =  "Transaction must specify amount (number not less than or equal to 0)";
 
 	@Autowired
-	public SplitService(SuperAppObjectEntityRepository objectRepository) {
+	public SplitService(SuperAppObjectEntityRepository objectRepository,
+						SuperAppObjectConverter objectConverter,
+						UserConverter userConverter) {
 		this.objectRepository = objectRepository;
-		this.converter = new SuperAppObjectConverter();
+		this.objectConverter = objectConverter;
+		this.userConverter = userConverter;
 	}
 
 	@Override
@@ -52,7 +54,7 @@ public class SplitService implements SplitsService, MiniAppServices {
 
 	@Override
 	public Object runCommand(MiniAppCommandBoundary command) {
-		SuperappObjectPK targetObjectKey = this.converter.idToEntity(command.getTargetObject().getObjectId());
+		SuperappObjectPK targetObjectKey = this.objectConverter.idToEntity(command.getTargetObject().getObjectId());
 		UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
 		SuperAppObjectEntity group =
 				this.objectRepository.findById(targetObjectKey)
@@ -98,8 +100,8 @@ public class SplitService implements SplitsService, MiniAppServices {
 
 		SuperAppObjectEntity group = groupOptional.get();
 		Set<SuperAppObjectEntity> transactions = group.getChildren();
-		int totalMembers =
-				((List<UserIdBoundary>)this.converter.detailsToMap(group.getObjectDetails())
+		int totalMembers = ((List<UserIdBoundary>)this.objectConverter
+				.detailsToMap(group.getObjectDetails())
 				.get("members"))
 				.size();
 		if (totalMembers == 0) // guarding against division by zero
@@ -110,7 +112,7 @@ public class SplitService implements SplitsService, MiniAppServices {
 			if (!t.getActive()) // check if transaction has already been settled
 				continue;
 
-			float amount = doubleToFloat(this.converter.detailsToMap(t.getObjectDetails()).get("amount").toString());
+			float amount = doubleToFloat(this.objectConverter.detailsToMap(t.getObjectDetails()).get("amount").toString());
 			if (t.getCreatedBy().getUserId().equals(user))
 				membersPayments += amount;
 			totalPayments += amount;
@@ -123,12 +125,10 @@ public class SplitService implements SplitsService, MiniAppServices {
 	@Override
 	public Object showAllDebts(SuperAppObjectEntity group) {
 		List<SplitDebtBoundary> allDebts = new ArrayList<>();
-		((List<LinkedHashMap<String, String>>)this.converter
-				.detailsToMap(group.getObjectDetails()).get("members"))
-				.forEach(userData -> {
-					UserIdBoundary userId = new UserIdBoundary(userData.get("superapp"), userData.get("email"));
-					SuperappObjectPK objectId =
-							new SuperappObjectPK(group.getSuperapp(), group.getObjectId());
+		this.userConverter.mapListToBoundaryList(
+				(List<Map<String, String>>)this.objectConverter.detailsToMap(group.getObjectDetails()).get("members")
+				).forEach(userId -> {
+					SuperappObjectPK objectId = new SuperappObjectPK(group.getSuperapp(), group.getObjectId());
 					allDebts.add(showDebt(objectId, userId));
 				});
 		return allDebts.toArray(new SplitDebtBoundary[0]);
@@ -140,15 +140,12 @@ public class SplitService implements SplitsService, MiniAppServices {
 	}
 
 	private boolean isUserInGroup(SuperAppObjectEntity group, UserIdBoundary userId) {
-		LinkedHashMap<String, String> linkedMap = new LinkedHashMap<>();
-		linkedMap.put("superapp", userId.getSuperapp());
-		linkedMap.put("email", userId.getEmail());
+		List<UserIdBoundary> members = this.userConverter.mapListToBoundaryList(
+				(List<Map<String, String>>)this.objectConverter
+						.detailsToMap(group.getObjectDetails())
+						.get("members"));
 
-		List<LinkedHashMap<String, String>> members = (List<LinkedHashMap<String, String>>)this.converter
-				.detailsToMap(group.getObjectDetails())
-				.get("members");
-
-		return (members != null && members.contains(linkedMap));
+		return (members != null && members.contains(userId));
 	}
 
 	private void checkGroupData(SuperAppObjectBoundary group) {
@@ -156,13 +153,14 @@ public class SplitService implements SplitsService, MiniAppServices {
 		Map<String, Object> objDetails = group.getObjectDetails();
 		if (objDetails == null)
 			throw new InvalidInputException("Group must specify it's members");
-		List<UserIdBoundary> groupMembers = (List<UserIdBoundary>)objDetails.get("members");
+		List<UserIdBoundary> groupMembers =
+				this.userConverter.mapListToBoundaryList((List<Map<String, String>>)objDetails.get("members"));
 
 		if (groupMembers == null || groupMembers.isEmpty() || groupMembers.size() < 2 ||
-				!this.isUserInGroup(this.converter.toEntity(group), creatingUser))
+				!this.isUserInGroup(this.objectConverter.toEntity(group), creatingUser))
 			throw new InvalidInputException("Group must contain at least two members including its creator");
 
-		SplitDebtBoundary[] debts = (SplitDebtBoundary[])this.showAllDebts(this.converter.toEntity(group));
+		SplitDebtBoundary[] debts = (SplitDebtBoundary[])this.showAllDebts(this.objectConverter.toEntity(group));
 		if (Arrays.stream(debts).anyMatch(member -> member != null && member.getDebt() < 0))
 			throw new InvalidInputException("Cannot remove group members while any group member owes money");
 	}

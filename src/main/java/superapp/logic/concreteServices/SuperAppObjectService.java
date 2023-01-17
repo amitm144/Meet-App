@@ -344,11 +344,14 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
 
     private void handleObjectBinding(SuperAppObjectEntity parent, SuperAppObjectEntity child, UserPK userId) {
         this.miniAppService = null; // this is done for the code to realize if the bounded objects has any limitations
-        if (child.getType().equals(Transaction.name()) && parent.getType().equals(ObjectTypes.Group.name()))
+        if (child.getType().equals(Transaction.name()) && parent.getType().equals(Group.name()))
             this.miniAppService = this.context.getBean("Split", SplitService.class);
 
-        else if (child.getAlias().equals(ObjectTypes.GrabPoll.toString()))
+        else if (child.getType().equals(GrabPoll.toString()))
             this.miniAppService = this.context.getBean("Grab", GrabService.class);
+
+        else if (child.getType().equals(Drive.toString()))
+            this.miniAppService = this.context.getBean("Lift", LiftService.class);
 
         if (this.miniAppService != null)
             this.miniAppService.checkValidBinding(parent, child, userId);

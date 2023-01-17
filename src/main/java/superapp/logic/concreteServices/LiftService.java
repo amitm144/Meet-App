@@ -7,6 +7,7 @@ import superapp.boundaries.command.MiniAppCommandBoundary;
 import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.SuperAppObjectConverter;
+import superapp.converters.UserConverter;
 import superapp.dal.SuperAppObjectEntityRepository;
 import superapp.data.ObjectTypes;
 import superapp.data.SuperAppObjectEntity;
@@ -14,10 +15,13 @@ import superapp.data.SuperappObjectPK;
 import superapp.data.UserPK;
 import superapp.logic.LiftsService;
 import superapp.logic.MiniAppServices;
+import superapp.util.exceptions.CannotProcessException;
 import superapp.util.exceptions.ForbbidenOperationException;
 import superapp.util.exceptions.InvalidInputException;
 import superapp.util.exceptions.NotFoundException;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static superapp.data.ObjectTypes.*;
@@ -26,14 +30,18 @@ import static superapp.util.Constants.*;
 @Service("Lift")
 public class LiftService implements LiftsService, MiniAppServices {
     private SuperAppObjectEntityRepository objectRepository;
-    private SuperAppObjectConverter converter;
+    private SuperAppObjectConverter objectConverter;
+    private UserConverter userConverter;
 
     private final String MISSING_VALUE_ERROR = "Drive %s must be specified";
 
     @Autowired
-    public LiftService(SuperAppObjectEntityRepository objectRepository) {
+    public LiftService(SuperAppObjectEntityRepository objectRepository,
+                       SuperAppObjectConverter objectConverter,
+                       UserConverter userConverter) {
         this.objectRepository = objectRepository;
-        this.converter = new SuperAppObjectConverter();
+        this.objectConverter = objectConverter;
+        this.userConverter = userConverter;
     }
 
     @Override
@@ -51,7 +59,7 @@ public class LiftService implements LiftsService, MiniAppServices {
 
     @Override
     public Object runCommand(MiniAppCommandBoundary command) {
-        SuperappObjectPK targetObjectKey = this.converter.idToEntity(command.getTargetObject().getObjectId());
+        SuperappObjectPK targetObjectKey = this.objectConverter.idToEntity(command.getTargetObject().getObjectId());
         UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
         SuperAppObjectEntity drive = this.objectRepository.findById(targetObjectKey)
                 .orElseThrow(() ->  new NotFoundException(VALUE_NOT_FOUND_EXCEPTION.formatted("Drive ")));
@@ -73,8 +81,16 @@ public class LiftService implements LiftsService, MiniAppServices {
                 this.checkRequestData(command);
                 this.addNewRequest(command);
             }
-            case "ApproveLiftRequest" -> { this.approveLiftRequest(drive, invokedBy); }
-            case "RejectLiftRequests" -> { this.rejectLiftRequest(drive, invokedBy); }
+            case "ApproveLiftRequest" -> {
+                UserIdBoundary requestingUser = this.userConverter
+                        .mapToBoundary((Map<String, String>)command.getCommandAttributes().get("userId"));
+                this.approveLiftRequest(drive, requestingUser);
+            }
+            case "RejectLiftRequest" -> {
+                UserIdBoundary requestingUser = this.userConverter
+                        .mapToBoundary((Map<String, String>)command.getCommandAttributes().get("userId"));
+                this.rejectLiftRequest(drive, requestingUser);
+            }
             default -> throw new NotFoundException(UNKNOWN_COMMAND_EXCEPTION);
         }
         return null;
@@ -86,6 +102,8 @@ public class LiftService implements LiftsService, MiniAppServices {
             throw new InvalidInputException("Cannot bind drive to non-group objects");
         if (child.getParents().size() > 0)
             throw new ForbbidenOperationException("Drive can only be bound to one group");
+        if (!isUserInGroup(parent, new UserIdBoundary(userId.getSuperapp(), userId.getEmail())))
+            throw new CannotProcessException("Drives can only be bound by users in the group");
     }
 
     @Override
@@ -97,16 +115,21 @@ public class LiftService implements LiftsService, MiniAppServices {
     public void approveLiftRequest(SuperAppObjectEntity drive, UserIdBoundary requestingUser) {
         if (!isUserRequestingPassenger(drive, requestingUser))
             throw new InputMismatchException("User has never requested to join this lift");
-        Map<String, Object> objectDetails = this.converter.detailsToMap(drive.getObjectDetails());
-        List<UserIdBoundary> requestedList = (List<UserIdBoundary>)objectDetails.get("requestingPassengers");
-        List<UserIdBoundary> registeredList = (List<UserIdBoundary>)objectDetails
-                .getOrDefault("registeredPassengers", new ArrayList<>());
+        Map<String, Object> objectDetails = this.objectConverter.detailsToMap(drive.getObjectDetails());
+        List<UserIdBoundary> requestedList = this.userConverter
+                .mapListToBoundaryList((List<Map<String, String>>)objectDetails.get("requestingPassengers"));
+        List<UserIdBoundary> registeredList = this.userConverter
+                .mapListToBoundaryList((List<Map<String, String>>)objectDetails
+                        .getOrDefault("registeredPassengers", new ArrayList<>()));
 
         requestedList.remove(requestingUser);
         registeredList.add(requestingUser);
         objectDetails.replace("requestingPassengers", requestedList);
-        objectDetails.replace("registeredPassengers", registeredList);
-        drive.setObjectDetails(this.converter.detailsToString(objectDetails));
+        if (objectDetails.containsKey("registeredPassengers"))
+            objectDetails.replace("registeredPassengers", registeredList);
+        else
+            objectDetails.put("registeredPassengers", registeredList);
+        drive.setObjectDetails(this.objectConverter.detailsToString(objectDetails));
         this.objectRepository.save(drive);
     }
 
@@ -114,66 +137,78 @@ public class LiftService implements LiftsService, MiniAppServices {
     public void rejectLiftRequest(SuperAppObjectEntity drive, UserIdBoundary requestingUser) {
         if (!isUserRequestingPassenger(drive, requestingUser))
             throw new InputMismatchException("User has never requested to join this lift");
-        Map<String, Object> objectDetails = this.converter.detailsToMap(drive.getObjectDetails());
-        List<UserIdBoundary> requestedList = (List<UserIdBoundary>)objectDetails.get("requestingPassengers");
+        Map<String, Object> objectDetails = this.objectConverter.detailsToMap(drive.getObjectDetails());
+        List<UserIdBoundary> requestedList = this.userConverter
+                .mapListToBoundaryList((List<Map<String, String>>)objectDetails.get("requestingPassengers"));
 
         requestedList.remove(requestingUser);
         objectDetails.replace("requestingPassengers", requestedList);
-        drive.setObjectDetails(this.converter.detailsToString(objectDetails));
+        drive.setObjectDetails(this.objectConverter.detailsToString(objectDetails));
         this.objectRepository.save(drive);
     }
 
     private void addNewRequest(MiniAppCommandBoundary request) {
         UserIdBoundary invokingUser = request.getInvokedBy().getUserId();
-        SuperappObjectPK targetObject = this.converter.idToEntity(request.getTargetObject().getObjectId());
+        SuperappObjectPK targetObject = this.objectConverter.idToEntity(request.getTargetObject().getObjectId());
         SuperAppObjectEntity requestedDrive = this.objectRepository.findById(targetObject)
                 .orElseThrow(() -> new NotFoundException(VALUE_NOT_FOUND_EXCEPTION.formatted("Drive")));
 
         String key = "requestingPassengers";
-        Map<String, Object> objectDetails = this.converter.detailsToMap(requestedDrive.getObjectDetails());
-        List<UserIdBoundary> requestList = (List<UserIdBoundary>)objectDetails.getOrDefault(key, new ArrayList<>());
+        Map<String, Object> objectDetails = this.objectConverter.detailsToMap(requestedDrive.getObjectDetails());
+        List<UserIdBoundary> requestList = this.userConverter.mapListToBoundaryList(
+                (List<Map<String, String>>)objectDetails.getOrDefault(key, new ArrayList<>()));
         requestList.add(invokingUser);
-        objectDetails.replace(key, requestList);
-        requestedDrive.setObjectDetails(this.converter.detailsToString(objectDetails));
+        if (objectDetails.containsKey(key))
+            objectDetails.replace(key, requestList);
+        else
+            objectDetails.put(key, requestList);
+        requestedDrive.setObjectDetails(this.objectConverter.detailsToString(objectDetails));
         this.objectRepository.save(requestedDrive);
     }
 
     private boolean isUserInGroup(SuperAppObjectEntity group, UserIdBoundary userId) {
-        LinkedHashMap<String, String> linkedMap = new LinkedHashMap<>();
-        linkedMap.put("superapp", userId.getSuperapp());
-        linkedMap.put("email", userId.getEmail());
+        List<UserIdBoundary> members = this.userConverter.mapListToBoundaryList(
+                (List<Map<String, String>>)this.objectConverter
+                        .detailsToMap(group.getObjectDetails())
+                        .get("members"));
 
-        List<LinkedHashMap<String, String>> members = (List<LinkedHashMap<String, String>>)this.converter
-                .detailsToMap(group.getObjectDetails())
-                .get("members");
-
-        return (members != null && members.contains(linkedMap));
+        return (members != null && members.contains(userId));
     }
 
     private boolean isUserRequestingPassenger(SuperAppObjectEntity drive, UserIdBoundary userId) {
-        List<UserIdBoundary> requesting =
-                (List<UserIdBoundary>) this.converter.detailsToMap(drive.getObjectDetails())
-                        .get("requestingPassengers");
+        if (userId == null)
+            throw new InvalidInputException("Missing user details");
+        List<UserIdBoundary> requesting = this.userConverter.mapListToBoundaryList(
+                (List<Map<String, String>>)this.objectConverter.detailsToMap(drive.getObjectDetails())
+                .getOrDefault("requestingPassengers", new ArrayList<>()));
 
-        return requesting.contains(userId);
+        return requesting != null && requesting.contains(userId);
     }
 
     private boolean isUserRegisteredPassenger(SuperAppObjectEntity drive, UserIdBoundary userId) {
-        List<UserIdBoundary> registered =
-                (List<UserIdBoundary>) this.converter.detailsToMap(drive.getObjectDetails())
-                        .get("registeredPassengers");
+        if (userId == null)
+            throw new InvalidInputException("Missing user details");
+        List<UserIdBoundary> registered = this.userConverter.mapListToBoundaryList(
+                (List<Map<String, String>>)this.objectConverter.detailsToMap(drive.getObjectDetails())
+                        .getOrDefault("requestingPassengers", new ArrayList<>()));
 
-        return registered.contains(userId);
+        return registered != null && registered.contains(userId);
     }
 
     private void checkDriveData(SuperAppObjectBoundary drive) {
-        Map<String, Object> details = (Map<String, Object>)drive.getObjectDetails().get("details");
+        Map<String, Object> details = drive.getObjectDetails();
         if (details == null)
             throw new InvalidInputException(MISSING_VALUE_ERROR.formatted("details"));
 
         String origin = (String) details.get("origin");
         String dest = (String) details.get("destination");
-        Date time = (Date) details.get("time");
+        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
+        Date time;
+        try {
+            time = ft.parse(details.get("time").toString());
+        } catch (ParseException e) {
+            throw new InvalidInputException("Invalid date");
+        }
 
         if (origin == null || origin.isBlank())
             throw new InvalidInputException(MISSING_VALUE_ERROR.formatted("origin"));
@@ -185,7 +220,7 @@ public class LiftService implements LiftsService, MiniAppServices {
 
     private void checkRequestData(MiniAppCommandBoundary request) {
         UserIdBoundary invokingUser = request.getInvokedBy().getUserId();
-        SuperappObjectPK targetObject = this.converter.idToEntity(request.getTargetObject().getObjectId());
+        SuperappObjectPK targetObject = this.objectConverter.idToEntity(request.getTargetObject().getObjectId());
 
         SuperAppObjectEntity requestedDrive = this.objectRepository.findById(targetObject)
                 .orElseThrow(() -> new NotFoundException(VALUE_NOT_FOUND_EXCEPTION.formatted("Drive")));
@@ -194,7 +229,7 @@ public class LiftService implements LiftsService, MiniAppServices {
             throw new InvalidInputException(WRONG_OBJECT_EXCEPTION);
         if (!requestedDrive.getActive())
             throw new InvalidInputException(EXECUTE_ON_INACTIVE_EXCEPTION.formatted("drive"));
-        if (isUserRegisteredPassenger(requestedDrive, invokingUser) ||isUserRequestingPassenger(requestedDrive, invokingUser))
+        if (isUserRegisteredPassenger(requestedDrive, invokingUser) || isUserRequestingPassenger(requestedDrive, invokingUser))
             throw new ForbbidenOperationException("Already registered or requested to join this lift");
         String origin = (String) request.getCommandAttributes().get("origin");
         if (origin == null)

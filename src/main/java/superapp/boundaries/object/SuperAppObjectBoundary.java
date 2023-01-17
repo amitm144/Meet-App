@@ -17,7 +17,7 @@ public class SuperAppObjectBoundary {
     public SuperAppObjectBoundary() {}
 
     public SuperAppObjectBoundary(SuperAppObjectIdBoundary objectId, String type, String alias,
-                                  Map<String, Object> objectDetails, UserIdWrapper createdBy){
+                                  Map<String, Object> objectDetails, UserIdWrapper createdBy) {
         this.objectId = objectId;
         this.type = type;
         this.alias = alias;
