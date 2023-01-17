@@ -214,16 +214,16 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         SuperappObjectPK objectId = new SuperappObjectPK(objectSuperapp,internalObjectId);
         PageRequest pageReq;
 
-        if (this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
-            pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
-
-        else if (this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository)) {
-            pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId", "active");
-            return this.objectRepository.findAllByParentsContainsAndActiveIsTrue(objectId ,pageReq)
-                    .stream()
-                    .map(this.converter::toBoundary)
-                    .collect(Collectors.toList());
-        }
+//        if (this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
+//            pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
+//
+//        else if (this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository)) {
+//            pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId", "active");
+//            return this.objectRepository.findAllByParentsContainsAndActiveIsTrue(objectId ,pageReq)
+//                    .stream()
+//                    .map(this.converter::toBoundary)
+//                    .collect(Collectors.toList());
+//        }
 
 
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
@@ -253,10 +253,10 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "userEmail");
 
         if (this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
-            return findAllObjectsRepoSearch(pageReq,true);
+            return findAllObjectsRepoSearch(pageReq);
 
         else if(this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
-            return findAllObjectsRepoSearch(pageReq,false);
+            return findAllObjectsRepoSearchAndActive(pageReq);
 
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
     }
@@ -267,10 +267,10 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
         if( isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
-            return findAllObjectsByTypeRepoSearch(pageReq, type,true);
+            return findAllObjectsByTypeRepoSearch(pageReq, type);
 
         else if (isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
-            return findAllObjectsByTypeRepoSearch(pageReq, type,false);
+            return findAllObjectsByTypeRepoSearchAndActive(pageReq, type);
 
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
     }
@@ -282,10 +282,10 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
         if (this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
-            return findByAliasRepoSearch(pageReq,alias,true);
+            return findByAliasRepoSearch(pageReq,alias);
 
         else if (this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
-            return findByAliasRepoSearch(pageReq,alias,false);
+            return findByAliasRepoSearchAndActive(pageReq,alias);
 
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
     }
@@ -298,10 +298,10 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
         if (this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
-            return findByAliasContainingRepoSearch(pageReq, text,true);
+            return findByAliasContainingRepoSearch(pageReq, text);
 
         else if (this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
-            return findByAliasContainingRepoSearch(pageReq, text,false);
+            return findByAliasContainingRepoSearchAndActive(pageReq, text);
 
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
 
@@ -317,27 +317,43 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
             throw new ForbbidenOperationException(SUPERAPP_USER_ONLY_EXCEPTION);
     }
 
-    private List<SuperAppObjectBoundary> findAllObjectsRepoSearch(PageRequest pageReq, boolean isSuperAppUser) {
+    private List<SuperAppObjectBoundary> findAllObjectsRepoSearch(PageRequest pageReq) {
         return this.objectRepository.findAll(pageReq)
                 .stream()
                 .map(this.converter::toBoundary)
-                .filter(object -> object.getActive()|| isSuperAppUser) // if MINIAPP_USER returns only active
+                .collect(Collectors.toList());
+    }
+    private List<SuperAppObjectBoundary> findAllObjectsRepoSearchAndActive(PageRequest pageReq) {
+        return this.objectRepository.findAllByActiveIsTrue(pageReq)
+                .stream()
+                .map(this.converter::toBoundary)
                 .collect(Collectors.toList());
     }
 
-    private List<SuperAppObjectBoundary> findByAliasRepoSearch(PageRequest pageReq, String alias, boolean isSuperAppUser){
+    private List<SuperAppObjectBoundary> findByAliasRepoSearch(PageRequest pageReq, String alias){
         return this.objectRepository.findByAlias(alias, pageReq)
                 .stream()
                 .map(this.converter::toBoundary)
-                .filter(object -> object.getActive() || isSuperAppUser) // if MINIAPP_USER returns only active
+                .collect(Collectors.toList());
+    }
+    private List<SuperAppObjectBoundary> findByAliasRepoSearchAndActive(PageRequest pageReq, String alias){
+        return this.objectRepository.findByAliasAndActiveIsTrue(alias, pageReq)
+                .stream()
+                .map(this.converter::toBoundary)
                 .collect(Collectors.toList());
     }
 
-    private List<SuperAppObjectBoundary> findByAliasContainingRepoSearch(PageRequest pageReq, String text, boolean isSuperAppUser){
+    private List<SuperAppObjectBoundary> findByAliasContainingRepoSearch(PageRequest pageReq, String text){
         return this.objectRepository
                 .findByAliasContaining(text, pageReq)
                 .stream()
-                .filter(object -> object.getActive() || isSuperAppUser) // if MiniappUser get only active
+                .map(this.converter::toBoundary)
+                .collect(Collectors.toList());
+    }
+    private List<SuperAppObjectBoundary> findByAliasContainingRepoSearchAndActive(PageRequest pageReq, String text){
+        return this.objectRepository
+                .findByActiveIsTrueAndAliasContaining(text, pageReq)
+                .stream()
                 .map(this.converter::toBoundary)
                 .collect(Collectors.toList());
     }
@@ -380,11 +396,17 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .collect(Collectors.toList());
     }
 
-    private List<SuperAppObjectBoundary> findAllObjectsByTypeRepoSearch(PageRequest pageReq, String type, boolean isSuperAppUser){
+    private List<SuperAppObjectBoundary> findAllObjectsByTypeRepoSearch(PageRequest pageReq, String type){
         return this.objectRepository.findByType(type, pageReq)
                 .stream()
                 .map(this.converter::toBoundary)
-                .filter(object -> object.getActive()|| isSuperAppUser)// if MiniappUser get only active
+                .collect(Collectors.toList());
+    }
+
+    private List<SuperAppObjectBoundary> findAllObjectsByTypeRepoSearchAndActive(PageRequest pageReq, String type){
+        return this.objectRepository.findByTypeAndActiveIsTrue(type, pageReq)
+                .stream()
+                .map(this.converter::toBoundary)
                 .collect(Collectors.toList());
     }
 }
