@@ -157,6 +157,7 @@ public class LiftService implements LiftsService, MiniAppServices {
         Map<String, Object> objectDetails = this.objectConverter.detailsToMap(requestedDrive.getObjectDetails());
         List<UserIdBoundary> requestList = this.userConverter.mapListToBoundaryList(
                 (List<Map<String, String>>)objectDetails.getOrDefault(key, new ArrayList<>()));
+
         requestList.add(invokingUser);
         if (objectDetails.containsKey(key))
             objectDetails.replace(key, requestList);

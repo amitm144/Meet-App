@@ -11,7 +11,7 @@ import superapp.data.UserRole;
 import java.util.Optional;
 
 @Service
-public abstract  class AbstractService {
+public abstract class AbstractService {
     protected String superappName;
 
     @Value("${spring.application.name}")
