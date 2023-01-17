@@ -41,19 +41,17 @@ public class DirectionsAPIHandler extends MapBox implements DirectionsAPIHandler
         try {
             response = restTemplate.getForObject(url, String.class);
         }
-        catch (HttpClientErrorException e){
-            if(e.getStatusCode().equals(HttpStatus.valueOf(422))){
+        catch (HttpClientErrorException e) {
+            if(e.getStatusCode().equals(HttpStatus.valueOf(422)))
                 throw new InvalidInputException("Route exceeds maximum distance limitation");
-            }
-            else if( e.getStatusCode().equals(HttpStatus.FORBIDDEN)){
-                throw new InvalidInputException("API key exception");
-            }
+            else if( e.getStatusCode().equals(HttpStatus.FORBIDDEN))
+                throw new InvalidInputException("Invalid API key");
             else
                 throw new RuntimeException("MAPBOX api failed to provide directions");
         }
         Map<String, Object> responseToMap = mapBoxConverter.detailsToMap(response);
-        if(!responseToMap.get("code").equals("Ok"))
-        throw new InvalidInputException("MapBoxAPI failed to provide directions!");
+        if (!responseToMap.get("code").equals("Ok"))
+            throw new InvalidInputException("failed to provide directions");
        return mapBoxConverter.filterMapBoxRequestToDirections(responseToMap);
     }
 
@@ -64,7 +62,7 @@ public class DirectionsAPIHandler extends MapBox implements DirectionsAPIHandler
         Map<String, Object> responseToMap =mapBoxConverter.detailsToMap(response);
         List< LinkedHashMap> features = (ArrayList< LinkedHashMap>)responseToMap.get("features");
         if(features.size() ==0)
-            throw new InvalidInputException("MapBoxAPI failed to provide directions please check again your address ");
+            throw new InvalidInputException("failed to provide directions");
         List<Double> center = (ArrayList<Double>) features.get(0).get("center");
         return new Coordinate(center.get(0), center.get(1));
     }
