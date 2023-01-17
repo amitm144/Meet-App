@@ -27,7 +27,7 @@ public class RestaurantGeoLocationHandler extends MapBox implements RestaurantGe
         Map<String, Object> responseToMap =mapBoxConverter.detailsToMap(response);
         ArrayList<LinkedHashMap> restaurants = (ArrayList<LinkedHashMap>) responseToMap.get("features");
 
-        if(restaurants.size() ==0)
+        if(restaurants.size() == 0)
             throw new InvalidInputException("cuisine Not Found");
 
         return extractRestaurantFromMap(restaurants);

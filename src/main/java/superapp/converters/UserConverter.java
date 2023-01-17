@@ -52,8 +52,9 @@ public class UserConverter {
     }
 
     public UserIdBoundary mapToBoundary(Map<String, String> map) {
-        if (map.containsKey("superapp") && map.containsKey("email"))
-            return new UserIdBoundary(map.get("superapp"), map.get("email"));
-        throw new InvalidInputException("Missing or invalid user data");
+        if (map == null || !(map.containsKey("superapp") && map.containsKey("email")))
+            throw new InvalidInputException("Missing or invalid user data");
+
+        return new UserIdBoundary(map.get("superapp"), map.get("email"));
     }
 }

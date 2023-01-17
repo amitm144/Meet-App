@@ -2,7 +2,6 @@ package superapp.logic;
 
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.data.SuperAppObjectEntity;
-import superapp.data.SuperappObjectPK;
 
 public interface LiftsService {
     public Object startDrive(SuperAppObjectEntity drive);
