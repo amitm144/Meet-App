@@ -276,7 +276,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     }
 
     @Override
-    public List<SuperAppObjectBoundary> SearchObjectsByType(String type, String userSuperapp,
+    public List<SuperAppObjectBoundary> searchObjectsByType(String type, String userSuperapp,
                                                             String email, int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
@@ -292,7 +292,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
 
     @Override
     @Transactional
-    public List<SuperAppObjectBoundary> SearchObjectsByExactAlias(String alias, String userSuperapp,
+    public List<SuperAppObjectBoundary> searchObjectsByExactAlias(String alias, String userSuperapp,
                                                                   String email, int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
@@ -308,7 +308,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
 
     @Override
     @Transactional
-    public List<SuperAppObjectBoundary> SearchObjectsByAliasContaining(String text, String userSuperapp,
+    public List<SuperAppObjectBoundary> searchObjectsByAliasContaining(String text, String userSuperapp,
                                                                        String email, int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
