@@ -24,6 +24,7 @@ import superapp.util.exceptions.NotFoundException;
 import superapp.util.EmailChecker;
 
 import static superapp.data.ObjectTypes.*;
+import static superapp.data.Timeframes.isValidTimeframes;
 import static superapp.data.UserRole.*;
 import static superapp.util.Constants.*;
 
@@ -130,7 +131,6 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         throw new ForbbidenOperationException(DEPRECATED_EXCEPTION);
     }
 
-
     @Override
     @Transactional
     public SuperAppObjectBoundary updateObject(String objectSuperapp, String internalObjectId,
@@ -233,11 +233,25 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
-        if (this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
-            return getChildrenRepoSearch(pageReq, internalObjectId, userSuperapp ,true);
+        SuperAppObjectEntity parent =
+                this.objectRepository.findById(new SuperappObjectPK(objectSuperapp,internalObjectId))
+                        .orElseThrow(()-> new NotFoundException("Cannot find requested object"));
 
-        else if (this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
-            return getChildrenRepoSearch(pageReq,internalObjectId,userSuperapp,false);
+
+        if (this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
+            return this.objectRepository
+                    .findByParentsContaining(parent,pageReq)
+                    .stream()
+                    .map(this.converter::toBoundary)
+                    .collect(Collectors.toList());
+
+        if (this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository)) {
+            return this.objectRepository
+                    .findByParentsContainingAndActiveIsTrue(parent,pageReq)
+                    .stream()
+                    .map(this.converter::toBoundary)
+                    .collect(Collectors.toList());
+        }
 
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
     }
@@ -249,11 +263,23 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
-        if(this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
-            return getParentRepoSearch(pageReq, internalObjectId, objectSuperapp,true);
+        SuperAppObjectEntity child =
+                this.objectRepository.findById(new SuperappObjectPK(objectSuperapp,internalObjectId))
+                        .orElseThrow(()-> new NotFoundException("Cannot find requested object"));
 
-        else if(this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
-            return getParentRepoSearch(pageReq, internalObjectId, objectSuperapp,false);
+        if(this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
+            return this.objectRepository
+                    .findByChildrenContaining(child,pageReq)
+                    .stream()
+                    .map(this.converter::toBoundary)
+                    .collect(Collectors.toList());
+
+        if(this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
+            return this.objectRepository
+                    .findByChildrenContainingAndActiveIsTrue(child,pageReq)
+                    .stream()
+                    .map(this.converter::toBoundary)
+                    .collect(Collectors.toList());
 
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
 
@@ -267,10 +293,16 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "userEmail");
 
         if (this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
-            return findAllObjectsRepoSearch(pageReq,true);
+            return this.objectRepository.findAll(pageReq)
+                    .stream()
+                    .map(this.converter::toBoundary)
+                    .collect(Collectors.toList());
 
-        else if(this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
-            return findAllObjectsRepoSearch(pageReq,false);
+        if(this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
+            return this.objectRepository.findAllByActiveIsTrue(pageReq)
+                    .stream()
+                    .map(this.converter::toBoundary)
+                    .collect(Collectors.toList());
 
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
     }
@@ -282,10 +314,16 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
         if( isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
-            return findAllObjectsByTypeRepoSearch(pageReq, type,true);
+            return this.objectRepository.findByType(type, pageReq)
+                    .stream()
+                    .map(this.converter::toBoundary)
+                    .collect(Collectors.toList());
 
-        else if (isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
-            return findAllObjectsByTypeRepoSearch(pageReq, type,false);
+        if (isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
+            return this.objectRepository.findByTypeAndActiveIsTrue(type, pageReq)
+                    .stream()
+                    .map(this.converter::toBoundary)
+                    .collect(Collectors.toList());
 
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
     }
@@ -298,10 +336,16 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
         if (this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
-            return findByAliasRepoSearch(pageReq,alias,true);
+            return this.objectRepository.findByAlias(alias, pageReq)
+                    .stream()
+                    .map(this.converter::toBoundary)
+                    .collect(Collectors.toList());
 
-        else if (this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
-            return findByAliasRepoSearch(pageReq,alias,false);
+        if (this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
+            return this.objectRepository.findByAliasAndActiveIsTrue(alias, pageReq)
+                    .stream()
+                    .map(this.converter::toBoundary)
+                    .collect(Collectors.toList());
 
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
     }
@@ -314,12 +358,41 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
         if (this.isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
-            return findByAliasContainingRepoSearch(pageReq, text,true);
+            return this.objectRepository
+                    .findByAliasContaining(text, pageReq)
+                    .stream()
+                    .map(this.converter::toBoundary)
+                    .collect(Collectors.toList());
 
-        else if (this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
-            return findByAliasContainingRepoSearch(pageReq, text,false);
+        if (this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository))
+            return this.objectRepository
+                    .findByActiveIsTrueAndAliasContaining(text, pageReq)
+                    .stream()
+                    .map(this.converter::toBoundary)
+                    .collect(Collectors.toList());
 
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
+    }
+
+    public List<SuperAppObjectBoundary> getObjectsByCreationTimestamp(String creationEnum, String userSuperapp,
+                                                                      String email, int size, int page) {
+
+        UserPK userId = new UserPK(userSuperapp, email);
+        if(!isValidTimeframes(creationEnum))
+            throw new InvalidInputException("Invalid timeframe");
+
+        if (!isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
+            throw new ForbbidenOperationException(SUPERAPP_USER_ONLY_EXCEPTION);
+
+        Timeframes timeframe = Timeframes.valueOf(creationEnum);
+
+        return this.objectRepository
+                .findAllByCreationTimestampAfter(new Date(System.currentTimeMillis()-timeframe.getValue()*1000),
+                        PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION,
+                                "creationTimestamp", "objectId"))
+                .stream()
+                .map(this.converter::toBoundary)
+                .toList();
     }
 
     private void handleObject(SuperAppObjectBoundary object) {
@@ -363,80 +436,5 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
             this.objectRepository.deleteAll();
         else
             throw new ForbbidenOperationException(SUPERAPP_USER_ONLY_EXCEPTION);
-    }
-
-    private List<SuperAppObjectBoundary> findAllObjectsRepoSearch(PageRequest pageReq, boolean isSuperAppUser) {
-        return this.objectRepository.findAll(pageReq)
-                .stream()
-                .map(this.converter::toBoundary)
-                .filter(object -> object.getActive()|| isSuperAppUser) // if MINIAPP_USER returns only active
-                .collect(Collectors.toList());
-    }
-
-    private List<SuperAppObjectBoundary> findByAliasRepoSearch(PageRequest pageReq, String alias, boolean isSuperAppUser){
-        return this.objectRepository.findByAlias(alias, pageReq)
-                .stream()
-                .map(this.converter::toBoundary)
-                .filter(object -> object.getActive() || isSuperAppUser) // if MINIAPP_USER returns only active
-                .collect(Collectors.toList());
-    }
-
-    private List<SuperAppObjectBoundary> findByAliasContainingRepoSearch(PageRequest pageReq, String text,
-                                                                         boolean isSuperAppUser){
-        return this.objectRepository
-                .findByAliasContaining(text, pageReq)
-                .stream()
-                .filter(object -> object.getActive() || isSuperAppUser) // if MiniappUser get only active
-                .map(this.converter::toBoundary)
-                .collect(Collectors.toList());
-    }
-
-    private List<SuperAppObjectBoundary> getParentRepoSearch(PageRequest pageReq, String internalObjectId,
-                                                             String objectSuperapp, boolean isSuperAppUser) {
-        List<SuperAppObjectEntity> objectList =
-                this.objectRepository
-                .findAll(pageReq)
-                .stream()
-                .filter(obj -> obj.getObjectId().equals(internalObjectId) && obj.getSuperapp().equals(objectSuperapp))
-                .toList();
-
-        SuperAppObjectEntity requestedObject = objectList.isEmpty() ? null : objectList.get(0);
-        if (requestedObject == null || !(isSuperAppUser || requestedObject.getActive()))
-            return new ArrayList<SuperAppObjectBoundary>(0);
-
-        return requestedObject.getParents()
-                .stream()
-                .map(this.converter::toBoundary)
-                .filter(object -> object.getActive()|| isSuperAppUser)
-                .collect(Collectors.toList());
-    }
-
-    private List<SuperAppObjectBoundary> getChildrenRepoSearch(PageRequest pageReq, String internalObjectId,
-                                                               String objectSuperapp, boolean isSuperAppUser) {
-        List<SuperAppObjectEntity> objectList =
-                this.objectRepository
-                .findAll(pageReq)
-                .stream()
-                .filter(obj -> obj.getObjectId().equals(internalObjectId) && obj.getSuperapp().equals(objectSuperapp))
-                .toList();
-
-        SuperAppObjectEntity requestedObject = objectList.isEmpty() ? null : objectList.get(0);
-        if (requestedObject == null || !(isSuperAppUser || requestedObject.getActive()))
-            return new ArrayList<SuperAppObjectBoundary>(0);
-
-        return requestedObject.getChildren()
-                .stream()
-                .map(this.converter::toBoundary)
-                .filter(object -> object.getActive()|| isSuperAppUser)
-                .collect(Collectors.toList());
-    }
-
-    private List<SuperAppObjectBoundary> findAllObjectsByTypeRepoSearch(PageRequest pageReq, String type,
-                                                                        boolean isSuperAppUser) {
-        return this.objectRepository.findByType(type, pageReq)
-                .stream()
-                .map(this.converter::toBoundary)
-                .filter(object -> object.getActive()|| isSuperAppUser)// if MiniappUser get only active
-                .collect(Collectors.toList());
     }
 }
