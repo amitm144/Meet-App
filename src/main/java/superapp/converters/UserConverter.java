@@ -1,6 +1,5 @@
 package superapp.converters;
 
-//import com.fasterxml.jackson.databind.ObjectMapper;
 import superapp.boundaries.user.UserBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.data.UserEntity;
@@ -16,11 +15,7 @@ import java.util.stream.Collectors;
 @Component
 public class UserConverter {
 
-//    private ObjectMapper mapper;
-
-    public UserConverter() {
-//        this.mapper = new ObjectMapper();
-    }
+    public UserConverter() { }
 
     public UserEntity toEntity(UserBoundary user) {
         UserEntity result = new UserEntity();

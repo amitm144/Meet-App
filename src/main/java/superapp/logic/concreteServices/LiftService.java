@@ -2,8 +2,8 @@ package superapp.logic.concreteServices;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import org.springframework.web.client.HttpClientErrorException;
+
 import superapp.boundaries.command.MiniAppCommandBoundary;
 import superapp.boundaries.lift.LiftRequestBoundary;
 import superapp.boundaries.object.SuperAppObjectBoundary;
