@@ -67,13 +67,18 @@ public class SplitService implements SplitsService, MiniAppServices {
 		UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
 		SuperAppObjectEntity group =
 				this.objectRepository.findById(targetObjectKey)
-					.orElseThrow(() -> new NotFoundException(VALUE_NOT_FOUND_EXCEPTION.formatted("Group")));
+					.orElseThrow(() -> {
+						logger.error("in runCommand func - %s".formatted(VALUE_NOT_FOUND_EXCEPTION
+								.formatted("Group")));
+						return new NotFoundException(VALUE_NOT_FOUND_EXCEPTION.formatted("Group"));
+					});
+
 		if (!isUserInGroup(group, invokedBy)) {
 			logger.error("in runCommand func - %s".formatted(USER_NOT_IN_GROUP_EXCEPTION));
 			throw new InvalidInputException(USER_NOT_IN_GROUP_EXCEPTION);
 		}
 		if (!group.getActive()) {
-			logger.error("in runCommand func - %s".formatted(EXECUTE_ON_INACTIVE_EXCEPTION));
+			logger.error("in runCommand func - %s".formatted(EXECUTE_ON_INACTIVE_EXCEPTION.formatted("group")));
 			throw new InvalidInputException(EXECUTE_ON_INACTIVE_EXCEPTION.formatted("group"));
 		}
 

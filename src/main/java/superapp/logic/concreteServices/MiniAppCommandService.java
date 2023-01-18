@@ -129,8 +129,10 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     @Transactional(readOnly = true)
     public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniappName ,String userSuperapp, String email,int size,int page) {
         UserPK userId = new UserPK(userSuperapp, email);
-        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
+        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository)) {
+            this.logger.debug("in getAllMiniAppCommands func - %s".formatted(ADMIN_ONLY_EXCEPTION));
             throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
+        }
 
         return this.miniappRepository.findAllByMiniapp(miniappName,
                         PageRequest.of(page,size, DEFAULT_SORTING_DIRECTION,"miniapp","internalCommandId"))
