@@ -19,7 +19,7 @@ public enum Timeframes
         if (creationEnum == null)
             return false;
         try {
-            UserRole.valueOf(creationEnum);
+            Timeframes.valueOf(creationEnum);
             return true;
         } catch (IllegalArgumentException e) {
             return false;

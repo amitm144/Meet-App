@@ -40,7 +40,6 @@ public class UsersController {
             path= {"/superapp/users/{superapp}/{userEmail}"},
             method = {RequestMethod.PUT},
             consumes = {MediaType.APPLICATION_JSON_VALUE})
-
     public void update (
             @PathVariable("superapp") String superapp,
             @PathVariable("userEmail") String email,
