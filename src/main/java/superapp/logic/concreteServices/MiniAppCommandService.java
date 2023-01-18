@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import superapp.boundaries.command.MiniAppCommandBoundary;
 import superapp.boundaries.command.MiniAppCommandIdBoundary;
 import superapp.boundaries.object.SuperAppObjectBoundary;
+import superapp.boundaries.user.UserBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.MiniappCommandConverter;
 import superapp.converters.SuperAppObjectConverter;
@@ -139,11 +140,10 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
 
     @Override
     @Transactional
-    public SuperAppObjectBoundary updateObjectCreationTimestamp(String userSuperapp,
-                                                                String userEmail,
-                                                                MiniAppCommandBoundary objectTimeTravel) {
+    public SuperAppObjectBoundary updateObjectCreationTimestamp(MiniAppCommandBoundary objectTimeTravel) {
         // Validate Admin user:
-        UserPK userId = new UserPK(userSuperapp, userEmail);
+        UserIdBoundary user = objectTimeTravel.getInvokedBy().getUserId();
+        UserPK userId = new UserPK(user.getSuperapp(), user.getEmail());
         if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
             throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
         // Validate correct command:
@@ -153,7 +153,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
         // Find object in db and update:
         String internalObjectId = objectTimeTravel.getTargetObject().getObjectId().getInternalObjectId();
         Optional<SuperAppObjectEntity> objectE = this.objectRepository.findById(
-                new SuperappObjectPK(userSuperapp,internalObjectId));
+                new SuperappObjectPK(objectTimeTravel.getInvokedBy().getUserId().getSuperapp(),internalObjectId));
         if (objectE.isEmpty())
             throw new NotFoundException("Unknown object");
 
@@ -174,13 +174,11 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
 
     @Override
     @Transactional
-    public MiniAppCommandBoundary storeMiniAppCommand(String userSuperapp,
-                                                      String userEmail,
-                                                      MiniAppCommandBoundary miniappCommandBoundary) {
+    public MiniAppCommandBoundary storeMiniAppCommand(MiniAppCommandBoundary miniappCommandBoundary) {
         // Validate requesting user is admin
-        UserPK userId = new UserPK(userSuperapp, userEmail);
-        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
-            throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
+//        UserPK userId = new UserPK(userSuperapp, userEmail);
+//        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
+//            throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
         // Validate correct command:
         if (!miniappCommandBoundary.getCommand().equals("echo"))
             throw new RuntimeException("Can't store MiniAppCommand");
