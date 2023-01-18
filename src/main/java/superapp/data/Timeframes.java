@@ -3,16 +3,16 @@ package superapp.data;
 public enum Timeframes
 {
     LAST_MINUTE(60),
-    LAST_HOUR(360),
-    LAST_DAY(8640);
+    LAST_HOUR(60*60),
+    LAST_DAY(60*60*24);
 
-    private final int minute;
-    Timeframes(int minute) {
-        this.minute = minute;
+    private final int value;
+    Timeframes(int value) {
+        this.value = value;
     }
 
-    public int getMinute() {
-        return minute;
+    public int getValue() {
+        return value;
     }
 
     public static boolean isValidTimeframes(String creationEnum) {

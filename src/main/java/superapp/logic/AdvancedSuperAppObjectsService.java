@@ -1,7 +1,11 @@
 package superapp.logic;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.repository.query.Param;
 import superapp.boundaries.object.SuperAppObjectBoundary;
 import superapp.boundaries.object.SuperAppObjectIdBoundary;
+import superapp.data.SuperAppObjectEntity;
 
 import java.util.List;
 
@@ -37,4 +41,5 @@ public interface AdvancedSuperAppObjectsService extends SuperAppObjectsService {
                                                                          String email, int size, int page);
 
     public void deleteAllObjects(String userSuperapp, String email);
-    }
+
+}

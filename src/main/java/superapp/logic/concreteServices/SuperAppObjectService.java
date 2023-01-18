@@ -198,11 +198,11 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
             return this.converter.toBoundary(objectE.get());
 
         else if (this.isValidUserCredentials(userId, MINIAPP_USER, this.userRepository)) {
-             if (!objectE.get().getActive())
+            if (!objectE.get().getActive())
                 throw new NotFoundException("Requested inactive object");
 
-             return this.converter.toBoundary(objectE.get());
-     }
+            return this.converter.toBoundary(objectE.get());
+        }
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
     }
 
@@ -339,10 +339,10 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     private List<SuperAppObjectBoundary> getParentRepoSearch(PageRequest pageReq, String internalObjectId, String objectSuperapp, boolean isSuperAppUser) {
         List<SuperAppObjectEntity> objectList =
                 this.objectRepository
-                .findAll(pageReq)
-                .stream()
-                .filter(obj -> obj.getObjectId().equals(internalObjectId) && obj.getSuperapp().equals(objectSuperapp))
-                .toList();
+                        .findAll(pageReq)
+                        .stream()
+                        .filter(obj -> obj.getObjectId().equals(internalObjectId) && obj.getSuperapp().equals(objectSuperapp))
+                        .toList();
 
         SuperAppObjectEntity requestedObject = objectList.isEmpty() ? null : objectList.get(0);
         if (requestedObject == null || !(isSuperAppUser || requestedObject.getActive()))
@@ -358,10 +358,10 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     private List<SuperAppObjectBoundary> getChildrenRepoSearch(PageRequest pageReq, String internalObjectId, String objectSuperapp, boolean isSuperAppUser) {
         List<SuperAppObjectEntity> objectList =
                 this.objectRepository
-                .findAll(pageReq)
-                .stream()
-                .filter(obj -> obj.getObjectId().equals(internalObjectId) && obj.getSuperapp().equals(objectSuperapp))
-                .toList();
+                        .findAll(pageReq)
+                        .stream()
+                        .filter(obj -> obj.getObjectId().equals(internalObjectId) && obj.getSuperapp().equals(objectSuperapp))
+                        .toList();
 
         SuperAppObjectEntity requestedObject = objectList.isEmpty() ? null : objectList.get(0);
         if (requestedObject == null || !(isSuperAppUser || requestedObject.getActive()))
@@ -383,22 +383,23 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     }
 
     public List<SuperAppObjectBoundary> getObjectsByCreationTimestamp(String creationEnum, String userSuperapp,
-                                                                         String email, int size, int page) {
+                                                                      String email, int size, int page) {
+
         UserPK userId = new UserPK(userSuperapp, email);
-            if(isValidTimeframes(creationEnum))
-                throw new InvalidInputException("");
+        if(isValidTimeframes(creationEnum))
+            throw new InvalidInputException("Invalid timeframe");
 
-            if (isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository)) {
+        if (!isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
+            throw new ForbbidenOperationException(SUPERAPP_USER_ONLY_EXCEPTION);
 
-                return this.objectRepository
-                        .findAllByCreationTimestamp(
-                                creationEnum,
-                                PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION,
-                                        "currentTimestamp", "objectId"))
-                        .stream()
-                        .map(this.converter::toBoundary)
-                        .toList();
-            }
-        return null;
+        Timeframes timeframe = Timeframes.valueOf(creationEnum);
+
+        return this.objectRepository
+                .findAllByCreationTimestampAfter(new Date(System.currentTimeMillis()-timeframe.getValue()*1000),
+                        PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION,
+                                "creationTimestamp", "objectId"))
+                .stream()
+                .map(this.converter::toBoundary)
+                .toList();
     }
 }
