@@ -149,4 +149,17 @@ public class SuperAppObjectsController {
             @RequestParam(name="page", required = false, defaultValue = DEFAULT_PAGE) int page) {
         return this.objService.searchObjectsByAliasContaining(text, userSuperapp, email, size, page).toArray(new SuperAppObjectBoundary[0]);
     }
+
+    @RequestMapping(
+            path="/superapp/objects/search/byCreation/{creationEnum}",
+            method = {RequestMethod.GET},
+            produces = {MediaType.APPLICATION_JSON_VALUE})
+    public SuperAppObjectBoundary[] SearchObjectsByCreationTimestamp(
+            @PathVariable("creationEnum") String creationEnum,
+            @RequestParam(name="userSuperapp", required = true, defaultValue = "") String userSuperapp,
+            @RequestParam(name="userEmail", required = true, defaultValue = "") String email,
+            @RequestParam(name = "size", required = false, defaultValue = DEFAULT_PAGE_SIZE) int size,
+            @RequestParam(name="page", required = false, defaultValue = DEFAULT_PAGE) int page) {
+        return this.objService.getObjectsByCreationTimestamp(creationEnum, userSuperapp, email, size, page).toArray(new SuperAppObjectBoundary[0]);
+    }
 }
