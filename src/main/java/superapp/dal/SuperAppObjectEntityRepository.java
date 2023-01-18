@@ -20,9 +20,9 @@ public interface SuperAppObjectEntityRepository extends PagingAndSortingReposito
     public Page<SuperAppObjectEntity> findByActiveIsTrueAndAliasContaining(@Param("text") String text, Pageable page);
     public Page<SuperAppObjectEntity> findAllByActiveIsTrue(Pageable page);
 
-
-
-   // public Page<SuperAppObjectEntity> findAllByParentsContainsAndActiveIsTrue(@Param("objectId") SuperappObjectPK objectId, Pageable page);
-  //  public Page<SuperAppObjectEntity> findAllByActiveIsTrueAndParentsAndObjectId(@Param("objectId") SuperappObjectPK objectId, Pageable page);
+    public Page<SuperAppObjectEntity> findByChildrenContaining(SuperAppObjectEntity child, Pageable page);
+    public Page<SuperAppObjectEntity> findByChildrenContainingAndActiveIsTrue(SuperAppObjectEntity child, Pageable page);
+    public Page<SuperAppObjectEntity> findByParentsContaining(SuperAppObjectEntity child, Pageable page);
+    public Page<SuperAppObjectEntity> findByParentsContainingAndActiveIsTrue(SuperAppObjectEntity child, Pageable page);
 
 }
