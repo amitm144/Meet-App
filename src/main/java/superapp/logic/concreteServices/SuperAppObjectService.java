@@ -195,11 +195,7 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .findById(this.converter.idToEntity(newChild))
                 .orElseThrow(() -> new NotFoundException("Cannot find children object"));
 
-        /*
-            if child is transaction ->
-            check to see if parent is group and invoking user in parent group
-        */
-        this.handleObjectBinding(parent, child, userId);
+        this.handleObjectBinding(parent, child, userId); // handle child appropriately if is miniapp object that has limitations
         if (parent.addChild(child) && child.addParent(parent)) {
             this.objectRepository.save(parent);
             this.objectRepository.save(child);
@@ -262,8 +258,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
 
     @Override
     @Transactional(readOnly = true)
-    public List<SuperAppObjectBoundary> getParents(String objectSuperapp, String internalObjectId,String userSuperapp,
-                                                   String email, int size, int page) {
+    public List<SuperAppObjectBoundary> getParents(String objectSuperapp, String internalObjectId,
+                                                   String userSuperapp, String email, int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
@@ -286,11 +282,13 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                     .collect(Collectors.toList());
 
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
+
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<SuperAppObjectBoundary> getAllObjects(String userSuperapp, String email, int size, int page) {
+    public List<SuperAppObjectBoundary> getAllObjects(String userSuperapp, String email,
+                                                      int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "userEmail");
 
@@ -310,7 +308,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     }
 
     @Override
-    public List<SuperAppObjectBoundary> searchObjectsByType(String type, String userSuperapp, String email, int size, int page) {
+    public List<SuperAppObjectBoundary> searchObjectsByType(String type, String userSuperapp,
+                                                            String email, int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
@@ -331,7 +330,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
 
     @Override
     @Transactional
-    public List<SuperAppObjectBoundary> searchObjectsByExactAlias(String alias, String userSuperapp, String email, int size, int page) {
+    public List<SuperAppObjectBoundary> searchObjectsByExactAlias(String alias, String userSuperapp,
+                                                                  String email, int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
@@ -352,8 +352,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
 
     @Override
     @Transactional
-    public List<SuperAppObjectBoundary> searchObjectsByAliasContaining(String text, String userSuperapp, String email, int size, int page)
-    {
+    public List<SuperAppObjectBoundary> searchObjectsByAliasContaining(String text, String userSuperapp,
+                                                                       String email, int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
@@ -399,9 +399,14 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         String objectType = object.getType();
         if (!isValidObjectType(objectType))
             objectType = "";
+
         switch (objectType) {
             case ("Transaction"), ("Group") -> {
                 this.miniAppService = this.context.getBean("Split", SplitService.class);
+                miniAppService.handleObjectByType(object);
+            }
+            case ("GrabPoll") -> {
+                this.miniAppService = this.context.getBean("Grab", GrabService.class);
                 miniAppService.handleObjectByType(object);
             }
             default -> throw new InvalidInputException("Unknown object type");
@@ -409,11 +414,18 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     }
 
     private void handleObjectBinding(SuperAppObjectEntity parent, SuperAppObjectEntity child, UserPK userId) {
-        if (child.getType().equals(Transaction.name()) && parent.getType().equals(Group.name())) {
-            this.miniAppService = this.context.getBean("Split", SplitService.class);
-        }
+        if (child.getType().equals(Group.name()) && ObjectTypes.isValidObjectType(parent.getType()))
+            throw new InvalidInputException("Cannot bind miniapp object as a parent");
 
-        this.miniAppService.checkValidBinding(parent, child, userId);
+        this.miniAppService = null; // this is done for the code to realize if the bounded objects has any limitations
+        if (child.getType().equals(Transaction.name()) && parent.getType().equals(ObjectTypes.Group.name()))
+            this.miniAppService = this.context.getBean("Split", SplitService.class);
+
+        else if (child.getAlias().equals(ObjectTypes.GrabPoll.toString()))
+            this.miniAppService = this.context.getBean("Grab", GrabService.class);
+
+        if (this.miniAppService != null)
+            this.miniAppService.checkValidBinding(parent, child, userId);
     }
 
     @Override
