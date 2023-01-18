@@ -142,8 +142,8 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     @Transactional
     public SuperAppObjectBoundary updateObjectCreationTimestamp(MiniAppCommandBoundary objectTimeTravel) {
         // Validate Admin user:
-        UserIdBoundary user = objectTimeTravel.getInvokedBy().getUserId();
-        UserPK userId = new UserPK(user.getSuperapp(), user.getEmail());
+        UserIdBoundary userIdBoundary = objectTimeTravel.getInvokedBy().getUserId();
+        UserPK userId = new UserPK(userIdBoundary.getSuperapp(), userIdBoundary.getEmail());
         if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
             throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
         // Validate correct command:
@@ -153,7 +153,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
         // Find object in db and update:
         String internalObjectId = objectTimeTravel.getTargetObject().getObjectId().getInternalObjectId();
         Optional<SuperAppObjectEntity> objectE = this.objectRepository.findById(
-                new SuperappObjectPK(objectTimeTravel.getInvokedBy().getUserId().getSuperapp(),internalObjectId));
+                new SuperappObjectPK(userIdBoundary.getSuperapp(),internalObjectId));
         if (objectE.isEmpty())
             throw new NotFoundException("Unknown object");
 
