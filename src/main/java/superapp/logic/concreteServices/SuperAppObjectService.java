@@ -341,6 +341,9 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     }
 
     private void handleObjectBinding(SuperAppObjectEntity parent, SuperAppObjectEntity child, UserPK userId) {
+        if (child.getType().equals(Group.name()) && ObjectTypes.isValidObjectType(parent.getType()))
+            throw new InvalidInputException("Cannot bind miniapp object as a parent");
+
         this.miniAppService = null; // this is done for the code to realize if the bounded objects has any limitations
         if (child.getType().equals(Transaction.name()) && parent.getType().equals(ObjectTypes.Group.name()))
             this.miniAppService = this.context.getBean("Split", SplitService.class);
