@@ -175,10 +175,6 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     @Override
     @Transactional
     public MiniAppCommandBoundary storeMiniAppCommand(MiniAppCommandBoundary miniappCommandBoundary) {
-        // Validate requesting user is admin
-//        UserPK userId = new UserPK(userSuperapp, userEmail);
-//        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
-//            throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
         // Validate correct command:
         if (!miniappCommandBoundary.getCommand().equals("echo"))
             throw new RuntimeException("Can't store MiniAppCommand");
