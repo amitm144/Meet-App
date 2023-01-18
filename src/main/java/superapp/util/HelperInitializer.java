@@ -77,10 +77,10 @@ public class HelperInitializer implements CommandLineRunner {
 				new HashMap<String, Object>(){{ put("amount", 34.5); }},
 				new UserIdWrapper(usersList.get(1).getUserId())));
 		// bind created transactions to group
-//		this.objects.bindNewChild(this.objects.getSuperappName(),
-//				groupList.get(0).getObjectId().getInternalObjectId(), t1.getObjectId());
-//		this.objects.bindNewChild(this.objects.getSuperappName(),
-//				groupList.get(0).getObjectId().getInternalObjectId(), t2.getObjectId());
+		this.objects.bindNewChild(this.objects.getSuperappName(),
+				groupList.get(0).getObjectId().getInternalObjectId(), t1.getObjectId());
+		this.objects.bindNewChild(this.objects.getSuperappName(),
+				groupList.get(0).getObjectId().getInternalObjectId(), t2.getObjectId());
 
 		// change user 1 to be miniapp user
 		UserBoundary miniappUser = usersList.get(1);
