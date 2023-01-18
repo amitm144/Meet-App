@@ -23,6 +23,7 @@ import superapp.util.exceptions.InvalidInputException;
 import superapp.util.exceptions.NotFoundException;
 import superapp.util.EmailChecker;
 
+import static superapp.data.Timeframes.*;
 import static superapp.data.ObjectTypes.*;
 import static superapp.data.UserRole.*;
 import static superapp.util.Constants.*;
@@ -423,5 +424,26 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                 .map(this.converter::toBoundary)
                 .filter(object -> object.getActive()|| isSuperAppUser)// if MiniappUser get only active
                 .collect(Collectors.toList());
+    }
+
+    public List<SuperAppObjectBoundary> getObjectsByCreationTimestamp(String creationEnum, String userSuperapp,
+                                                                      String email, int size, int page) {
+
+        UserPK userId = new UserPK(userSuperapp, email);
+        if(!isValidTimeframes(creationEnum))
+            throw new InvalidInputException("Invalid timeframe");
+
+        if (!isValidUserCredentials(userId, SUPERAPP_USER, this.userRepository))
+            throw new ForbbidenOperationException(SUPERAPP_USER_ONLY_EXCEPTION);
+
+        Timeframes timeframe = Timeframes.valueOf(creationEnum);
+
+        return this.objectRepository
+                .findAllByCreationTimestampAfter(new Date(System.currentTimeMillis()-timeframe.getValue()*1000),
+                        PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION,
+                                "creationTimestamp", "objectId"))
+                .stream()
+                .map(this.converter::toBoundary)
+                .toList();
     }
 }
