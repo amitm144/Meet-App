@@ -3,6 +3,7 @@ package superapp.converters;
 import superapp.boundaries.user.UserBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.data.UserEntity;
+import superapp.data.UserPK;
 import superapp.data.UserRole;
 import org.springframework.stereotype.Component;
 import superapp.util.exceptions.InvalidInputException;
@@ -35,6 +36,10 @@ public class UserConverter {
         result.setUsername(user.getUsername());
         result.setAvatar(user.getAvatar());
         return result;
+    }
+
+    public UserPK idBoundaryToPK(UserIdBoundary id) {
+        return new UserPK(id.getSuperapp(), id.getEmail());
     }
 
     public List<UserIdBoundary> mapListToBoundaryList(List<Map<String, String>> list) {

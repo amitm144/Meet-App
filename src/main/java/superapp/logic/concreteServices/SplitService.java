@@ -10,6 +10,7 @@ import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.SuperAppObjectConverter;
 import superapp.converters.UserConverter;
 import superapp.dal.SuperAppObjectEntityRepository;
+import superapp.dal.UserEntityRepository;
 import superapp.data.SuperAppObjectEntity;
 import superapp.data.SuperappObjectPK;
 import superapp.data.UserPK;
@@ -27,15 +28,18 @@ import static superapp.util.Constants.*;
 @Service("Split")
 public class SplitService implements SplitsService, MiniAppServices {
 	private SuperAppObjectEntityRepository objectRepository;
+	private UserEntityRepository userRepository;
 	private SuperAppObjectConverter objectConverter;
 	private UserConverter userConverter;
 	private final String INVALID_AMOUNT_MESSAGE =  "Transaction must specify amount (number not less than or equal to 0)";
 
 	@Autowired
 	public SplitService(SuperAppObjectEntityRepository objectRepository,
+						UserEntityRepository userRepository,
 						SuperAppObjectConverter objectConverter,
 						UserConverter userConverter) {
 		this.objectRepository = objectRepository;
+		this.userRepository = userRepository;
 		this.objectConverter = objectConverter;
 		this.userConverter = userConverter;
 	}
@@ -159,6 +163,15 @@ public class SplitService implements SplitsService, MiniAppServices {
 		if (groupMembers == null || groupMembers.isEmpty() || groupMembers.size() < 2 ||
 				!this.isUserInGroup(this.objectConverter.toEntity(group), creatingUser))
 			throw new InvalidInputException("Group must contain at least two members including its creator");
+
+		boolean missingMember = groupMembers
+				.stream()
+				.map(this.userConverter::idBoundaryToPK)
+				.map(this.userRepository::findById)
+				.anyMatch(Optional::isEmpty);
+		if (missingMember)
+			throw new InvalidInputException("One or more users in this group doesn't exist");
+
 
 		SplitDebtBoundary[] debts = (SplitDebtBoundary[])this.showAllDebts(this.objectConverter.toEntity(group));
 		if (Arrays.stream(debts).anyMatch(member -> member != null && member.getDebt() < 0))

@@ -286,7 +286,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
 
     @Override
     @Transactional(readOnly = true)
-    public List<SuperAppObjectBoundary> getAllObjects(String userSuperapp, String email, int size, int page) {
+    public List<SuperAppObjectBoundary> getAllObjects(String userSuperapp, String email,
+                                                      int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "userEmail");
 
@@ -306,8 +307,8 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     }
 
     @Override
-    public List<SuperAppObjectBoundary> searchObjectsByType(String type,String userSuperapp,
-                                                            String email,int size, int page) {
+    public List<SuperAppObjectBoundary> searchObjectsByType(String type, String userSuperapp,
+                                                            String email, int size, int page) {
         UserPK userId = new UserPK(userSuperapp, email);
         PageRequest pageReq = PageRequest.of(page, size, DEFAULT_SORTING_DIRECTION, "superapp", "objectId");
 
@@ -414,6 +415,9 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
     }
 
     private void handleObjectBinding(SuperAppObjectEntity parent, SuperAppObjectEntity child, UserPK userId) {
+        if (child.getType().equals(Group.name()) && ObjectTypes.isValidObjectType(parent.getType()))
+            throw new InvalidInputException("Cannot bind miniapp object as a parent");
+
         this.miniAppService = null; // this is done for the code to realize if the bounded objects has any limitations
         if (child.getType().equals(Transaction.name()) && parent.getType().equals(Group.name()))
             this.miniAppService = this.context.getBean("Split", SplitService.class);
