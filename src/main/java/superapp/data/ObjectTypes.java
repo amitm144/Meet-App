@@ -3,7 +3,8 @@ package superapp.data;
 public enum ObjectTypes {
     Group,
     Transaction,
-    GrabPoll;
+    GrabPoll,
+    Drive;
 
     public static boolean isValidObjectType(String objectType) {
         if (objectType == null)

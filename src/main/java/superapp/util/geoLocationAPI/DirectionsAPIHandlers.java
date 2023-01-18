@@ -1,8 +1,8 @@
 package superapp.util.geoLocationAPI;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public interface DirectionsAPIHandlers {
-    public Map<String,Object> getDirectionsByAddress(String language, ArrayList<String> addresses);
+    public Map<String,Object> getDirectionsByAddress(String language, List<String> addresses);
 }

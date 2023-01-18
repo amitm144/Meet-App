@@ -206,15 +206,16 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
         switch (miniapp) {
             case ("Split") -> {
                 this.miniAppService = this.context.getBean("Split", SplitService.class);
-                return this.miniAppService.runCommand(command);
             }
             case ("Grab") -> {
                 this.miniAppService = this.context.getBean("Grab", GrabService.class);
-                return this.miniAppService.runCommand(command);
             }
-            case ("Lift") -> { return null; }
+            case ("Lift") -> {
+                this.miniAppService = this.context.getBean("Lift", LiftService.class);
+            }
             default -> { throw new InvalidInputException("Unknown miniapp"); }
         }
+        return this.miniAppService.runCommand(command);
     }
 
     private void checkInvokedCommand(MiniAppCommandBoundary command,UserRole userRole){

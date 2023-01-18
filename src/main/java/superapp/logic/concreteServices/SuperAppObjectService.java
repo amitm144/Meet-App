@@ -282,7 +282,6 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
                     .collect(Collectors.toList());
 
         throw new ForbbidenOperationException(SUPERAPP_MINIAPP_USERS_ONLY_EXCEPTION);
-
     }
 
     @Override
@@ -403,14 +402,16 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
         switch (objectType) {
             case ("Transaction"), ("Group") -> {
                 this.miniAppService = this.context.getBean("Split", SplitService.class);
-                miniAppService.handleObjectByType(object);
             }
             case ("GrabPoll") -> {
                 this.miniAppService = this.context.getBean("Grab", GrabService.class);
-                miniAppService.handleObjectByType(object);
+            }
+            case ("Drive") -> {
+                this.miniAppService = this.context.getBean("Lift", LiftService.class);
             }
             default -> throw new InvalidInputException("Unknown object type");
         }
+        miniAppService.handleObjectByType(object);
     }
 
     private void handleObjectBinding(SuperAppObjectEntity parent, SuperAppObjectEntity child, UserPK userId) {
@@ -418,11 +419,14 @@ public class SuperAppObjectService extends AbstractService implements AdvancedSu
             throw new InvalidInputException("Cannot bind miniapp object as a parent");
 
         this.miniAppService = null; // this is done for the code to realize if the bounded objects has any limitations
-        if (child.getType().equals(Transaction.name()) && parent.getType().equals(ObjectTypes.Group.name()))
+        if (child.getType().equals(Transaction.name()) && parent.getType().equals(Group.name()))
             this.miniAppService = this.context.getBean("Split", SplitService.class);
 
-        else if (child.getAlias().equals(ObjectTypes.GrabPoll.toString()))
+        else if (child.getType().equals(GrabPoll.toString()))
             this.miniAppService = this.context.getBean("Grab", GrabService.class);
+
+        else if (child.getType().equals(Drive.toString()))
+            this.miniAppService = this.context.getBean("Lift", LiftService.class);
 
         if (this.miniAppService != null)
             this.miniAppService.checkValidBinding(parent, child, userId);

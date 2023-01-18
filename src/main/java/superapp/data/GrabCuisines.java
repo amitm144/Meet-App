@@ -2,7 +2,6 @@ package superapp.data;
 
 public enum GrabCuisines {
 	AFRICAN,
-	AMERICAN,
 	ARABIC,
 	ASIAN,
 	BAGEL,
@@ -11,7 +10,7 @@ public enum GrabCuisines {
 	BOWLS,
 	BREAKFAST,
 	BRUNCH,
-	HAMBURGER,
+	BURGER,
 	COFFEE,
 	CHICKEN,
 	CHINESE,
@@ -23,7 +22,6 @@ public enum GrabCuisines {
 	FALAFEL,
 	FISH,
 	FRENCH,
-	GEORGIAN,
 	GREEK,
 	HEALTHY,
 	HOMEMADE_FOOD,
