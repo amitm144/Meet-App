@@ -30,6 +30,8 @@ import superapp.util.EmailChecker;
 import superapp.util.exceptions.NotFoundException;
 import superapp.util.wrappers.SuperAppObjectIdWrapper;
 import superapp.util.wrappers.UserIdWrapper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -48,6 +50,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     private MiniAppCommandRepository miniappRepository;
     private SuperAppObjectEntityRepository objectRepository;
     private UserEntityRepository userEntityRepository;
+    private Log logger = LogFactory.getLog(MiniAppCommandService.class);
     private UserConverter userConverter;
 
     @Autowired
@@ -78,6 +81,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
         command.getCommandId().setSuperapp(this.superappName);
 
         this.miniappRepository.save(this.miniAppConverter.toEntity(command));
+        this.logger.info("saved Command successfully in db");
         return this.handleCommand(command);
     }
 
@@ -85,6 +89,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     @Transactional(readOnly = true)
     @Deprecated
     public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniappName) {
+        this.logger.debug("in getAllMiniAppCommands func, - %s".formatted(DEPRECATED_EXCEPTION));
         throw new NotFoundException(DEPRECATED_EXCEPTION);
     }
 
@@ -92,6 +97,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     @Deprecated
     @Transactional(readOnly = true)
     public List<MiniAppCommandBoundary> getAllCommands() {
+        this.logger.debug("in getAllCommands func,without scope vars - %s".formatted(DEPRECATED_EXCEPTION));
         throw new NotFoundException(DEPRECATED_EXCEPTION);
     }
 
@@ -99,6 +105,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     @Deprecated
     @Transactional
     public void deleteAllCommands() {
+        this.logger.debug("in deleteAllCommands func, without scope vars - %s".formatted(DEPRECATED_EXCEPTION));
         throw new NotFoundException(DEPRECATED_EXCEPTION);
     }
 
@@ -106,8 +113,10 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     @Transactional(readOnly = true)
     public List<MiniAppCommandBoundary> getAllCommands(String userSuperapp, String email,int size,int page) {
         UserPK userId = new UserPK(userSuperapp, email);
-        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
+        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository)) {
+            this.logger.debug("in getAllCommands func - %s".formatted(ADMIN_ONLY_EXCEPTION));
             throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
+        }
 
         return this.miniappRepository
                 .findAll(PageRequest.of(page,size, DEFAULT_SORTING_DIRECTION,"miniapp", "internalCommandId"))
@@ -120,8 +129,10 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     @Transactional(readOnly = true)
     public List<MiniAppCommandBoundary> getAllMiniAppCommands(String miniappName ,String userSuperapp, String email,int size,int page) {
         UserPK userId = new UserPK(userSuperapp, email);
-        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
+        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository)) {
+            this.logger.debug("in getAllMiniAppCommands func - %s".formatted(ADMIN_ONLY_EXCEPTION));
             throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
+        }
 
         return this.miniappRepository.findAllByMiniapp(miniappName,
                         PageRequest.of(page,size, DEFAULT_SORTING_DIRECTION,"miniapp","internalCommandId"))
@@ -135,8 +146,11 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     public void deleteAllCommands(String userSuperapp, String email)
     {
         UserPK userId = new UserPK(userSuperapp, email);
-        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
+        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository)) {
+            this.logger.debug("in deleteAllCommands func - %s".formatted(ADMIN_ONLY_EXCEPTION));
             throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
+        }
+        this.logger.debug("Deleted All Commands successfully");
         this.miniappRepository.deleteAll();
     }
 
@@ -145,6 +159,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     public SuperAppObjectBoundary updateObjectCreationTimestamp(MiniAppCommandBoundary objectTimeTravel) {
         // Validate correct command:
         if(!objectTimeTravel.getCommand().equals("objectTimeTravel")) {
+            this.logger.debug("in updateObjectCreationTimestamp func - Missing new CreationTimeStamp");
             throw new InvalidInputException("Missing new CreationTimestamp");
         }
         checkInvokedCommand(objectTimeTravel, ADMIN);
@@ -153,21 +168,26 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
         UserIdBoundary userIdBoundary = objectTimeTravel.getInvokedBy().getUserId();
         Optional<SuperAppObjectEntity> objectE = this.objectRepository.findById(
                 new SuperappObjectPK(userIdBoundary.getSuperapp(),internalObjectId));
-        if (objectE.isEmpty())
+        if (objectE.isEmpty()) {
+            this.logger.debug("in updateObjectCreationTimestamp func - Unknown Object");
             throw new NotFoundException("Unknown object");
+        }
 
         SuperAppObjectBoundary updatedObjectTimeTravel = this.superAppObjectConverter.toBoundary(objectE.get());
-        if(!updatedObjectTimeTravel.getActive())
+        if(!updatedObjectTimeTravel.getActive()) {
+            this.logger.debug("in updateObjectCreationTimestamp func - Cannot execute time travel on inactive object");
             throw new ForbbidenOperationException("Cannot execute time travel on inactive object");
-
+        }
         try {
             String d = objectTimeTravel.getCommandAttributes().get("creationTimestamp").toString();
             SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
             updatedObjectTimeTravel.setCreationTimestamp(ft.parse(d));
         } catch (Exception e) {
+            this.logger.error("in updateObjectCreationTimestamp func - Invalid Date");
             throw new InvalidInputException("Can't update creation timestamp - invalid Date");
         }
         this.objectRepository.save(this.superAppObjectConverter.toEntity(updatedObjectTimeTravel));
+        this.logger.debug("updated object timestamp successfully");
         return updatedObjectTimeTravel;
     }
 
@@ -175,9 +195,10 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     @Transactional
     public MiniAppCommandBoundary storeMiniAppCommand(MiniAppCommandBoundary miniappCommandBoundary) {
         // Validate correct command:
-        if (!miniappCommandBoundary.getCommand().equals("echo"))
+        if (!miniappCommandBoundary.getCommand().equals("echo")) {
+            this.logger.error("in storeMiniAppCommand func - Can't store MiniAppCommand");
             throw new RuntimeException("Can't store MiniAppCommand");
-
+        }
         // Validate invoking user is admin and valid command boundary:
         checkInvokedCommand(miniappCommandBoundary, ADMIN);
         // store as new command
@@ -190,7 +211,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
         miniappCommandBoundary.setCommandId(miniAppCommandIdBoundary);
         miniappCommandBoundary.setInvocationTimestamp(new Date());
         this.miniappRepository.save(this.miniAppConverter.toEntity(miniappCommandBoundary));
-
+        this.logger.debug("stored miniAppCommand successfully");
         return miniappCommandBoundary;
     }
 
@@ -206,7 +227,11 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
             case ("Lift") -> {
                 this.miniAppService = this.context.getBean("Lift", LiftService.class);
             }
-            default -> { throw new InvalidInputException("Unknown miniapp"); }
+            default -> {
+                this.logger.error("in handleCommand func - Unknown miniapp");
+                throw new InvalidInputException("Unknown miniapp");
+            }
+
         }
         return this.miniAppService.runCommand(command);
     }
@@ -218,11 +243,15 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
                 invokedBy.getUserId().getSuperapp() == null ||
                 invokedBy.getUserId().getEmail() == null ||
                 invokedBy.getUserId().getSuperapp().isBlank() ||
-                invokedBy.getUserId().getEmail().isBlank())
+                invokedBy.getUserId().getEmail().isBlank()) {
+            this.logger.error("in checkInvokedCommand func - Invoked by fields cannot be missing or empty");
             throw new InvalidInputException("Invoked by fields cannot be missing or empty");
+        }
 
-        if (!EmailChecker.isValidEmail(invokedBy.getUserId().getEmail()))
+        if (!EmailChecker.isValidEmail(invokedBy.getUserId().getEmail())) {
+            this.logger.error("in checkInvokedCommand func - Invalid invoking user email");
             throw new InvalidInputException("Invalid invoking user email");
+        }
 
         SuperAppObjectIdWrapper targetObject = command.getTargetObject();
         if (targetObject == null ||
@@ -230,11 +259,15 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
                 targetObject.getObjectId().getSuperapp() == null ||
                 targetObject.getObjectId().getInternalObjectId() == null ||
                 targetObject.getObjectId().getSuperapp().isBlank() ||
-                targetObject.getObjectId().getInternalObjectId().isBlank())
+                targetObject.getObjectId().getInternalObjectId().isBlank()) {
+            this.logger.error("in checkInvokedCommand func - Target object fields cannot be missing or empty");
             throw new InvalidInputException("Target object fields cannot be missing or empty");
+        }
 
-        if (command.getCommand() == null || command.getCommand().isEmpty())
+        if (command.getCommand() == null || command.getCommand().isEmpty()) {
+            this.logger.error("in checkInvokedCommand func - Command attribute cannot be missing or empty");
             throw new InvalidInputException("Command attribute cannot be missing or empty");
+        }
 
         // issue internalCommandId, tie with superapp and set invocation timestamp
         Optional<SuperAppObjectEntity> objectE =
@@ -242,14 +275,20 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
                         targetObject.getObjectId().getSuperapp(),
                         targetObject.getObjectId().getInternalObjectId()));
 
-        if(objectE.isEmpty())
+        if(objectE.isEmpty()) {
+            this.logger.error("in checkInvokedCommand func - Object Not Found");
             throw new NotFoundException("Object Not Found");
+        }
 
         if(!isValidUserCredentials(new UserPK(invokedBy.getUserId().getSuperapp(), invokedBy.getUserId().getEmail()),
-                userRole,this.userEntityRepository))
+                userRole,this.userEntityRepository)) {
+            this.logger.error("in checkInvokedCommand func - Operation allowed for %s only".formatted(userRole));
             throw new ForbbidenOperationException("Operation allowed for %s only".formatted(userRole));
+        }
 
-        if(!objectE.get().getActive())
+        if(!objectE.get().getActive()) {
+            this.logger.error("in checkInvokedCommand func - Cannot preform actions on an inactive object");
             throw new ForbbidenOperationException("Cannot preform actions on an inactive object");
+        }
     }
 }

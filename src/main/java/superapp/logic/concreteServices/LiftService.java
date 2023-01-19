@@ -1,5 +1,7 @@
 package superapp.logic.concreteServices;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -37,6 +39,7 @@ public class LiftService implements LiftsService, MiniAppServices {
     private SuperAppObjectConverter objectConverter;
     private UserConverter userConverter;
     private DirectionsAPIHandler directionsHandler;
+    private Log logger = LogFactory.getLog(LiftService.class);
 
     private final String MISSING_VALUE_ERROR = "Drive %s must be specified";
     private final String DEFAULT_LANGUAGE = "EN";
@@ -60,6 +63,7 @@ public class LiftService implements LiftsService, MiniAppServices {
         if (objectType.equals(Drive.name())) {
             this.checkDriveData(object);
         } else {
+            this.logger.error("in handleObjectByType func - %s".formatted(UNKNOWN_OBJECT_EXCEPTION));
             throw new InvalidInputException(UNKNOWN_OBJECT_EXCEPTION);
         }
     }
@@ -69,23 +73,37 @@ public class LiftService implements LiftsService, MiniAppServices {
         SuperappObjectPK targetObjectKey = this.objectConverter.idToEntity(command.getTargetObject().getObjectId());
         UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
         SuperAppObjectEntity drive = this.objectRepository.findById(targetObjectKey)
-                .orElseThrow(() ->  new NotFoundException(VALUE_NOT_FOUND_EXCEPTION.formatted("Drive ")));
+                .orElseThrow(() ->  {
+                    this.logger.error("in runCommand func - %s"
+                            .formatted(VALUE_NOT_FOUND_EXCEPTION.formatted("Drive")));
+                    return new NotFoundException(VALUE_NOT_FOUND_EXCEPTION.formatted("Drive "));
+                });
         SuperAppObjectEntity group =
                 drive.getParents()
                         .stream()
                         .findFirst() // single drive can only be bound to one parent
-                        .orElseThrow(() ->  new NotFoundException(OBJECT_NOT_BOUND_EXCEPTION.formatted("Drive")));
+                        .orElseThrow(() ->  {
+                            this.logger.error("in runCommand func - %s"
+                                    .formatted(OBJECT_NOT_BOUND_EXCEPTION.formatted("Drive")));
+                            return new NotFoundException(OBJECT_NOT_BOUND_EXCEPTION.formatted("Drive"));
+                        });
 
-        if (!isUserInGroup(group, invokedBy))
+        if (!isUserInGroup(group, invokedBy)) {
+            this.logger.error("in runCommand func - %s".formatted(USER_NOT_IN_GROUP_EXCEPTION));
             throw new InvalidInputException(USER_NOT_IN_GROUP_EXCEPTION);
-        if (!(group.getActive() && drive.getActive()))
+        }
+        if (!(group.getActive() && drive.getActive())) {
+            this.logger.error("in runCommand func - %s".formatted(EXECUTE_ON_INACTIVE_EXCEPTION
+                    .formatted("group or drive")));
             throw new InvalidInputException(EXECUTE_ON_INACTIVE_EXCEPTION.formatted("group or drive"));
-
+        }
         String commandCase = command.getCommand();
         switch (commandCase) {
             case "StartDrive" -> {
-                if (!drive.getCreatedBy().getUserId().equals(invokedBy))
+                if (!drive.getCreatedBy().getUserId().equals(invokedBy)) {
+                    this.logger.error("in runCommand func - Only the driver can start the drive");
                     throw new ForbbidenOperationException("Only the driver can start the drive");
+                }
                 return this.startDrive(drive);
             }
             case "LiftRequest" -> {
@@ -102,19 +120,27 @@ public class LiftService implements LiftsService, MiniAppServices {
                         .mapToBoundary((Map<String, String>)command.getCommandAttributes().get("userId"));
                 this.rejectLiftRequest(drive, requestingUser);
             }
-            default -> throw new NotFoundException(UNKNOWN_COMMAND_EXCEPTION);
+            default -> {
+                this.logger.error("in runCommand func - %s".formatted(UNKNOWN_COMMAND_EXCEPTION));
+                throw new NotFoundException(UNKNOWN_COMMAND_EXCEPTION);}
         }
         return null;
     }
 
     @Override
     public void checkValidBinding(SuperAppObjectEntity parent, SuperAppObjectEntity child, UserPK userId) {
-        if (!parent.getType().equals(ObjectTypes.Group.name()))
+        if (!parent.getType().equals(ObjectTypes.Group.name())) {
+            this.logger.error("in checkValidBinding func - Cannot bind drive to non-group objects");
             throw new InvalidInputException("Cannot bind drive to non-group objects");
-        if (child.getParents().size() > 0)
+        }
+        if (child.getParents().size() > 0) {
+            this.logger.error("in checkValidBinding func - Drive can only be bound to one group");
             throw new ForbbidenOperationException("Drive can only be bound to one group");
-        if (!isUserInGroup(parent, new UserIdBoundary(userId.getSuperapp(), userId.getEmail())))
+        }
+        if (!isUserInGroup(parent, new UserIdBoundary(userId.getSuperapp(), userId.getEmail()))) {
+            this.logger.error("in checkValidBinding func - Drives can only be bound by users in the group");
             throw new CannotProcessException("Drives can only be bound by users in the group");
+        }
     }
 
     @Override
@@ -133,16 +159,20 @@ public class LiftService implements LiftsService, MiniAppServices {
             drive.setActive(false);
             drive.setObjectDetails(this.objectConverter.detailsToString(objectDetails));
             this.objectRepository.save(drive);
+            this.logger.info("Drive saved successfully");
             return this.objectConverter.toBoundary(drive);
         } catch (HttpClientErrorException e) {
+            this.logger.error("in startDrive func - %s".formatted(e.getMessage()));
             throw new ForbbidenOperationException(e.getMessage());
         }
     }
 
     @Override
     public void approveLiftRequest(SuperAppObjectEntity drive, UserIdBoundary requestingUser) {
-        if (!isUserRequestingPassenger(drive, requestingUser))
+        if (!isUserRequestingPassenger(drive, requestingUser)) {
+            this.logger.error("in approveLiftRequest func - User has never requested to join this lift");
             throw new InputMismatchException("User has never requested to join this lift");
+        }
         Map<String, Object> objectDetails = this.objectConverter.detailsToMap(drive.getObjectDetails());
         List<LiftRequestBoundary> requestedList =
                 this.mapListToBoundaryList((List<Map<String, Object>>)objectDetails.get("requestingPassengers"));
@@ -163,12 +193,16 @@ public class LiftService implements LiftsService, MiniAppServices {
             objectDetails.put("registeredPassengers", registeredList);
         drive.setObjectDetails(this.objectConverter.detailsToString(objectDetails));
         this.objectRepository.save(drive);
+        this.logger.info("Approve Lift request success, Drive saved successfully");
+
     }
 
     @Override
     public void rejectLiftRequest(SuperAppObjectEntity drive, UserIdBoundary requestingUser) {
-        if (!isUserRequestingPassenger(drive, requestingUser))
+        if (!isUserRequestingPassenger(drive, requestingUser)) {
+            this.logger.error("in rejectLiftRequest func - User has never requested to join this lift");
             throw new InputMismatchException("User has never requested to join this lift");
+        }
         Map<String, Object> objectDetails = this.objectConverter.detailsToMap(drive.getObjectDetails());
         List<LiftRequestBoundary> requestedList =
                 this.mapListToBoundaryList((List<Map<String, Object>>)objectDetails.get("requestingPassengers"));
@@ -177,13 +211,18 @@ public class LiftService implements LiftsService, MiniAppServices {
         objectDetails.replace("requestingPassengers", requestedList);
         drive.setObjectDetails(this.objectConverter.detailsToString(objectDetails));
         this.objectRepository.save(drive);
+        this.logger.info("Reject Lift Request, Drive saved successfully");
     }
 
     private void addNewRequest(MiniAppCommandBoundary request) {
         UserIdBoundary invokingUser = request.getInvokedBy().getUserId();
         SuperappObjectPK targetObject = this.objectConverter.idToEntity(request.getTargetObject().getObjectId());
         SuperAppObjectEntity requestedDrive = this.objectRepository.findById(targetObject)
-                .orElseThrow(() -> new NotFoundException(VALUE_NOT_FOUND_EXCEPTION.formatted("Drive")));
+                .orElseThrow(() -> {
+                    this.logger.error("in addNewRequest func - %s".formatted(VALUE_NOT_FOUND_EXCEPTION
+                            .formatted("Drive")));
+                    return new NotFoundException(VALUE_NOT_FOUND_EXCEPTION.formatted("Drive"));
+                });
 
         String key = "requestingPassengers";
         Map<String, Object> objectDetails = this.objectConverter.detailsToMap(requestedDrive.getObjectDetails());
@@ -198,6 +237,8 @@ public class LiftService implements LiftsService, MiniAppServices {
             objectDetails.put(key, requestList);
         requestedDrive.setObjectDetails(this.objectConverter.detailsToString(objectDetails));
         this.objectRepository.save(requestedDrive);
+        this.logger.info("Lift - Add new Request succeeded, requested Drive saved successfully");
+
     }
 
     private boolean isUserInGroup(SuperAppObjectEntity group, UserIdBoundary userId) {
@@ -210,8 +251,10 @@ public class LiftService implements LiftsService, MiniAppServices {
     }
 
     private boolean isUserRequestingPassenger(SuperAppObjectEntity drive, UserIdBoundary userId) {
-        if (userId == null)
+        if (userId == null) {
+            this.logger.error("in isUserRequestingPassenger - Missing user details");
             throw new InvalidInputException("Missing user details");
+        }
         List<UserIdBoundary> requesting = mapListToBoundaryList(
                 (List<Map<String, Object>>) this.objectConverter
                         .detailsToMap(drive.getObjectDetails())
@@ -224,8 +267,10 @@ public class LiftService implements LiftsService, MiniAppServices {
     }
 
     private boolean isUserRegisteredPassenger(SuperAppObjectEntity drive, UserIdBoundary userId) {
-        if (userId == null)
+        if (userId == null) {
+            this.logger.error("in isUserRegisteredPassenger - Missing user details");
             throw new InvalidInputException("Missing user details");
+        }
         List<UserIdBoundary> registered = mapListToBoundaryList(
                 (List<Map<String, Object>>) this.objectConverter
                         .detailsToMap(drive.getObjectDetails())
@@ -239,9 +284,10 @@ public class LiftService implements LiftsService, MiniAppServices {
 
     private void checkDriveData(SuperAppObjectBoundary drive) {
         Map<String, Object> details = drive.getObjectDetails();
-        if (details == null)
+        if (details == null) {
+            this.logger.error("in checkDriveData - %s".formatted(MISSING_VALUE_ERROR.formatted("details")));
             throw new InvalidInputException(MISSING_VALUE_ERROR.formatted("details"));
-
+        }
         String origin = (String) details.get("origin");
         String dest = (String) details.get("destination");
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
@@ -249,15 +295,22 @@ public class LiftService implements LiftsService, MiniAppServices {
         try {
             time = ft.parse(details.get("time").toString());
         } catch (ParseException e) {
+            this.logger.error("in checkDriveData - Invalid date");
             throw new InvalidInputException("Invalid date");
         }
 
-        if (origin == null || origin.isBlank())
+        if (origin == null || origin.isBlank()) {
+            this.logger.error("in checkDriveData - %s".formatted(MISSING_VALUE_ERROR.formatted("origin")));
             throw new InvalidInputException(MISSING_VALUE_ERROR.formatted("origin"));
-        if (dest == null || dest.isBlank())
+        }
+        if (dest == null || dest.isBlank()) {
+            this.logger.error("in checkDriveData - %s".formatted(MISSING_VALUE_ERROR.formatted("destination")));
             throw new InvalidInputException(MISSING_VALUE_ERROR.formatted("destination"));
-        if (time == null || time.before(new Date()) || time.equals(new Date()))
+        }
+        if (time == null || time.before(new Date()) || time.equals(new Date())) {
+            this.logger.error("in checkDriveData - %s".formatted(MISSING_VALUE_ERROR.formatted("time")));
             throw new InvalidInputException(MISSING_VALUE_ERROR.formatted("time"));
+        }
     }
 
     private void checkRequestData(MiniAppCommandBoundary request) {
@@ -267,15 +320,26 @@ public class LiftService implements LiftsService, MiniAppServices {
         SuperAppObjectEntity requestedDrive = this.objectRepository.findById(targetObject)
                 .orElseThrow(() -> new NotFoundException(VALUE_NOT_FOUND_EXCEPTION.formatted("Drive")));
 
-        if (!requestedDrive.getType().equals(Drive.name()))
+        if (!requestedDrive.getType().equals(Drive.name())) {
+            this.logger.error("in checkRequestData func - %s".formatted(WRONG_OBJECT_EXCEPTION));
             throw new InvalidInputException(WRONG_OBJECT_EXCEPTION);
-        if (!requestedDrive.getActive())
+        }
+        if (!requestedDrive.getActive()) {
+            this.logger.error("in checkRequestData func - %s".formatted(EXECUTE_ON_INACTIVE_EXCEPTION
+                    .formatted("drive")));
             throw new InvalidInputException(EXECUTE_ON_INACTIVE_EXCEPTION.formatted("drive"));
-        if (isUserRegisteredPassenger(requestedDrive, invokingUser) || isUserRequestingPassenger(requestedDrive, invokingUser))
+        }
+        if (isUserRegisteredPassenger(requestedDrive, invokingUser) || isUserRequestingPassenger(requestedDrive, invokingUser)) {
+            this.logger.error("in checkRequestData func - Already registered or requested to join this lift");
             throw new ForbbidenOperationException("Already registered or requested to join this lift");
+        }
         String origin = (String) request.getCommandAttributes().get("origin");
-        if (origin == null)
+        if (origin == null) {
+            this.logger.error("in checkRequestData func - %s".formatted(VALUE_NOT_FOUND_EXCEPTION
+                    .formatted("Request origin")));
             throw new InvalidInputException(VALUE_NOT_FOUND_EXCEPTION.formatted("Request origin"));
+        }
+        this.logger.debug("Lift - Request Data checked successfully");
     }
 
     private List<LiftRequestBoundary> mapListToBoundaryList(List<Map<String, Object>> list) {
@@ -284,8 +348,10 @@ public class LiftService implements LiftsService, MiniAppServices {
 
         List<LiftRequestBoundary> boundaryList = new ArrayList<>();
         for (Map<String, Object> map: list) {
-            if (!(map.containsKey("userId") && map.containsKey("origin")))
+            if (!(map.containsKey("userId") && map.containsKey("origin"))) {
+                this.logger.error("in mapListToBoundaryList func - Missing or invalid data");
                 throw new InvalidInputException("Missing or invalid data");
+            }
 
             UserIdBoundary userId = this.userConverter.mapToBoundary((Map<String,String>)map.get("userId"));
             boundaryList.add(new LiftRequestBoundary(userId,map.get("origin").toString()));

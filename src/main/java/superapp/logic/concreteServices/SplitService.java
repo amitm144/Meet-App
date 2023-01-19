@@ -1,5 +1,7 @@
 package superapp.logic.concreteServices;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +34,7 @@ public class SplitService implements SplitsService, MiniAppServices {
 	private SuperAppObjectConverter objectConverter;
 	private UserConverter userConverter;
 	private final String INVALID_AMOUNT_MESSAGE =  "Transaction must specify amount (number not less than or equal to 0)";
-
+	private Log logger = LogFactory.getLog(SplitService.class);
 	@Autowired
 	public SplitService(SuperAppObjectEntityRepository objectRepository,
 						UserEntityRepository userRepository,
@@ -52,7 +54,10 @@ public class SplitService implements SplitsService, MiniAppServices {
 		switch (objectType) {
 			case ("Group") -> this.checkGroupData(object);
 			case ("Transaction") -> this.checkTransactionData(object);
-			default -> throw new InvalidInputException(UNKNOWN_OBJECT_EXCEPTION);
+			default -> {
+				logger.error("in handleObjectByType func - %s".formatted(UNKNOWN_OBJECT_EXCEPTION));
+				throw new InvalidInputException(UNKNOWN_OBJECT_EXCEPTION);
+			}
 		}
 	}
 
@@ -62,11 +67,20 @@ public class SplitService implements SplitsService, MiniAppServices {
 		UserIdBoundary invokedBy = command.getInvokedBy().getUserId();
 		SuperAppObjectEntity group =
 				this.objectRepository.findById(targetObjectKey)
-					.orElseThrow(() -> new NotFoundException(VALUE_NOT_FOUND_EXCEPTION.formatted("Group")));
-		if (!isUserInGroup(group, invokedBy))
+					.orElseThrow(() -> {
+						logger.error("in runCommand func - %s".formatted(VALUE_NOT_FOUND_EXCEPTION
+								.formatted("Group")));
+						return new NotFoundException(VALUE_NOT_FOUND_EXCEPTION.formatted("Group"));
+					});
+
+		if (!isUserInGroup(group, invokedBy)) {
+			logger.error("in runCommand func - %s".formatted(USER_NOT_IN_GROUP_EXCEPTION));
 			throw new InvalidInputException(USER_NOT_IN_GROUP_EXCEPTION);
-		if (!group.getActive())
+		}
+		if (!group.getActive()) {
+			logger.error("in runCommand func - %s".formatted(EXECUTE_ON_INACTIVE_EXCEPTION.formatted("group")));
 			throw new InvalidInputException(EXECUTE_ON_INACTIVE_EXCEPTION.formatted("group"));
+		}
 
 		String commandCase = command.getCommand();
 		switch (commandCase) {
@@ -80,20 +94,27 @@ public class SplitService implements SplitsService, MiniAppServices {
 				this.settleGroupDebts(group);
 				return null;
 			}
-			default -> throw new NotFoundException(UNKNOWN_COMMAND_EXCEPTION);
+			default -> {
+				logger.error("in runCommand func - %s".formatted(UNKNOWN_COMMAND_EXCEPTION));
+				throw new NotFoundException(UNKNOWN_COMMAND_EXCEPTION);
+			}
 		}
 	}
 
 	@Override
 	public void checkValidBinding(SuperAppObjectEntity parent, SuperAppObjectEntity child, UserPK userId) {
-		if (!child.getType().equals(Transaction.name()))
+		if (!child.getType().equals(Transaction.name())) {
+			logger.error("in checkValidBinding func - Unknown bind request (Split)");
 			throw new CannotProcessException("Unknown bind request (Split)");
-
-		if (!parent.getType().equals(Group.name()))
+		}
+		if (!parent.getType().equals(Group.name())) {
+			logger.error("in checkValidBinding func - Transactions can only be bound to groups");
 			throw new InvalidInputException("Transactions can only be bound to groups");
-
-		if (!isUserInGroup(parent, new UserIdBoundary(userId.getSuperapp(), userId.getEmail())))
+		}
+		if (!isUserInGroup(parent, new UserIdBoundary(userId.getSuperapp(), userId.getEmail()))) {
+			logger.error("in checkValidBinding func - Transactions can only be bound to users in the group");
 			throw new CannotProcessException("Transactions can only be bound by users in the group");
+		}
 	}
 
 	@Override
@@ -108,8 +129,10 @@ public class SplitService implements SplitsService, MiniAppServices {
 				.detailsToMap(group.getObjectDetails())
 				.get("members"))
 				.size();
-		if (totalMembers == 0) // guarding against division by zero
+		if (totalMembers == 0) { // guarding against division by zero
+			logger.error("in showDebt func - Group has no members");
 			throw new CannotProcessException("Group has no members");
+		}
 
 		float totalPayments = 0, membersPayments = 0;
 		for (SuperAppObjectEntity t : transactions) {
@@ -141,6 +164,7 @@ public class SplitService implements SplitsService, MiniAppServices {
 	@Override
 	public void settleGroupDebts(SuperAppObjectEntity group) {
 		group.getChildren().forEach(t -> t.setActive(false));
+		logger.info("All debts set to not active");
 	}
 
 	private boolean isUserInGroup(SuperAppObjectEntity group, UserIdBoundary userId) {
@@ -155,41 +179,53 @@ public class SplitService implements SplitsService, MiniAppServices {
 	private void checkGroupData(SuperAppObjectBoundary group) {
 		UserIdBoundary creatingUser = group.getCreatedBy().getUserId();
 		Map<String, Object> objDetails = group.getObjectDetails();
-		if (objDetails == null)
+		if (objDetails == null) {
+			logger.error("in checkGroupData func - Group must specify it's members");
 			throw new InvalidInputException("Group must specify it's members");
+		}
 		List<UserIdBoundary> groupMembers =
 				this.userConverter.mapListToBoundaryList((List<Map<String, String>>)objDetails.get("members"));
 
 		if (groupMembers == null || groupMembers.isEmpty() || groupMembers.size() < 2 ||
-				!this.isUserInGroup(this.objectConverter.toEntity(group), creatingUser))
+				!this.isUserInGroup(this.objectConverter.toEntity(group), creatingUser)) {
+			logger.error("in checkGroupData func - Group must contain at least two members including its creator");
 			throw new InvalidInputException("Group must contain at least two members including its creator");
+		}
 
 		boolean missingMember = groupMembers
 				.stream()
 				.map(this.userConverter::idBoundaryToPK)
 				.map(this.userRepository::findById)
 				.anyMatch(Optional::isEmpty);
-		if (missingMember)
+		if (missingMember) {
+			logger.error("in checkGroupData func - One or more users in this group doesn't exist");
 			throw new InvalidInputException("One or more users in this group doesn't exist");
+		}
 
 
 		SplitDebtBoundary[] debts = (SplitDebtBoundary[])this.showAllDebts(this.objectConverter.toEntity(group));
-		if (Arrays.stream(debts).anyMatch(member -> member != null && member.getDebt() < 0))
+		if (Arrays.stream(debts).anyMatch(member -> member != null && member.getDebt() < 0)) {
+			logger.error("in checkGroupData func - Cannot remove group members while any group member owes money");
 			throw new InvalidInputException("Cannot remove group members while any group member owes money");
+		}
 	}
 
 	private void checkTransactionData(SuperAppObjectBoundary transaction) {
 		Map<String, Object> objDetails = transaction.getObjectDetails();
-		if (objDetails == null)
+		if (objDetails == null) {
+			logger.error("in checkTransactionData func - object details - %s".formatted(INVALID_AMOUNT_MESSAGE));
 			throw new InvalidInputException(INVALID_AMOUNT_MESSAGE);
-
+		}
 		Object amountData = objDetails.get("amount");
-		if (amountData == null)
+		if (amountData == null) {
+			logger.error("in checkTransactionData func - amountData - %s".formatted(INVALID_AMOUNT_MESSAGE));
 			throw new InvalidInputException(INVALID_AMOUNT_MESSAGE);
+		}
 
 		float amount = doubleToFloat(amountData.toString());
 		if (amount <= 0) {
 			transaction.setActive(false);
+			logger.error("in checkTransactionData func - amount - %s".formatted(INVALID_AMOUNT_MESSAGE));
 			throw new InvalidInputException(INVALID_AMOUNT_MESSAGE);
 		}
 	}
@@ -198,6 +234,7 @@ public class SplitService implements SplitsService, MiniAppServices {
 		try {
 			return Double.valueOf(value).floatValue();
 		} catch (Exception e) {
+			logger.error("in doubleToFloat func - %s".formatted(INVALID_AMOUNT_MESSAGE));
 			throw new InvalidInputException(INVALID_AMOUNT_MESSAGE);
 		}
 	}
