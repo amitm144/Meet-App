@@ -9,9 +9,11 @@ import org.springframework.stereotype.Service;
 import superapp.boundaries.command.MiniAppCommandBoundary;
 import superapp.boundaries.command.MiniAppCommandIdBoundary;
 import superapp.boundaries.object.SuperAppObjectBoundary;
+import superapp.boundaries.user.UserBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.MiniappCommandConverter;
 import superapp.converters.SuperAppObjectConverter;
+import superapp.converters.UserConverter;
 import superapp.dal.IdGeneratorRepository;
 import superapp.dal.MiniAppCommandRepository;
 import superapp.dal.SuperAppObjectEntityRepository;
@@ -46,6 +48,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     private MiniAppCommandRepository miniappRepository;
     private SuperAppObjectEntityRepository objectRepository;
     private UserEntityRepository userEntityRepository;
+    private UserConverter userConverter;
 
     @Autowired
     public MiniAppCommandService(MiniappCommandConverter miniAppConverter, ApplicationContext context,
@@ -139,21 +142,17 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
 
     @Override
     @Transactional
-    public SuperAppObjectBoundary updateObjectCreationTimestamp(String userSuperapp,
-                                                                String userEmail,
-                                                                MiniAppCommandBoundary objectTimeTravel) {
-        // Validate Admin user:
-        UserPK userId = new UserPK(userSuperapp, userEmail);
-        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
-            throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
+    public SuperAppObjectBoundary updateObjectCreationTimestamp(MiniAppCommandBoundary objectTimeTravel) {
         // Validate correct command:
         if(!objectTimeTravel.getCommand().equals("objectTimeTravel")) {
             throw new InvalidInputException("Missing new CreationTimestamp");
         }
+        checkInvokedCommand(objectTimeTravel, ADMIN);
         // Find object in db and update:
         String internalObjectId = objectTimeTravel.getTargetObject().getObjectId().getInternalObjectId();
+        UserIdBoundary userIdBoundary = objectTimeTravel.getInvokedBy().getUserId();
         Optional<SuperAppObjectEntity> objectE = this.objectRepository.findById(
-                new SuperappObjectPK(userSuperapp,internalObjectId));
+                new SuperappObjectPK(userIdBoundary.getSuperapp(),internalObjectId));
         if (objectE.isEmpty())
             throw new NotFoundException("Unknown object");
 
@@ -174,13 +173,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
 
     @Override
     @Transactional
-    public MiniAppCommandBoundary storeMiniAppCommand(String userSuperapp,
-                                                      String userEmail,
-                                                      MiniAppCommandBoundary miniappCommandBoundary) {
-        // Validate requesting user is admin
-        UserPK userId = new UserPK(userSuperapp, userEmail);
-        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
-            throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
+    public MiniAppCommandBoundary storeMiniAppCommand(MiniAppCommandBoundary miniappCommandBoundary) {
         // Validate correct command:
         if (!miniappCommandBoundary.getCommand().equals("echo"))
             throw new RuntimeException("Can't store MiniAppCommand");
