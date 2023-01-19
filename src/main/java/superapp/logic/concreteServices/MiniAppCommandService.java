@@ -244,12 +244,12 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
                 invokedBy.getUserId().getEmail() == null ||
                 invokedBy.getUserId().getSuperapp().isBlank() ||
                 invokedBy.getUserId().getEmail().isBlank()) {
-            this.logger.debug("in checkInvokedCommand func - Invoked by fields cannot be missing or empty");
+            this.logger.error("in checkInvokedCommand func - Invoked by fields cannot be missing or empty");
             throw new InvalidInputException("Invoked by fields cannot be missing or empty");
         }
 
         if (!EmailChecker.isValidEmail(invokedBy.getUserId().getEmail())) {
-            this.logger.debug("in checkInvokedCommand func - Invalid invoking user email");
+            this.logger.error("in checkInvokedCommand func - Invalid invoking user email");
             throw new InvalidInputException("Invalid invoking user email");
         }
 
@@ -260,12 +260,12 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
                 targetObject.getObjectId().getInternalObjectId() == null ||
                 targetObject.getObjectId().getSuperapp().isBlank() ||
                 targetObject.getObjectId().getInternalObjectId().isBlank()) {
-            this.logger.debug("in checkInvokedCommand func - Target object fields cannot be missing or empty");
+            this.logger.error("in checkInvokedCommand func - Target object fields cannot be missing or empty");
             throw new InvalidInputException("Target object fields cannot be missing or empty");
         }
 
         if (command.getCommand() == null || command.getCommand().isEmpty()) {
-            this.logger.debug("in checkInvokedCommand func - Command attribute cannot be missing or empty");
+            this.logger.error("in checkInvokedCommand func - Command attribute cannot be missing or empty");
             throw new InvalidInputException("Command attribute cannot be missing or empty");
         }
 
