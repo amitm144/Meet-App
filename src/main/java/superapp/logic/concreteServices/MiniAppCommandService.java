@@ -13,6 +13,7 @@ import superapp.boundaries.user.UserBoundary;
 import superapp.boundaries.user.UserIdBoundary;
 import superapp.converters.MiniappCommandConverter;
 import superapp.converters.SuperAppObjectConverter;
+import superapp.converters.UserConverter;
 import superapp.dal.IdGeneratorRepository;
 import superapp.dal.MiniAppCommandRepository;
 import superapp.dal.SuperAppObjectEntityRepository;
@@ -47,6 +48,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     private MiniAppCommandRepository miniappRepository;
     private SuperAppObjectEntityRepository objectRepository;
     private UserEntityRepository userEntityRepository;
+    private UserConverter userConverter;
 
     @Autowired
     public MiniAppCommandService(MiniappCommandConverter miniAppConverter, ApplicationContext context,
@@ -143,7 +145,7 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     public SuperAppObjectBoundary updateObjectCreationTimestamp(MiniAppCommandBoundary objectTimeTravel) {
         // Validate Admin user:
         UserIdBoundary userIdBoundary = objectTimeTravel.getInvokedBy().getUserId();
-        UserPK userId = new UserPK(userIdBoundary.getSuperapp(), userIdBoundary.getEmail());
+        UserPK userId = this.userConverter.idBoundaryToPK(userIdBoundary);
         if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
             throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
         // Validate correct command:
