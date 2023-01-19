@@ -143,17 +143,14 @@ public class MiniAppCommandService extends AbstractService implements AdvancedMi
     @Override
     @Transactional
     public SuperAppObjectBoundary updateObjectCreationTimestamp(MiniAppCommandBoundary objectTimeTravel) {
-        // Validate Admin user:
-        UserIdBoundary userIdBoundary = objectTimeTravel.getInvokedBy().getUserId();
-        UserPK userId = this.userConverter.idBoundaryToPK(userIdBoundary);
-        if(!isValidUserCredentials(userId, ADMIN, this.userEntityRepository))
-            throw new ForbbidenOperationException(ADMIN_ONLY_EXCEPTION);
         // Validate correct command:
         if(!objectTimeTravel.getCommand().equals("objectTimeTravel")) {
             throw new InvalidInputException("Missing new CreationTimestamp");
         }
+        checkInvokedCommand(objectTimeTravel, ADMIN);
         // Find object in db and update:
         String internalObjectId = objectTimeTravel.getTargetObject().getObjectId().getInternalObjectId();
+        UserIdBoundary userIdBoundary = objectTimeTravel.getInvokedBy().getUserId();
         Optional<SuperAppObjectEntity> objectE = this.objectRepository.findById(
                 new SuperappObjectPK(userIdBoundary.getSuperapp(),internalObjectId));
         if (objectE.isEmpty())
